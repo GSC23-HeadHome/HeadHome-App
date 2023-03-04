@@ -70,15 +70,18 @@ class Volunteer extends StatelessWidget {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
                       child: Text("Patients Near You",
                           style: Theme.of(context).textTheme.titleSmall),
                     ),
-                    const Text("Help locate these patients and bring them home to their worried caregivers.",
-                        style: TextStyle(
-                            fontSize: 14.0, color: Color(0xFF263238),
-                            ),
-                            textAlign: TextAlign.center,),
+                    const Text(
+                      "Help locate these patients and bring them home to their worried caregivers.",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Color(0xFF263238),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -114,7 +117,6 @@ class Volunteer extends StatelessWidget {
           ),
         ),
       ),
-      
       bottomNavigationBar: BottomAppBar(
         //bottom navigation bar on scaffold
         height: 80,
@@ -123,7 +125,7 @@ class Volunteer extends StatelessWidget {
         notchMargin:
             5, //notche margin between floating button and bottom appbar
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0,8,0,0),
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
           child: Row(
             //children inside bottom appbar
             mainAxisSize: MainAxisSize.max,
@@ -172,86 +174,82 @@ class PatientDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-        child: 
-        GestureDetector(
-          onTap: () {
-            print("clicked");
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const PatientPage()),
-            );
-          },
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
           child: Container(
-          decoration: BoxDecoration(
-            color: Color(0xFFF8E3E4),
-            borderRadius: BorderRadius.all(Radius.circular(6)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 3,
-                blurRadius: 6,
-                offset: Offset(0, 5), // changes position of shadow
+              decoration: BoxDecoration(
+                color: Color(0xFFF8E3E4),
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 3,
+                    blurRadius: 6,
+                    offset: Offset(0, 5), // changes position of shadow
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                  flex: 2, // 60%
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(imageurl),
-                    ),
-                  )),
-              Expanded(
-                flex: 4, // 60%
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                        child: Wrap(children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                                fontSize: 16.0,
-                                color: Color(0xFF263238),
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ])),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                      child: Text(distance, style: TextStyle(fontSize: 12.0)),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 4, // 40%
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      //send alert
-                    },
-                    style: ElevatedButton.styleFrom(
-                        minimumSize: Size(100, 45),
-                        backgroundColor: Theme.of(context).colorScheme.error),
-                    child: Text(
-                      'Contact',
-                      style: TextStyle(color: Colors.white),
+              child: Row(
+                children: [
+                  Expanded(
+                      flex: 2, // 60%
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundImage: NetworkImage(imageurl),
+                        ),
+                      )),
+                  Expanded(
+                    flex: 4, // 60%
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                            child: Wrap(children: [
+                              Text(
+                                name,
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    color: Color(0xFF263238),
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ])),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                          child:
+                              Text(distance, style: TextStyle(fontSize: 12.0)),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                  Expanded(
+                    flex: 4, // 40%
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const PatientPage()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                            minimumSize: Size(100, 45),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.error),
+                        child: Text(
+                          'Locate',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),)
-        
-      ),
     );
   }
 }
