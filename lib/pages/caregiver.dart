@@ -39,7 +39,7 @@ class Caregiver extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 40, 0, 40),
+              padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
               child: Column(
                 children: [
                   const Text("Welcome back,",
@@ -52,24 +52,31 @@ class Caregiver extends StatelessWidget {
             ),
             Column(
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Text("Select Patient",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center),
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Icon(Icons.edit),
-                    )
-                  ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0,0,0,20),
+                  child: Container(
+                    width: 350,
+                    child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // mainAxisSize: MainAxisSize.values,
+                    children: [
+                      Container(),
+                      Container(child: Text("Select Patient",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center),),
+                      Container(child: Icon(Icons.edit),)
+                    
+                    ],
+                  ),
+                  )
                 ),
                 // Expanded(child: SizedBox(width: 200,
                 const Column(
                   children: [
                     CaregiverPatients(
                         name: "Amy Zhang",
-                        note:"Known to leave safe zone. Hangs out in ang mo kio park",
+                        note:
+                            "Known to leave safe zone. Hangs out in ang mo kio park",
                         status: "danger",
                         imageurl: "https://picsum.photos/id/237/200/300"),
                     CaregiverPatients(
@@ -85,6 +92,55 @@ class Caregiver extends StatelessWidget {
                   ],
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: Container(
+          height: 80,
+          width: 80,
+          child: FittedBox(
+            child: FloatingActionButton(
+              //Floating action button on Scaffold
+              onPressed: () {
+                //code to execute on bxutton press
+              },
+              child: Icon(Icons.add),
+              backgroundColor:
+                  Theme.of(context).colorScheme.primary, //icon inside button
+            ),
+          )),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        //bottom navigation bar on scaffold
+        color: Theme.of(context).colorScheme.tertiary,
+        shape: CircularNotchedRectangle(), //shape of notch
+        notchMargin:
+            5, //notche margin between floating button and bottom appbar
+        child: Row(
+          //children inside bottom appbar
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Expanded(
+              flex: 5, // 50%
+              child: IconButton(
+                icon: Icon(
+                  Icons.person_2_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: () {},
+              ),
+            ),
+            Expanded(
+              flex: 5, // 50%
+              child: IconButton(
+                icon: Icon(
+                  Icons.settings,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: () {},
+              ),
             ),
           ],
         ),
@@ -115,11 +171,11 @@ class CaregiverPatients extends StatelessWidget {
     if (status == "danger") {
       statusText = "Out of Safe Zone";
       containerColour = Color(0xFFF8E3E4);
-      statusTextColour =  Theme.of(context).colorScheme.error;
+      statusTextColour = Theme.of(context).colorScheme.error;
     } else if (status == "safe") {
       statusText = "Within Safe Zone";
       containerColour = Colors.white;
-      statusTextColour =  Theme.of(context).colorScheme.primary;
+      statusTextColour = Theme.of(context).colorScheme.primary;
     } else if (status == "home") {
       statusText = "At Home";
       containerColour = Colors.white;
@@ -155,20 +211,30 @@ class CaregiverPatients extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 0, 5),
-                        child: Text(name,
-                            style: Theme.of(context).textTheme.titleSmall),
-                      ),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 5),
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                                fontSize: 20.0,
+                                color: Color(0xFF263238),
+                                fontWeight: FontWeight.w500),
+                          )),
                       Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 5, 0, 5),
+                          padding: const EdgeInsets.fromLTRB(20, 5, 0, 10),
                           child: Wrap(children: [
-                            Text(note,
-                                style: Theme.of(context).textTheme.bodyLarge),
+                            Text(
+                              note,
+                              style: TextStyle(
+                                  fontSize: 14.0,
+                                  color: Color(0xFF263238),
+                                  fontWeight: FontWeight.w400),
+                            ),
                           ])),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
                         child: Text(statusText,
-                            style: TextStyle(fontSize: 12.0, color: statusTextColour)),
+                            style: TextStyle(
+                                fontSize: 12.0, color: statusTextColour)),
                       ),
                     ],
                   ),
