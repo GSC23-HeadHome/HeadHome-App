@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart' show MyApp;
+import './caregiverPatient.dart' show PatientDetails;
 
 class Caregiver extends StatelessWidget {
   const Caregiver({super.key});
@@ -53,23 +54,25 @@ class Caregiver extends StatelessWidget {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0,0,0,20),
-                  child: Container(
-                    width: 350,
-                    child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    // mainAxisSize: MainAxisSize.values,
-                    children: [
-                      Container(),
-                      Container(child: Text("Select Patient",
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          textAlign: TextAlign.center),),
-                      Container(child: Icon(Icons.edit),)
-                    
-                    ],
-                  ),
-                  )
-                ),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+                    child: Container(
+                      width: 350,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        // mainAxisSize: MainAxisSize.values,
+                        children: [
+                          Container(),
+                          Container(
+                            child: Text("Select Patient",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                textAlign: TextAlign.center),
+                          ),
+                          Container(
+                            child: Icon(Icons.edit),
+                          )
+                        ],
+                      ),
+                    )),
                 // Expanded(child: SizedBox(width: 200,
                 const Column(
                   children: [
@@ -113,6 +116,7 @@ class Caregiver extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         //bottom navigation bar on scaffold
+        height: 80,
         color: Theme.of(context).colorScheme.tertiary,
         shape: CircularNotchedRectangle(), //shape of notch
         notchMargin:
@@ -151,7 +155,7 @@ class Caregiver extends StatelessWidget {
 
 class CaregiverPatients extends StatelessWidget {
   const CaregiverPatients(
-      {Key? key,
+      {super.key,
       required this.name,
       required this.note,
       required this.status,
@@ -188,6 +192,10 @@ class CaregiverPatients extends StatelessWidget {
         child: GestureDetector(
           onTap: () {
             print("clicked");
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PatientDetails()),
+            );
           },
           child: Container(
             width: 350,
