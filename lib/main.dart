@@ -1,9 +1,16 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import './pages/caregiver.dart' show Caregiver;
 import './pages/patient.dart' show Patient;
 import './pages/volunteer.dart' show Volunteer;
+import 'package:flutter_blue/flutter_blue.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -58,6 +65,34 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+  String _address = "...";
+  String _name = "...";
+
+  void initBluetooth() async {
+    FlutterBlue flutterBlue = FlutterBlue.instance;
+    flutterBlue.startScan(timeout: const Duration(seconds: 4));
+    flutterBlue.scanResults.listen((results) {
+      // do something with scan results
+      for (ScanResult r in results) {
+        debugPrint('${r.device.name} found! rssi: ${r.rssi}');
+      }
+    });
+
+// Stop scanning
+    flutterBlue.stopScan();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initBluetooth();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => const Patient()),
                   );
                 },
-                child: Text('Patient Page')),
+                child: const Text('Patient Page')),
             ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -125,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => const Caregiver()),
                   );
                 },
-                child: Text('Caregiver Page')),
+                child: const Text('Caregiver Page')),
             ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -133,7 +168,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => const Volunteer()),
                   );
                 },
-                child: Text('Volunteer Page')),
+                child: const Text('Volunteer Page')),
+            Text(
+              'Address: $_address',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              'Name: $_name',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),

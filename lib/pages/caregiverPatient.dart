@@ -291,14 +291,14 @@ class alertSent extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   flex: 6, // 60%
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
                           padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                          child: Wrap(children: [
+                          child: Wrap(children: const [
                             Text(
                               "Sarah",
                               style: TextStyle(
@@ -307,8 +307,8 @@ class alertSent extends StatelessWidget {
                                   fontWeight: FontWeight.w600),
                             ),
                           ])),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 5, 0, 20),
                         child:
                             Text("250m away", style: TextStyle(fontSize: 12.0)),
                       ),

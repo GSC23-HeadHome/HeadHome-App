@@ -8,7 +8,6 @@ class PatientPage extends StatelessWidget {
     bool reached = false;
     var pageui;
 
-    
     if (reached == false) {
       pageui = findPatient();
     } else {
@@ -197,70 +196,70 @@ class findPatient extends StatelessWidget {
               ),
             ),
             Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-          child: Container(
-            width: 350,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.all(Radius.circular(6)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 3,
-                  blurRadius: 6,
-                  offset: Offset(0, 5), // changes position of shadow
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+              child: Container(
+                width: 350,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 3,
+                      blurRadius: 6,
+                      offset: Offset(0, 5), // changes position of shadow
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  flex: 6, // 60%
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                          child: Wrap(children: [
-                            Text(
-                              "Sarah",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Color(0xFF263238),
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ])),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                        child:
-                            Text("91234567", style: TextStyle(fontSize: 12.0)),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 4, // 40%
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        //send alert
-                      },
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: Size(100, 45),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary),
-                      child: Text(
-                        'Contact',
-                        style: TextStyle(color: Colors.white),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 6, // 60%
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                              child: Wrap(children: const [
+                                Text(
+                                  "Sarah",
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      color: Color(0xFF263238),
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ])),
+                          const Padding(
+                            padding: EdgeInsets.fromLTRB(20, 5, 0, 20),
+                            child: Text("91234567",
+                                style: TextStyle(fontSize: 12.0)),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    Expanded(
+                      flex: 4, // 40%
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            //send alert
+                          },
+                          style: ElevatedButton.styleFrom(
+                              minimumSize: Size(100, 45),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary),
+                          child: Text(
+                            'Contact',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
           ]),
         ),
       ],
@@ -276,7 +275,6 @@ class findHome extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        
         //google map widget
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
@@ -315,70 +313,70 @@ class findHome extends StatelessWidget {
               ),
             ),
             Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-          child: Container(
-            width: 350,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.all(Radius.circular(6)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 3,
-                  blurRadius: 6,
-                  offset: Offset(0, 5), // changes position of shadow
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+              child: Container(
+                width: 350,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 3,
+                      blurRadius: 6,
+                      offset: Offset(0, 5), // changes position of shadow
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  flex: 6, // 60%
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                          child: Wrap(children: [
-                            Text(
-                              "Sarah",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Color(0xFF263238),
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ])),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                        child:
-                            Text("91234567", style: TextStyle(fontSize: 12.0)),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 4, // 40%
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        //send alert
-                      },
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: Size(100, 45),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary),
-                      child: Text(
-                        'Contact',
-                        style: TextStyle(color: Colors.white),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 6, // 60%
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                              child: Wrap(children: const [
+                                Text(
+                                  "Sarah",
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      color: Color(0xFF263238),
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ])),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                            child: Text("91234567",
+                                style: TextStyle(fontSize: 12.0)),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    Expanded(
+                      flex: 4, // 40%
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            //send alert
+                          },
+                          style: ElevatedButton.styleFrom(
+                              minimumSize: Size(100, 45),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary),
+                          child: const Text(
+                            'Contact',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
           ]),
         ),
       ],

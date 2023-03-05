@@ -74,8 +74,8 @@ class Caregiver extends StatelessWidget {
                       ),
                     )),
                 // Expanded(child: SizedBox(width: 200,
-                const Column(
-                  children: [
+                Column(
+                  children: const [
                     CaregiverPatients(
                         name: "Amy Zhang",
                         note:
