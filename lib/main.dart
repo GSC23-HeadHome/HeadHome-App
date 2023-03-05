@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +8,8 @@ import './pages/caregiver.dart' show Caregiver;
 import './pages/patient.dart' show Patient;
 import './pages/volunteer.dart' show Volunteer;
 import 'package:flutter_blue/flutter_blue.dart';
+import 'constants.dart';
+import 'package:collection/collection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,16 +70,40 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
-  String _address = "...";
-  String _name = "...";
+  BluetoothDevice? _device;
+  StreamSubscription? _deviceStateSubscription;
+  BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
 
   void initBluetooth() async {
     FlutterBlue flutterBlue = FlutterBlue.instance;
     flutterBlue.startScan(timeout: const Duration(seconds: 4));
-    flutterBlue.scanResults.listen((results) {
+    flutterBlue.scanResults.listen((results) async {
       // do something with scan results
       for (ScanResult r in results) {
-        debugPrint('${r.device.name} found! rssi: ${r.rssi}');
+        debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
+      }
+      _device = results
+          .firstWhereOrNull((result) => result.device.name == deviceName)
+          ?.device;
+      if (_device != null &&
+          _deviceState == BluetoothDeviceState.disconnected) {
+        debugPrint("Connecting to device...");
+        _deviceStateSubscription = _device?.state.listen((s) {
+          _deviceState = s;
+        });
+        await _device!.connect();
+        List<BluetoothService> services = await _device!.discoverServices();
+        BluetoothService targetService = services
+            .firstWhere((service) => service.uuid.toString() == serviceUUID);
+        List<BluetoothCharacteristic> characteristics =
+            targetService.characteristics;
+        BluetoothCharacteristic targetCharacteristic =
+            characteristics.firstWhere((characteristic) =>
+                characteristic.uuid.toString() == characteristicUUID);
+
+        List<int> receivedData = await targetCharacteristic.read();
+        debugPrint(String.fromCharCodes(receivedData));
+        await targetCharacteristic.write(utf8.encode("Hello from flutter!"));
       }
     });
 
@@ -91,6 +120,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     super.dispose();
+    _device?.disconnect();
+    _deviceStateSubscription?.cancel();
   }
 
   @override
@@ -170,11 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 child: const Text('Volunteer Page')),
             Text(
-              'Address: $_address',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            Text(
-              'Name: $_name',
+              'Device: ${_device == null ? "..." : _device?.name}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
