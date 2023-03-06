@@ -1,11 +1,23 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:headhome/pages/authlogin.dart';
 import 'package:headhome/pages/authregister.dart';
 import './pages/caregiver.dart' show Caregiver;
 import './pages/patient.dart' show Patient;
 import './pages/volunteer.dart' show Volunteer;
+import 'package:flutter_blue/flutter_blue.dart';
+import 'constants.dart';
+import 'package:collection/collection.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -60,6 +72,60 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+  BluetoothDevice? _device;
+  StreamSubscription? _deviceStateSubscription;
+  BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
+
+  void initBluetooth() async {
+    FlutterBlue flutterBlue = FlutterBlue.instance;
+    flutterBlue.startScan(timeout: const Duration(seconds: 4));
+    flutterBlue.scanResults.listen((results) async {
+      // do something with scan results
+      for (ScanResult r in results) {
+        debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
+      }
+      _device = results
+          .firstWhereOrNull((result) => result.device.name == deviceName)
+          ?.device;
+      if (_device != null &&
+          _deviceState == BluetoothDeviceState.disconnected) {
+        debugPrint("Connecting to device...");
+        _deviceStateSubscription = _device?.state.listen((s) {
+          _deviceState = s;
+        });
+        await _device!.connect();
+        List<BluetoothService> services = await _device!.discoverServices();
+        BluetoothService targetService = services
+            .firstWhere((service) => service.uuid.toString() == serviceUUID);
+        List<BluetoothCharacteristic> characteristics =
+            targetService.characteristics;
+        BluetoothCharacteristic targetCharacteristic =
+            characteristics.firstWhere((characteristic) =>
+                characteristic.uuid.toString() == characteristicUUID);
+
+        List<int> receivedData = await targetCharacteristic.read();
+        debugPrint(String.fromCharCodes(receivedData));
+        await targetCharacteristic.write(utf8.encode("Hello from flutter!"));
+      }
+    });
+
+// Stop scanning
+    flutterBlue.stopScan();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initBluetooth();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _device?.disconnect();
+    _deviceStateSubscription?.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => const Patient()),
                   );
                 },
-                child: Text('Patient Page')),
+                child: const Text('Patient Page')),
             ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -127,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => const Caregiver()),
                   );
                 },
-                child: Text('Caregiver Page')),
+                child: const Text('Caregiver Page')),
             ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -135,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => const Volunteer()),
                   );
                 },
-                child: Text('Volunteer Page')),
+                child: const Text('Volunteer Page')),
             ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -153,6 +219,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
                 child: Text('Login Page')),
+            Text(
+              'Device: ${_device == null ? "..." : _device?.name}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),
