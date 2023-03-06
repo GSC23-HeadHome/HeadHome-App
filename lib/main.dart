@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
+import 'package:headhome/pages/authlogin.dart';
+import 'package:headhome/pages/authregister.dart';
 import './pages/caregiver.dart' show Caregiver;
 import './pages/patient.dart' show Patient;
 import './pages/volunteer.dart' show Volunteer;
@@ -200,6 +202,23 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
                 child: const Text('Volunteer Page')),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AuthRegister()),
+                  );
+                },
+                child: Text('Register Page')),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AuthLogin()),
+                  );
+                },
+                child: Text('Login Page')),
             Text(
               'Device: ${_device == null ? "..." : _device?.name}',
               style: Theme.of(context).textTheme.bodySmall,
