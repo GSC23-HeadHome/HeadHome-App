@@ -72,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
   BluetoothDevice? _device;
   StreamSubscription? _deviceStateSubscription;
+  BluetoothCharacteristic? _targetCharacteristic;
   BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
 
   void initBluetooth() async {
@@ -97,13 +98,15 @@ class _MyHomePageState extends State<MyHomePage> {
             .firstWhere((service) => service.uuid.toString() == serviceUUID);
         List<BluetoothCharacteristic> characteristics =
             targetService.characteristics;
-        BluetoothCharacteristic targetCharacteristic =
-            characteristics.firstWhere((characteristic) =>
-                characteristic.uuid.toString() == characteristicUUID);
+        _targetCharacteristic = characteristics.firstWhere((characteristic) =>
+            characteristic.uuid.toString() == characteristicUUID);
 
-        List<int> receivedData = await targetCharacteristic.read();
-        debugPrint(String.fromCharCodes(receivedData));
-        await targetCharacteristic.write(utf8.encode("Hello from flutter!"));
+        if (_targetCharacteristic != null) {
+          List<int> receivedData = await _targetCharacteristic!.read();
+          debugPrint(String.fromCharCodes(receivedData));
+          await _targetCharacteristic!
+              .write(utf8.encode("Hello from flutter!"));
+        }
       }
     });
 
