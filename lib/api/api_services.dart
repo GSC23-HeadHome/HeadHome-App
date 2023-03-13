@@ -10,7 +10,7 @@ class ApiService {
   Future<Carereceiver?> getUser(String id) async {
     try {
       var url = Uri.parse(
-          '${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/' + id);
+          '${ApiConstants.baseUrl}${ApiConstants.carereceiver}/' + id);
       print(url);
       var response = await http.get(url);
       if (response.statusCode == 200) {
@@ -28,7 +28,8 @@ class ApiService {
     var request = http.Request(
         'GET',
         Uri.parse(
-            '${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/${ApiConstants.contactcg}'));
+            'https://HeadHome.chayhuixiang.repl.co/carereceiver/contactcg'));
+    print(cgId + " " + crId);
     request.body = json.encode({"CrId": crId, "CgId": cgId});
     request.headers.addAll(headers);
 

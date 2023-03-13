@@ -61,7 +61,7 @@ class _PatientState extends State<Patient> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "amyzhang",
+                            nameValue,
                             style: Theme.of(context).textTheme.displayMedium,
                           ),
                           Text(
@@ -147,6 +147,7 @@ class _PatientState extends State<Patient> {
                             borderRadius: BorderRadius.circular(5.0)),
                       ),
                       onPressed: () {
+                        Navigator.pop(context);
                         showEditProfile();
                       },
                       child: const Text(
@@ -371,27 +372,26 @@ class _PatientState extends State<Patient> {
   void initState() {
     super.initState();
     _getData();
-    _getContact();
   }
 
   void _getData() async {
     _carereceiverModel = (await ApiService().getUser(crId)!);
-    Future.delayed(const Duration(seconds: 1)).then((value) => setState(() {
-          nameValue = _carereceiverModel!.name;
-          authenticationID = _carereceiverModel!.authId;
-          priContactUsername = _carereceiverModel!.careGiver[0].id;
-          priContactRel = _carereceiverModel!.careGiver[0].relationship;
-          phoneNumberValue = _carereceiverModel!.contactNum;
-          homeAddress = _carereceiverModel!.address;
-        }));
+    setState(() {
+      nameValue = _carereceiverModel!.name;
+      authenticationID = _carereceiverModel!.authId;
+      priContactUsername = _carereceiverModel!.careGiver[0].id;
+      priContactRel = _carereceiverModel!.careGiver[0].relationship;
+      phoneNumberValue = _carereceiverModel!.contactNum;
+      homeAddress = _carereceiverModel!.address;
+    });
+    _getContact(_carereceiverModel!.careGiver[0].id);
   }
 
-  void _getContact() async {
-    _cgcontactnumModel =
-        (await ApiService().getCgContact(priContactUsername, crId));
-    Future.delayed(const Duration(seconds: 1)).then((value) => setState(() {
-          priContactNo = _cgcontactnumModel!.cgContactNum;
-        }));
+  void _getContact(cgId) async {
+    _cgcontactnumModel = (await ApiService().getCgContact(cgId, crId));
+    setState(() {
+      priContactNo = _cgcontactnumModel!.cgContactNum;
+    });
   }
 
   @override
