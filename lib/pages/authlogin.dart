@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthLogin extends StatefulWidget {
   const AuthLogin({super.key});
@@ -9,7 +10,7 @@ class AuthLogin extends StatefulWidget {
 
 class _AuthLoginState extends State<AuthLogin> {
   String dropdownValue = "Caregiver";
-  String usernameValue = "";
+  String emailValue = "";
   String passwordValue = "";
   List<DropdownMenuItem<String>> get dropdownItems {
     List<DropdownMenuItem<String>> menuItems = [
@@ -27,6 +28,21 @@ class _AuthLoginState extends State<AuthLogin> {
       ),
     ];
     return menuItems;
+  }
+
+  void loginAccount() async {
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailValue, password: passwordValue);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        debugPrint('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        debugPrint('Wrong password provided for that user.');
+      }
+    } catch (e) {
+      debugPrint("$e");
+    }
   }
 
   @override
@@ -95,17 +111,17 @@ class _AuthLoginState extends State<AuthLogin> {
                   ),
                   TextField(
                     decoration: InputDecoration(
-                      labelText: 'Username',
+                      labelText: 'Email',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0)),
                       contentPadding: const EdgeInsets.all(10),
-                      hintText: 'Enter Username',
+                      hintText: 'Enter Email',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
-                        usernameValue = newValue!;
+                        emailValue = newValue!;
                       });
                     },
                   ),
@@ -138,7 +154,8 @@ class _AuthLoginState extends State<AuthLogin> {
                           const Size(double.infinity, 50), //////// HERE
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      loginAccount();
+                      // Navigator.pop(context);
                     },
                     child: const Text("Login"),
                   )

@@ -11,7 +11,7 @@ class AuthRegister extends StatefulWidget {
 class _AuthRegisterState extends State<AuthRegister> {
   String dropdownValue = "Caregiver";
   String nameValue = "";
-  String usernameValue = "";
+  String emailValue = "";
   String passwordValue = "";
   String confirmValue = "";
   String mobileValue = "";
@@ -37,7 +37,7 @@ class _AuthRegisterState extends State<AuthRegister> {
     try {
       final credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: usernameValue,
+        email: emailValue,
         password: passwordValue,
       );
     } on FirebaseAuthException catch (e) {
@@ -136,17 +136,17 @@ class _AuthRegisterState extends State<AuthRegister> {
                   ),
                   TextField(
                     decoration: InputDecoration(
-                      labelText: 'Username',
+                      labelText: 'Email',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0)),
                       contentPadding: const EdgeInsets.all(10),
-                      hintText: 'Enter Username',
+                      hintText: 'Enter Email',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
-                        usernameValue = newValue!;
+                        emailValue = newValue!;
                       });
                     },
                   ),
