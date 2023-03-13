@@ -591,20 +591,6 @@ class _PatientState extends State<Patient> {
   }
 }
 
-class EditProfile extends StatefulWidget {
-  const EditProfile({super.key});
-
-  @override
-  State<EditProfile> createState() => _EditProfileState();
-}
-
-class _EditProfileState extends State<EditProfile> {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
-
 class NavigateMap extends StatefulWidget {
   const NavigateMap({super.key});
 
