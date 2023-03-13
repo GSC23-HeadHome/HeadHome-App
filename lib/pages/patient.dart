@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
+import 'package:headhome/utils/extensions.dart';
+
+import 'package:headhome/api/api_services.dart';
+import 'package:headhome/api/models/caregivercontactmodel.dart';
+import 'package:headhome/api/models/carereceiverdata.dart';
 
 class Patient extends StatefulWidget {
   const Patient({super.key});
@@ -9,14 +14,21 @@ class Patient extends StatefulWidget {
 }
 
 class _PatientState extends State<Patient> {
+  late Carereceiver? _carereceiverModel = {} as Carereceiver?;
+  late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
+  // UI
   bool visible = true;
   bool fade = true;
+  // Patient Details
+  String crId = "cr0001";
   String nameValue = "Amy Zhang";
   String phoneNumberValue = "69823042";
   String authenticationID = "amyzhang001";
   String passwordValue = "12345678";
   String priContactUsername = "alice123";
   String priContactRel = "Eldest Daughter";
+  String priContactNo = "91234567";
+  String homeAddress = "Blk 123 Clementi Rd #12-34 S(123456)";
 
   showPatientDetails() {
     showDialog(
@@ -49,7 +61,7 @@ class _PatientState extends State<Patient> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "amyzhang",
+                            nameValue,
                             style: Theme.of(context).textTheme.displayMedium,
                           ),
                           Text(
@@ -135,6 +147,7 @@ class _PatientState extends State<Patient> {
                             borderRadius: BorderRadius.circular(5.0)),
                       ),
                       onPressed: () {
+                        Navigator.pop(context);
                         showEditProfile();
                       },
                       child: const Text(
@@ -356,6 +369,32 @@ class _PatientState extends State<Patient> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  void _getData() async {
+    _carereceiverModel = (await ApiService().getUser(crId)!);
+    setState(() {
+      nameValue = _carereceiverModel!.name;
+      authenticationID = _carereceiverModel!.authId;
+      priContactUsername = _carereceiverModel!.careGiver[0].id;
+      priContactRel = _carereceiverModel!.careGiver[0].relationship;
+      phoneNumberValue = _carereceiverModel!.contactNum;
+      homeAddress = _carereceiverModel!.address;
+    });
+    _getContact(_carereceiverModel!.careGiver[0].id);
+  }
+
+  void _getContact(cgId) async {
+    _cgcontactnumModel = (await ApiService().getCgContact(cgId, crId));
+    setState(() {
+      priContactNo = _cgcontactnumModel!.cgContactNum;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -416,7 +455,7 @@ class _PatientState extends State<Patient> {
                       Icon(MaterialSymbols.home_pin,
                           color: Theme.of(context).colorScheme.primary),
                       Text(
-                        "Blk 123 Clementi Rd #12-34 S(123456)",
+                        homeAddress,
                         textScaleFactor: 1.2,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyLarge,
@@ -573,12 +612,12 @@ class _PatientState extends State<Patient> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  "Eldest Daughter",
+                  priContactRel.toTitleCase(),
                   style: Theme.of(context).textTheme.bodyLarge,
                   textAlign: TextAlign.right,
                 ),
                 Text(
-                  "91234567",
+                  priContactNo,
                   style: Theme.of(context).textTheme.bodySmall,
                   textAlign: TextAlign.right,
                 ),
