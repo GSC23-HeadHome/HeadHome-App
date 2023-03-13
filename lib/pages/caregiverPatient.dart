@@ -72,7 +72,7 @@ class _PatientDetailsState extends State<PatientDetails> {
           children: [
             Expanded(
               child: Scrollbar(
-                child: Padding(
+                child: Padding( 
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
                   child: ListView(
                     scrollDirection:
@@ -337,7 +337,7 @@ class sendAlert extends StatelessWidget {
                             children: [
                               Padding(
                                   padding:
-                                      const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                                      const EdgeInsets.fromLTRB(20, 20, 0, 20),
                                   child: Wrap(children: const [
                                     Text(
                                       "Sarah",
@@ -347,11 +347,11 @@ class sendAlert extends StatelessWidget {
                                           fontWeight: FontWeight.w600),
                                     ),
                                   ])),
-                              const Padding(
-                                padding: EdgeInsets.fromLTRB(20, 5, 0, 20),
-                                child: Text("250m away",
-                                    style: TextStyle(fontSize: 12.0)),
-                              ),
+                              // const Padding(
+                              //   padding: EdgeInsets.fromLTRB(20, 5, 0, 20),
+                              //   child: Text("250m away",
+                              //       style: TextStyle(fontSize: 12.0)),
+                              // ),
                             ],
                           ),
                         ),
