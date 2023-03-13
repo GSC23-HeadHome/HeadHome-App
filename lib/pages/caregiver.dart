@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../main.dart' show MyApp;
 import './caregiverPatient.dart' show PatientDetails;
+import '../components/profileDialog.dart' show ProfileOverlay;
+import '../components/settingsDialog.dart' show SettingsOverlay;
 
 class Caregiver extends StatelessWidget {
   const Caregiver({super.key});
@@ -126,25 +128,19 @@ class Caregiver extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
+            const Expanded(
+                flex: 5, // 50%
+                // child: IconButton(
+                //   icon: Icon(
+                //     Icons.person_2_outlined,
+                //     color: Theme.of(context).colorScheme.primary,
+                //   ),
+                //   onPressed: () {},
+                // ),
+                child: ProfileOverlay()),
             Expanded(
               flex: 5, // 50%
-              child: IconButton(
-                icon: Icon(
-                  Icons.person_2_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                onPressed: () {},
-              ),
-            ),
-            Expanded(
-              flex: 5, // 50%
-              child: IconButton(
-                icon: Icon(
-                  Icons.settings,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                onPressed: () {},
-              ),
+              child: SettingsOverlay(),
             ),
           ],
         ),
