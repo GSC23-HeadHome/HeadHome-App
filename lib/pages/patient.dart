@@ -7,30 +7,34 @@ import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 
 class Patient extends StatefulWidget {
-  const Patient({super.key, required this.crId});
-  final String crId;
+  const Patient({super.key, this.carereceiverModel});
+  final CarereceiverModel? carereceiverModel;
 
   @override
   State<Patient> createState() => _PatientState();
 }
 
 class _PatientState extends State<Patient> {
-  late Carereceiver? _carereceiverModel = {} as Carereceiver?;
+  late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
   late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
   // UI
   bool visible = true;
   bool fade = true;
   // Patient Details
-  String nameValue = "Amy Zhang";
-  String phoneNumberValue = "69823042";
-  String authenticationID = "amyzhang001";
-  String passwordValue = "12345678";
-  String priContactUsername = "alice123";
-  String priContactRel = "Eldest Daughter";
-  String priContactNo = "91234567";
-  String homeAddress = "Blk 123 Clementi Rd #12-34 S(123456)";
+  late String crId = widget.carereceiverModel?.name ?? "Cr0001";
+  late String nameValue = widget.carereceiverModel?.name ?? "Amy Zhang";
+  late String phoneNumberValue =
+      widget.carereceiverModel?.contactNum ?? "69823042";
+  late String authenticationID =
+      widget.carereceiverModel?.authId ?? "amyzhang001";
+  late String passwordValue = "12345678";
+  late String priContactUsername = "alice123";
+  late String priContactRel = "Eldest Daughter";
+  late String priContactNo = "91234567";
+  late String homeAddress = widget.carereceiverModel?.address ??
+      "Blk 123 Clementi Rd #12-34 S(123456)";
 
-  showPatientDetails() {
+  void showPatientDetails() {
     showDialog(
         context: context,
         builder: (context) {
@@ -166,7 +170,7 @@ class _PatientState extends State<Patient> {
         });
   }
 
-  showEditProfile() {
+  void showEditProfile() {
     showDialog(
         context: context,
         builder: (context) {
@@ -375,22 +379,13 @@ class _PatientState extends State<Patient> {
   }
 
   void _getData() async {
-    _carereceiverModel = await ApiService.getCarereceiver(widget.crId);
-    if (_carereceiverModel != null) {
-      setState(() {
-        nameValue = _carereceiverModel!.name;
-        authenticationID = _carereceiverModel!.authId;
-        priContactUsername = _carereceiverModel!.careGiver[0].id;
-        priContactRel = _carereceiverModel!.careGiver[0].relationship;
-        phoneNumberValue = _carereceiverModel!.contactNum;
-        homeAddress = _carereceiverModel!.address;
-      });
-      _getContact(_carereceiverModel!.careGiver[0].id);
+    if (widget.carereceiverModel != null) {
+      _getContact(widget.carereceiverModel!.careGiver[0].id);
     }
   }
 
   void _getContact(cgId) async {
-    _cgcontactnumModel = await ApiService.getCgContact(cgId, widget.crId);
+    _cgcontactnumModel = await ApiService.getCgContact(cgId, crId);
     setState(() {
       priContactNo = _cgcontactnumModel!.cgContactNum;
     });

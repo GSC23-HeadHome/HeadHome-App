@@ -188,8 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const Patient(crId: "cr0001")),
+                    MaterialPageRoute(builder: (context) => const Patient()),
                   );
                 },
                 child: const Text('Patient Page')),
@@ -198,9 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const Caregiver(
-                        cgId: "cg0021",
-                      ),
+                      builder: (context) => const Caregiver(),
                     ),
                   );
                 },
@@ -210,9 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const Volunteer(
-                        vId: "v0005",
-                      ),
+                      builder: (context) => const Volunteer(),
                     ),
                   );
                 },

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:headhome/api/models/caregiverdata.dart';
 import '../main.dart' show MyApp;
 import './caregiverPatient.dart' show PatientDetails;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
 
 class Caregiver extends StatelessWidget {
-  const Caregiver({super.key, required this.cgId});
-  final String cgId;
+  const Caregiver({super.key, this.caregiverModel});
+  final CaregiverModel? caregiverModel;
 
   @override
   Widget build(BuildContext context) {

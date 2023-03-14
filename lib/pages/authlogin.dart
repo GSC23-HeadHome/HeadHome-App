@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:headhome/api/models/caregiverdata.dart';
 import 'package:headhome/pages/patient.dart';
 import 'package:headhome/pages/caregiver.dart';
 import 'package:headhome/pages/volunteer.dart';
+import 'package:headhome/api/api_services.dart';
+import 'package:headhome/api/models/carereceiverdata.dart';
+import 'package:headhome/api/models/volunteerdata.dart';
 
 class AuthLogin extends StatefulWidget {
   const AuthLogin({super.key});
@@ -22,38 +26,54 @@ class _AuthLoginState extends State<AuthLogin> {
         email: emailValue,
         password: passwordValue,
       );
-      if (credential.user != null && context.mounted) {
+      if (credential.user != null) {
         String uid = credential.user!.uid;
         switch (dropdownValue) {
           case "Patient":
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext bctx) => Patient(
-                  crId: uid,
+            CarereceiverModel? carereceiverModel =
+                await ApiService.getCarereceiver(uid);
+            if (carereceiverModel != null && context.mounted) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext bctx) => Patient(
+                    carereceiverModel: carereceiverModel,
+                  ),
                 ),
-              ),
-            );
-            break;
+              );
+              break;
+            } else {
+              throw Exception("User is not a Carereceiver");
+            }
 
           case "Volunteer":
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext bctx) => Volunteer(
-                  vId: uid,
+            VolunteerModel? volunteerModel = await ApiService.getVolunteer(uid);
+            if (volunteerModel != null && context.mounted) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext bctx) => Volunteer(
+                    volunteerModel: volunteerModel,
+                  ),
                 ),
-              ),
-            );
-            break;
+              );
+              break;
+            } else {
+              throw Exception("User is not a Volunteer");
+            }
 
           case "Caregiver":
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext bctx) => Caregiver(
-                  cgId: uid,
+            CaregiverModel? caregiverModel = await ApiService.getCaregiver(uid);
+            if (caregiverModel != null && context.mounted) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext bctx) => Caregiver(
+                    caregiverModel: caregiverModel,
+                  ),
                 ),
-              ),
-            );
-            break;
+              );
+              break;
+            } else {
+              throw Exception("User is not a Caregiver");
+            }
 
           default:
             throw Exception("Invalid Dropdown Value");

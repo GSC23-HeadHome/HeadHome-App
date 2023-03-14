@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:headhome/api/models/volunteerdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
 
 class Volunteer extends StatelessWidget {
-  const Volunteer({super.key, required this.vId});
-  final String vId;
+  const Volunteer({super.key, this.volunteerModel});
+  final VolunteerModel? volunteerModel;
 
   @override
   Widget build(BuildContext context) {

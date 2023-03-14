@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' hide log;
 
+import 'package:headhome/api/models/volunteerdata.dart';
 import 'package:http/http.dart' as http;
 import 'package:headhome/constants.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
+import 'package:headhome/api/models/caregiverdata.dart';
 
 class ApiService {
   // ---------- CARERECEIVER METHODS ----------
@@ -32,14 +34,14 @@ class ApiService {
     return response;
   }
 
-  static Future<Carereceiver?> getCarereceiver(String id) async {
+  static Future<CarereceiverModel?> getCarereceiver(String id) async {
     try {
       var url =
           Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
       print(url);
       var response = await http.get(url);
       if (response.statusCode == 200) {
-        Carereceiver model = carereceiverFromJson(response.body);
+        CarereceiverModel model = carereceiverFromJson(response.body);
         return model;
       }
     } catch (e) {
@@ -69,6 +71,22 @@ class ApiService {
     var response = await http.post(url,
         headers: {"Content-Type": "application/json"}, body: body);
     return response;
+  }
+
+  static Future<CaregiverModel?> getCaregiver(String id) async {
+    try {
+      var url =
+          Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.caregiver}/$id');
+      print(url);
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        CaregiverModel model = caregiverFromJson(response.body);
+        return model;
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
   }
 
   static Future<Cgcontactnum?> getCgContact(String cgId, crId) async {
@@ -117,6 +135,22 @@ class ApiService {
     var response = await http.post(url,
         headers: {"Content-Type": "application/json"}, body: body);
     return response;
+  }
+
+  static Future<VolunteerModel?> getVolunteer(String id) async {
+    try {
+      var url =
+          Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.volunteers}/$id');
+      print(url);
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        VolunteerModel model = volunteerFromJson(response.body);
+        return model;
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
   }
 
   // -------- END OF VOLUNTEER METHODS ---------
