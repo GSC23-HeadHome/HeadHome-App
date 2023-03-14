@@ -7,7 +7,8 @@ import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 
 class Patient extends StatefulWidget {
-  const Patient({super.key});
+  const Patient({super.key, required this.crId});
+  final String crId;
 
   @override
   State<Patient> createState() => _PatientState();
@@ -20,7 +21,6 @@ class _PatientState extends State<Patient> {
   bool visible = true;
   bool fade = true;
   // Patient Details
-  String crId = "cr0001";
   String nameValue = "Amy Zhang";
   String phoneNumberValue = "69823042";
   String authenticationID = "amyzhang001";
@@ -375,20 +375,22 @@ class _PatientState extends State<Patient> {
   }
 
   void _getData() async {
-    _carereceiverModel = (await ApiService().getUser(crId)!);
-    setState(() {
-      nameValue = _carereceiverModel!.name;
-      authenticationID = _carereceiverModel!.authId;
-      priContactUsername = _carereceiverModel!.careGiver[0].id;
-      priContactRel = _carereceiverModel!.careGiver[0].relationship;
-      phoneNumberValue = _carereceiverModel!.contactNum;
-      homeAddress = _carereceiverModel!.address;
-    });
-    _getContact(_carereceiverModel!.careGiver[0].id);
+    _carereceiverModel = await ApiService.getCarereceiver(widget.crId);
+    if (_carereceiverModel != null) {
+      setState(() {
+        nameValue = _carereceiverModel!.name;
+        authenticationID = _carereceiverModel!.authId;
+        priContactUsername = _carereceiverModel!.careGiver[0].id;
+        priContactRel = _carereceiverModel!.careGiver[0].relationship;
+        phoneNumberValue = _carereceiverModel!.contactNum;
+        homeAddress = _carereceiverModel!.address;
+      });
+      _getContact(_carereceiverModel!.careGiver[0].id);
+    }
   }
 
   void _getContact(cgId) async {
-    _cgcontactnumModel = (await ApiService().getCgContact(cgId, crId));
+    _cgcontactnumModel = await ApiService.getCgContact(cgId, widget.crId);
     setState(() {
       priContactNo = _cgcontactnumModel!.cgContactNum;
     });

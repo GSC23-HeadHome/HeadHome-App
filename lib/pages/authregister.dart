@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:headhome/api/api_services.dart';
 
 class AuthRegister extends StatefulWidget {
   const AuthRegister({super.key});
@@ -15,23 +16,6 @@ class _AuthRegisterState extends State<AuthRegister> {
   String passwordValue = "";
   String confirmValue = "";
   String mobileValue = "";
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      const DropdownMenuItem(
-        value: "Caregiver",
-        child: Text("Caregiver"),
-      ),
-      const DropdownMenuItem(
-        value: "Patient",
-        child: Text("Patient"),
-      ),
-      const DropdownMenuItem(
-        value: "Volunteer",
-        child: Text("Volunteer"),
-      ),
-    ];
-    return menuItems;
-  }
 
   void registerAccount() async {
     try {
@@ -40,6 +24,43 @@ class _AuthRegisterState extends State<AuthRegister> {
         email: emailValue,
         password: passwordValue,
       );
+
+      if (credential.user == null) {
+        throw Exception("User could not be created in Firebase Auth.");
+      }
+
+      switch (dropdownValue) {
+        case "Caregiver":
+          await ApiService.createCaregiver(
+            credential.user!.uid,
+            nameValue,
+            "",
+            mobileValue,
+          );
+          break;
+
+        case "Patient":
+          await ApiService.createCarereceiver(
+            credential.user!.uid,
+            nameValue,
+            "",
+            mobileValue,
+          );
+          debugPrint("Carereceiver Created!");
+          break;
+
+        case "Volunteer":
+          await ApiService.createVolunteer(
+            credential.user!.uid,
+            nameValue,
+            mobileValue,
+          );
+          debugPrint("Volunteer Created!");
+          break;
+
+        default:
+          throw Exception("Invalid Dropdown Value");
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         debugPrint('The password provided is too weak.');

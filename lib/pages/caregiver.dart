@@ -5,7 +5,8 @@ import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
 
 class Caregiver extends StatelessWidget {
-  const Caregiver({super.key});
+  const Caregiver({super.key, required this.cgId});
+  final String cgId;
 
   @override
   Widget build(BuildContext context) {
