@@ -10,7 +10,6 @@ import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 
-
 class Caregiver extends StatefulWidget {
   const Caregiver({super.key, this.caregiverModel});
   final CaregiverModel? caregiverModel;
@@ -24,7 +23,7 @@ class _CaregiverState extends State<Caregiver> {
   late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
   // late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
   //caregiver details
-  late String CgId = widget.caregiverModel?.cgId ?? "cg0021";
+  late String CgId = widget.caregiverModel?.cgId ?? "cg0002";
 
   late String nameValue = widget.caregiverModel?.name ?? "John";
 
@@ -33,7 +32,7 @@ class _CaregiverState extends State<Caregiver> {
   late String password = "69823042";
 
   late List<CareReceiver> careReceivers = [];
-  late List<CareReceiver> careReceiverDetails = [];
+  late List<CarereceiverModel?> careReceiverDetails = [];
 
   @override
   void initState() {
@@ -57,20 +56,16 @@ class _CaregiverState extends State<Caregiver> {
       contactNum = _CaregiverModel!.contactNum;
       careReceivers = _CaregiverModel!.careReceiver;
     });
+    //get all careReceivers
     for (var i = 0; i < careReceivers.length; i++) {
       // TO DO
-      // print(careReceivers[i].id);
-
-      // call _getReceiverInfo(careReceivers[i].id)
+      _CarereceiverModel =
+          await ApiService.getCarereceiver(careReceivers[i].id);
+      setState(() {
+        careReceiverDetails.add(_CarereceiverModel);
+      });
       // add to careReceiverDetails
     }
-    
-  }
-
-  void _getCareReceiverInfo(id) async {
-    _CarereceiverModel = await ApiService.getCarereceiver(id);
-    print(_CarereceiverModel?.name);
-    print(_CarereceiverModel?.);
   }
 
   @override
