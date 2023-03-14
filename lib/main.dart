@@ -38,26 +38,27 @@ class MyApp extends StatelessWidget {
         ),
         fontFamily: 'Roboto',
         textTheme: const TextTheme(
-            //headline 3
-            displayLarge: TextStyle(
-                fontSize: 34.0,
-                color: Color(0xFF263238),
-                fontWeight: FontWeight.bold),
-            //headline 5
-            displayMedium: TextStyle(
-                fontSize: 24.0,
-                color: Color(0xFF263238),
-                fontWeight: FontWeight.w700),
-            //subtitle2
-            titleSmall: TextStyle(
-                fontSize: 18.0,
-                color: Color(0xFF263238),
-                fontWeight: FontWeight.bold),
-            bodyLarge: TextStyle(fontSize: 16.0),
-            bodyMedium: TextStyle(fontSize: 14.0),
-            bodySmall: TextStyle(fontSize: 12.0)),
+          //headline 3
+          displayLarge: TextStyle(
+              fontSize: 34.0,
+              color: Color(0xFF263238),
+              fontWeight: FontWeight.bold),
+          //headline 5
+          displayMedium: TextStyle(
+              fontSize: 24.0,
+              color: Color(0xFF263238),
+              fontWeight: FontWeight.w700),
+          //subtitle2
+          titleSmall: TextStyle(
+              fontSize: 18.0,
+              color: Color(0xFF263238),
+              fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(fontSize: 16.0),
+          bodyMedium: TextStyle(fontSize: 14.0),
+          bodySmall: TextStyle(fontSize: 12.0),
+        ),
       ),
-      home: MyHomePage(title: "Temp Navigator"),
+      home: const MyHomePage(title: "Temp Navigator"),
     );
   }
 }
@@ -86,7 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
         debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
       }
       _device = results
-          .firstWhereOrNull((result) => result.device.name == deviceName)
+          .firstWhereOrNull(
+              (result) => result.device.name == BluetoothConstants.deviceName)
           ?.device;
       if (_device != null &&
           _deviceState == BluetoothDeviceState.disconnected) {
@@ -96,12 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
         });
         await _device!.connect();
         List<BluetoothService> services = await _device!.discoverServices();
-        BluetoothService targetService = services
-            .firstWhere((service) => service.uuid.toString() == serviceUUID);
+        BluetoothService targetService = services.firstWhere((service) =>
+            service.uuid.toString() == BluetoothConstants.serviceUUID);
         List<BluetoothCharacteristic> characteristics =
             targetService.characteristics;
         _targetCharacteristic = characteristics.firstWhere((characteristic) =>
-            characteristic.uuid.toString() == characteristicUUID);
+            characteristic.uuid.toString() ==
+            BluetoothConstants.characteristicUUID);
 
         if (_targetCharacteristic != null) {
           List<int> receivedData = await _targetCharacteristic!.read();
@@ -185,7 +188,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const Patient()),
+                    MaterialPageRoute(
+                        builder: (context) => const Patient(crId: "cr0001")),
                   );
                 },
                 child: const Text('Patient Page')),
@@ -193,7 +197,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const Caregiver()),
+                    MaterialPageRoute(
+                      builder: (context) => const Caregiver(
+                        cgId: "cg0021",
+                      ),
+                    ),
                   );
                 },
                 child: const Text('Caregiver Page')),
@@ -201,7 +209,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const Volunteer()),
+                    MaterialPageRoute(
+                      builder: (context) => const Volunteer(
+                        vId: "v0005",
+                      ),
+                    ),
                   );
                 },
                 child: const Text('Volunteer Page')),

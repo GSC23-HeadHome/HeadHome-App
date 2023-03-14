@@ -157,7 +157,8 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                                         color: Colors
                                                             .black // the color of the border
                                                         ),
-                                                    minimumSize: Size(120, 50),
+                                                    minimumSize:
+                                                        const Size(120, 50),
                                                     backgroundColor:
                                                         (Colors.white)),
                                                 onPressed: () {

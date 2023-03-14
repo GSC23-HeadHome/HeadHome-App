@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:headhome/pages/patient.dart';
+import 'package:headhome/pages/caregiver.dart';
+import 'package:headhome/pages/volunteer.dart';
 
 class AuthLogin extends StatefulWidget {
   const AuthLogin({super.key});
@@ -9,24 +13,63 @@ class AuthLogin extends StatefulWidget {
 
 class _AuthLoginState extends State<AuthLogin> {
   String dropdownValue = "Caregiver";
-  String usernameValue = "";
+  String emailValue = "";
   String passwordValue = "";
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      const DropdownMenuItem(
-        value: "Caregiver",
-        child: Text("Caregiver"),
-      ),
-      const DropdownMenuItem(
-        value: "Patient",
-        child: Text("Patient"),
-      ),
-      const DropdownMenuItem(
-        value: "Volunteer",
-        child: Text("Volunteer"),
-      ),
-    ];
-    return menuItems;
+
+  void loginAccount(BuildContext context) async {
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailValue,
+        password: passwordValue,
+      );
+      if (credential.user != null && context.mounted) {
+        String uid = credential.user!.uid;
+        switch (dropdownValue) {
+          case "Patient":
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext bctx) => Patient(
+                  crId: uid,
+                ),
+              ),
+            );
+            break;
+
+          case "Volunteer":
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext bctx) => Volunteer(
+                  vId: uid,
+                ),
+              ),
+            );
+            break;
+
+          case "Caregiver":
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext bctx) => Caregiver(
+                  cgId: uid,
+                ),
+              ),
+            );
+            break;
+
+          default:
+            throw Exception("Invalid Dropdown Value");
+        }
+      } else {
+        throw Exception("User could not be logged in from Firebase Auth.");
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        debugPrint('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        debugPrint('Wrong password provided for that user.');
+      }
+    } catch (e) {
+      debugPrint("$e");
+    }
   }
 
   @override
@@ -95,17 +138,17 @@ class _AuthLoginState extends State<AuthLogin> {
                   ),
                   TextField(
                     decoration: InputDecoration(
-                      labelText: 'Username',
+                      labelText: 'Email',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0)),
                       contentPadding: const EdgeInsets.all(10),
-                      hintText: 'Enter Username',
+                      hintText: 'Enter Email',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
-                        usernameValue = newValue!;
+                        emailValue = newValue!;
                       });
                     },
                   ),
@@ -138,7 +181,7 @@ class _AuthLoginState extends State<AuthLogin> {
                           const Size(double.infinity, 50), //////// HERE
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      loginAccount(context);
                     },
                     child: const Text("Login"),
                   )

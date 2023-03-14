@@ -3,7 +3,8 @@ import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
 
 class Volunteer extends StatelessWidget {
-  const Volunteer({super.key});
+  const Volunteer({super.key, required this.vId});
+  final String vId;
 
   @override
   Widget build(BuildContext context) {
@@ -174,82 +175,80 @@ class PatientDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-          child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xFFF8E3E4),
-                borderRadius: BorderRadius.all(Radius.circular(6)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 3,
-                    blurRadius: 6,
-                    offset: Offset(0, 5), // changes position of shadow
-                  ),
-                ],
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color(0xFFF8E3E4),
+            borderRadius: BorderRadius.all(Radius.circular(6)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 3,
+                blurRadius: 6,
+                offset: Offset(0, 5), // changes position of shadow
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                      flex: 2, // 60%
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundImage: NetworkImage(imageurl),
-                        ),
-                      )),
-                  Expanded(
-                    flex: 4, // 60%
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                            child: Wrap(children: [
-                              Text(
-                                name,
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    color: Color(0xFF263238),
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ])),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                          child:
-                              Text(distance, style: TextStyle(fontSize: 12.0)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 4, // 40%
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const PatientPage()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(100, 45),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.error),
-                        child: Text(
-                          'Locate',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
+          child: Row(
+            children: [
+              Expanded(
+                  flex: 2, // 60%
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: NetworkImage(imageurl),
+                    ),
+                  )),
+              Expanded(
+                flex: 4, // 60%
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                        child: Wrap(children: [
+                          Text(
+                            name,
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                color: Color(0xFF263238),
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ])),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                      child: Text(distance, style: TextStyle(fontSize: 12.0)),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 4, // 40%
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const PatientPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                        minimumSize: Size(100, 45),
+                        backgroundColor: Theme.of(context).colorScheme.error),
+                    child: Text(
+                      'Locate',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

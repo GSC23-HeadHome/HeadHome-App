@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:headhome/api/api_services.dart';
 
 class AuthRegister extends StatefulWidget {
   const AuthRegister({super.key});
@@ -10,26 +12,64 @@ class AuthRegister extends StatefulWidget {
 class _AuthRegisterState extends State<AuthRegister> {
   String dropdownValue = "Caregiver";
   String nameValue = "";
-  String usernameValue = "";
+  String emailValue = "";
   String passwordValue = "";
   String confirmValue = "";
   String mobileValue = "";
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      const DropdownMenuItem(
-        value: "Caregiver",
-        child: Text("Caregiver"),
-      ),
-      const DropdownMenuItem(
-        value: "Patient",
-        child: Text("Patient"),
-      ),
-      const DropdownMenuItem(
-        value: "Volunteer",
-        child: Text("Volunteer"),
-      ),
-    ];
-    return menuItems;
+
+  void registerAccount() async {
+    try {
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailValue,
+        password: passwordValue,
+      );
+
+      if (credential.user == null) {
+        throw Exception("User could not be created in Firebase Auth.");
+      }
+
+      switch (dropdownValue) {
+        case "Caregiver":
+          await ApiService.createCaregiver(
+            credential.user!.uid,
+            nameValue,
+            "",
+            mobileValue,
+          );
+          break;
+
+        case "Patient":
+          await ApiService.createCarereceiver(
+            credential.user!.uid,
+            nameValue,
+            "",
+            mobileValue,
+          );
+          debugPrint("Carereceiver Created!");
+          break;
+
+        case "Volunteer":
+          await ApiService.createVolunteer(
+            credential.user!.uid,
+            nameValue,
+            mobileValue,
+          );
+          debugPrint("Volunteer Created!");
+          break;
+
+        default:
+          throw Exception("Invalid Dropdown Value");
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        debugPrint('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        debugPrint('The account already exists for that email.');
+      }
+    } catch (e) {
+      debugPrint("$e");
+    }
   }
 
   @override
@@ -117,17 +157,17 @@ class _AuthRegisterState extends State<AuthRegister> {
                   ),
                   TextField(
                     decoration: InputDecoration(
-                      labelText: 'Username',
+                      labelText: 'Email',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0)),
                       contentPadding: const EdgeInsets.all(10),
-                      hintText: 'Enter Username',
+                      hintText: 'Enter Email',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
-                        usernameValue = newValue!;
+                        emailValue = newValue!;
                       });
                     },
                   ),
@@ -203,6 +243,7 @@ class _AuthRegisterState extends State<AuthRegister> {
                           const Size(double.infinity, 50), //////// HERE
                     ),
                     onPressed: () {
+                      registerAccount();
                       Navigator.pop(context);
                     },
                     child: const Text(
