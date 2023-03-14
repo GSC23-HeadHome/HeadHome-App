@@ -5,9 +5,73 @@ import './caregiverPatient.dart' show PatientDetails;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
 
-class Caregiver extends StatelessWidget {
+import 'package:headhome/api/api_services.dart';
+
+import 'package:headhome/api/models/caregivercontactmodel.dart';
+import 'package:headhome/api/models/carereceiverdata.dart';
+
+
+class Caregiver extends StatefulWidget {
   const Caregiver({super.key, this.caregiverModel});
   final CaregiverModel? caregiverModel;
+
+  @override
+  State<Caregiver> createState() => _CaregiverState();
+}
+
+class _CaregiverState extends State<Caregiver> {
+  late CaregiverModel? _CaregiverModel = {} as CaregiverModel?;
+  late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
+  // late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
+  //caregiver details
+  late String CgId = widget.caregiverModel?.cgId ?? "cg0021";
+
+  late String nameValue = widget.caregiverModel?.name ?? "John";
+
+  late String contactNum = widget.caregiverModel?.contactNum ?? "69823042";
+
+  late String password = "69823042";
+
+  late List<CareReceiver> careReceivers = [];
+  late List<CareReceiver> careReceiverDetails = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  void _getData() async {
+    print("getdata function");
+    // if (widget.caregiverModel != null) {
+    //   print("caregiverModel not null");
+    //   _getCaregiverInfo(widget.caregiverModel!.cgId);
+    // }
+    _getCaregiverInfo(CgId);
+  }
+
+  void _getCaregiverInfo(cgId) async {
+    _CaregiverModel = await ApiService.getCaregiver(cgId);
+    setState(() {
+      nameValue = _CaregiverModel!.name;
+      contactNum = _CaregiverModel!.contactNum;
+      careReceivers = _CaregiverModel!.careReceiver;
+    });
+    for (var i = 0; i < careReceivers.length; i++) {
+      // TO DO
+      // print(careReceivers[i].id);
+
+      // call _getReceiverInfo(careReceivers[i].id)
+      // add to careReceiverDetails
+    }
+    
+  }
+
+  void _getCareReceiverInfo(id) async {
+    _CarereceiverModel = await ApiService.getCarereceiver(id);
+    print(_CarereceiverModel?.name);
+    print(_CarereceiverModel?.);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +114,7 @@ class Caregiver extends StatelessWidget {
                   const Text("Welcome back,",
                       style:
                           TextStyle(fontSize: 18.0, color: Color(0xFF263238))),
-                  Text("John",
+                  Text(nameValue,
                       style: Theme.of(context).textTheme.displayMedium),
                 ],
               ),
