@@ -136,27 +136,25 @@ class _CaregiverState extends State<Caregiver> {
                         ],
                       ),
                     )),
-                // Expanded(child: SizedBox(width: 200,
-                Column(
-                  children: const [
-                    CaregiverPatients(
-                        name: "Amy Zhang",
-                        note:
-                            "Known to leave safe zone. Hangs out in ang mo kio park",
-                        status: "danger",
-                        imageurl: "https://picsum.photos/id/237/200/300"),
-                    CaregiverPatients(
-                        name: "David Teo",
-                        note: "testtest",
-                        status: "safe",
-                        imageurl: "https://picsum.photos/id/237/200/300"),
-                    CaregiverPatients(
-                        name: "Mary Ang",
-                        note: "testtest",
-                        status: "home",
-                        imageurl: "https://picsum.photos/id/237/200/300")
-                  ],
-                ),
+                SizedBox(
+                  height: 480,
+                  child: ListView.builder(
+                      itemCount: careReceiverDetails.length,
+                      itemBuilder: (BuildContext context, int i) {
+                        return Card(
+                          elevation: 0,
+                          color: Colors.transparent,
+                          surfaceTintColor: Colors.white,
+                          child: CaregiverPatients(
+                              name: careReceiverDetails[i]!.name,
+                              note:
+                                  "Known to leave safe zone. Hangs out in ang mo kio park",
+                              status: "danger",
+                              //change imageurl to careReceiverDetails[i]!.profilePic
+                              imageurl: "https://picsum.photos/id/237/200/300"),
+                        );
+                      }),
+                )
               ],
             ),
           ],
