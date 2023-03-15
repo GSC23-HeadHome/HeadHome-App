@@ -71,7 +71,7 @@ class _CaregiverState extends State<Caregiver> {
   
 
   Future<String> _updateCgInfo(
-      String _name, String _contact, String _password) async {
+      String _cgid, String _name, String _contact, String _password) async {
     //set states of parent widget
     setState(() {
       nameValue = _name;
@@ -80,7 +80,7 @@ class _CaregiverState extends State<Caregiver> {
     });
 
     //send put request to update caregiver num
-    var response = await ApiService.updateCg(contactNum, CgId);
+    var response = await ApiService.updateCg(contactNum, _cgid);
     print(response.message);
     return response.message;
     //get all careReceiver
@@ -215,11 +215,13 @@ class _CaregiverState extends State<Caregiver> {
                 //   onPressed: () {},
                 // ),
                 child: ProfileOverlay(
+                  
                   name: nameValue,
                   phoneNum: contactNum,
                   password: password,
                   role: "Caregiver",
-                  updateCgInfo: _updateCgInfo,
+                  updateInfo: _updateCgInfo,
+                  id: CgId,
                 )),
             Expanded(
               flex: 5, // 50%

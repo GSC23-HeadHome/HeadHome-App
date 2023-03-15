@@ -154,7 +154,8 @@ class ApiService {
     }
   }
 
-  static Future<AddPatientMessage> addPatient(String cgId, String crId, String relationship) async {
+  static Future<AddPatientMessage> addPatient(
+      String cgId, String crId, String relationship) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'PUT',
@@ -216,6 +217,25 @@ class ApiService {
       log(e.toString());
     }
     return null;
+  }
+
+  static Future<UpdateVolResponse> updateVolunteer(
+      String contact, String VId) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request('PUT',
+        Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/${VId}'));
+    request.body = json.encode({"ContactNum": contact});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var res = await response.stream.bytesToString();
+      UpdateVolResponse model = updateVolResponseFromJson(res);
+      return model;
+    } else {
+      throw Exception('Failed to update volunteer info: ${response.reasonPhrase}');
+    }
   }
 
   // -------- END OF VOLUNTEER METHODS ---------

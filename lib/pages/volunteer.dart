@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
+import '../components/profileDialog.dart' show ProfileOverlay;
+import '../components/settingsDialog.dart' show SettingsOverlay;
+
 
 import 'package:headhome/api/api_services.dart';
+
 
 class Volunteer extends StatefulWidget {
   const Volunteer({super.key, this.volunteerModel});
@@ -15,8 +19,10 @@ class Volunteer extends StatefulWidget {
 
 class _VolunteerState extends State<Volunteer> {
   late VolunteerModel? _VolunteerModel = {} as VolunteerModel?;
-  late String VId = widget.volunteerModel?.vId ?? "v0003";
+  late String vId = widget.volunteerModel?.vId ?? "v0004";
   late String nameValue = widget.volunteerModel?.name ?? "John";
+  late String contactNum = widget.volunteerModel?.contactNum ?? "91234567";
+  late String password = "";
 
   @override
   void initState() {
@@ -25,10 +31,25 @@ class _VolunteerState extends State<Volunteer> {
   }
 
   void _getData() async {
-    _VolunteerModel = await ApiService.getVolunteer(VId);
+    _VolunteerModel = await ApiService.getVolunteer(vId);
     setState(() {
       nameValue = _VolunteerModel!.name;
     });
+  }
+
+  Future<String> _updateVolunteerInfo(
+      String vId, String _name, String _contact, String _password) async {
+
+    setState(() {
+      nameValue = _name;
+      contactNum = _contact;
+      password = _password;
+    });
+    //send put request to update caregiver num
+    var response = await ApiService.updateVolunteer(contactNum, vId);
+    print(response.message);
+    return response.message;
+    //get all careReceiver
   }
 
   @override
@@ -159,23 +180,18 @@ class _VolunteerState extends State<Volunteer> {
             children: <Widget>[
               Expanded(
                 flex: 5, // 50%
-                child: IconButton(
-                  icon: Icon(
-                    Icons.person_2_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  onPressed: () {},
-                ),
+                child: ProfileOverlay(
+                  name: nameValue,
+                  phoneNum: contactNum,
+                  password: password,
+                  role: "Volunteer",
+                  updateInfo: _updateVolunteerInfo,
+                  id: vId,
+                )
               ),
               Expanded(
                 flex: 5, // 50%
-                child: IconButton(
-                  icon: Icon(
-                    Icons.settings,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  onPressed: () {},
-                ),
+                child: SettingsOverlay(),
               ),
             ],
           ),

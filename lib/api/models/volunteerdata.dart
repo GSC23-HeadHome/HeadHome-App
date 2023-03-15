@@ -44,3 +44,24 @@ class VolunteerModel {
         "ProfilePic": profilePic,
       };
 }
+
+UpdateVolResponse updateVolResponseFromJson(String str) => UpdateVolResponse.fromJson(json.decode(str));
+
+String updateVolResponseToJson(UpdateVolResponse data) => json.encode(data.toJson());
+
+class UpdateVolResponse {
+    UpdateVolResponse({
+        required this.message,
+    });
+
+    String message;
+
+    factory UpdateVolResponse.fromJson(Map<String, dynamic> json) => UpdateVolResponse(
+        message: json["message"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "message": message,
+    };
+}
+
