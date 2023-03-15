@@ -106,3 +106,24 @@ class SosMessage {
     };
 }
 
+AddPatientMessage addPatientMessageFromJson(String str) => AddPatientMessage.fromJson(json.decode(str));
+
+String addPatientMessageToJson(AddPatientMessage data) => json.encode(data.toJson());
+
+class AddPatientMessage {
+    AddPatientMessage({
+        required this.message,
+    });
+
+    String message;
+
+    factory AddPatientMessage.fromJson(Map<String, dynamic> json) => AddPatientMessage(
+        message: json["message"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "message": message,
+    };
+}
+
+

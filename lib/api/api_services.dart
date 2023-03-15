@@ -154,6 +154,27 @@ class ApiService {
     }
   }
 
+  static Future<AddPatientMessage> addPatient(String cgId, String crId, String relationship) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'PUT',
+        Uri.parse(
+            'https://HeadHome.chayhuixiang.repl.co/caregiver/${cgId}/newcr'));
+    request.body = json.encode({"Id": crId, "Relationship": relationship});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 202) {
+      var res = await response.stream.bytesToString();
+      AddPatientMessage model = addPatientMessageFromJson(res);
+      print("alert sent");
+      return model;
+    } else {
+      throw Exception('Failed to add patient: ${response.reasonPhrase}');
+    }
+  }
+
   // -------- END OF CAREGIVER METHODS ---------
 
   // ------------ VOLUNTEER METHODS ------------

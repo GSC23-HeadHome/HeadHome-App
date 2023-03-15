@@ -4,6 +4,7 @@ import '../main.dart' show MyApp;
 import './caregiverPatient.dart' show PatientDetails;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
+import '../components/addPatient.dart' show AddPatientOverlay;
 
 import 'package:headhome/api/api_services.dart';
 
@@ -67,6 +68,7 @@ class _CaregiverState extends State<Caregiver> {
       // add to careReceiverDetails
     }
   }
+  
 
   Future<String> _updateCgInfo(
       String _name, String _contact, String _password) async {
@@ -82,6 +84,13 @@ class _CaregiverState extends State<Caregiver> {
     print(response.message);
     return response.message;
     //get all careReceiver
+  }
+
+    Future<String> _addNewPatient(String cgId, String crId, String relationship) async {
+
+     var response = await ApiService.addPatient(cgId, crId, relationship);
+    print(response.message);
+    return response.message;
   }
 
   @override
@@ -181,16 +190,8 @@ class _CaregiverState extends State<Caregiver> {
           height: 80,
           width: 80,
           child: FittedBox(
-            child: FloatingActionButton(
-              //Floating action button on Scaffold
-              onPressed: () {
-                //code to execute on bxutton press
-              },
-              child: Icon(Icons.add),
-              backgroundColor:
-                  Theme.of(context).colorScheme.primary, //icon inside button
-            ),
-          )),
+            child: AddPatientOverlay(addNewPatient: _addNewPatient,)),
+          ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         //bottom navigation bar on scaffold
@@ -237,7 +238,8 @@ class CaregiverPatients extends StatelessWidget {
       required this.name,
       required this.note,
       required this.status,
-      required this.imageurl, required this.model});
+      required this.imageurl,
+      required this.model});
 
   final String name;
   final String note;
@@ -273,7 +275,10 @@ class CaregiverPatients extends StatelessWidget {
             print("clicked");
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => PatientDetails(CarereceiverModel: model,)),
+              MaterialPageRoute(
+                  builder: (context) => PatientDetails(
+                        CarereceiverModel: model,
+                      )),
             );
           },
           child: Container(
