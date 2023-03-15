@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../pages/volunteer.dart' show Volunteer;
+import '../pages/caregiver.dart' show Caregiver;
 
 class ProfileOverlay extends StatefulWidget {
   const ProfileOverlay(
@@ -163,13 +164,23 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                         minimumSize: const Size(120, 50),
                                         backgroundColor: (Colors.white)),
                                     onPressed: () {
+
+                                      if (widget.role == "Volunteer")
                                       //Navigator.pop(context);
-                                      Navigator.push(
+                                      {Navigator.push(
                     context,
                     PageRouteBuilder(
                         pageBuilder: (context, animation1, animation2) =>  Volunteer()),
 
+                  );}
+                  else if (widget.role == "Caregiver"){
+                    Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        pageBuilder: (context, animation1, animation2) =>  Caregiver()),
+
                   );
+                  }
                                     },
                                     child: Text(
                                       'Cancel',

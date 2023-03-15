@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
@@ -75,7 +76,7 @@ class _VolunteerState extends State<Volunteer> {
      },child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.home, color: Theme.of(context).colorScheme.primary),
+            Icon(MaterialSymbols.home_pin, color: Theme.of(context).colorScheme.primary),
             Padding(
               padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
               child: Text(

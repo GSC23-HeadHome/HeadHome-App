@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
 import '../main.dart' show MyApp;
 import './caregiverPatient.dart' show PatientDetails;
@@ -99,16 +100,22 @@ class _CaregiverState extends State<Caregiver> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        title: Row(
+        // leading: BackButton(
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //   },
+        //   color: Theme.of(context).colorScheme.primary,
+        // ),
+        title: GestureDetector(
+     onTap: () {
+        Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        pageBuilder: (context, animation1, animation2) =>  MyApp()),);
+     },child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.home, color: Theme.of(context).colorScheme.primary),
+            Icon(MaterialSymbols.home_pin, color: Theme.of(context).colorScheme.primary),
             Padding(
               padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
               child: Text(
@@ -120,7 +127,8 @@ class _CaregiverState extends State<Caregiver> {
               ),
             ),
           ],
-        ),
+          
+        ),),
       ),
       body: Center(
         child: Column(
