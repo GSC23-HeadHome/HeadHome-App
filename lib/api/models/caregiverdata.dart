@@ -85,3 +85,24 @@ class UpdateCgResponse {
         "message": message,
     };
 }
+
+SosMessage sosMessageFromJson(String str) => SosMessage.fromJson(json.decode(str));
+
+String sosMessageToJson(SosMessage data) => json.encode(data.toJson());
+
+class SosMessage {
+    SosMessage({
+        required this.sosId,
+    });
+
+    String sosId;
+
+    factory SosMessage.fromJson(Map<String, dynamic> json) => SosMessage(
+        sosId: json["SOSId"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "SOSId": sosId,
+    };
+}
+

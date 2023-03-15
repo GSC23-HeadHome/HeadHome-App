@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:provider/provider.dart';
 
 class PatientDetails extends StatefulWidget {
-  const PatientDetails({super.key});
+  const PatientDetails({super.key, this.CarereceiverModel});
+  final CarereceiverModel;
 
   @override
   State<PatientDetails> createState() => _PatientDetailsState();
@@ -72,7 +74,7 @@ class _PatientDetailsState extends State<PatientDetails> {
           children: [
             Expanded(
               child: Scrollbar(
-                child: Padding( 
+                child: Padding(
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
                   child: ListView(
                     scrollDirection:
@@ -80,10 +82,10 @@ class _PatientDetailsState extends State<PatientDetails> {
                     children: <Widget>[
                       // list of widgets that you want to scroll through
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
+                        padding: EdgeInsets.fromLTRB(0, 40, 0, 30),
                         child: Column(
                           children: [
-                            Text("Amy Zhang",
+                            Text(widget.CarereceiverModel.name,
                                 style:
                                     Theme.of(context).textTheme.displayMedium),
                           ],
@@ -187,7 +189,8 @@ class _PatientDetailsState extends State<PatientDetails> {
                                       fontWeight: FontWeight.bold),
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(5.0)),
-                                  contentPadding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+                                  contentPadding:
+                                      const EdgeInsets.fromLTRB(15, 20, 15, 20),
                                   hintText: 'Enter Distance',
                                   suffixText: 'meters',
                                   floatingLabelBehavior:
@@ -246,41 +249,6 @@ class sendAlert extends StatelessWidget {
       print(myState._alert_sent);
       return myState._alert_sent
           ? Column(
-              children: [
-                //button
-                Container(
-                  width: 200,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        //send alert
-                        myState.respondButton();
-                        print("responded");
-                      },
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: Size(200, 50),
-                          backgroundColor: Color(0xFFF8E3E4)),
-                      child: Text(
-                        'Send Alert',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.error),
-                      ),
-                    ),
-                  ),
-                ),
-                //text below button
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-                  child: Text(
-                    "Navigation for elderly will be activated, and alert will be sent to nearby volunteers.",
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            )
-          : Column(
               children: [
                 //button
                 Container(
@@ -376,6 +344,41 @@ class sendAlert extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              children: [
+                //button
+                Container(
+                  width: 200,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        //send alert
+                        myState.respondButton();
+                        print("responded");
+                      },
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: Size(200, 50),
+                          backgroundColor: Color(0xFFF8E3E4)),
+                      child: Text(
+                        'Send Alert',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
+                    ),
+                  ),
+                ),
+                //text below button
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+                  child: Text(
+                    "Navigation for elderly will be activated, and alert will be sent to nearby volunteers.",
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],

@@ -128,6 +128,32 @@ class ApiService {
       throw Exception('Failed to update CG: ${response.reasonPhrase}');
     }
   }
+
+  static Future<SosMessage> sendSOS(String contact, String crId) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos'));
+    request.body = json.encode({
+      "CrId": crId,
+      "Datetime": 1677280000,
+      "StartLocation": {"Lat": 1.34176, "Lng": 103.846836},
+      "Status": "home",
+      "Volunteer": ""
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+
+      var res = await response.stream.bytesToString();
+      SosMessage model = sosMessageFromJson(res);
+      return model;
+    } else {
+      throw Exception('Failed to send SOS: ${response.reasonPhrase}');
+    }
+  }
+
   // -------- END OF CAREGIVER METHODS ---------
 
   // ------------ VOLUNTEER METHODS ------------

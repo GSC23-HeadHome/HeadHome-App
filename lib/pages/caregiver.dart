@@ -68,7 +68,8 @@ class _CaregiverState extends State<Caregiver> {
     }
   }
 
-  Future<String> _updateCgInfo(String _name, String _contact, String _password) async {
+  Future<String> _updateCgInfo(
+      String _name, String _contact, String _password) async {
     //set states of parent widget
     setState(() {
       nameValue = _name;
@@ -161,6 +162,7 @@ class _CaregiverState extends State<Caregiver> {
                           color: Colors.transparent,
                           surfaceTintColor: Colors.white,
                           child: CaregiverPatients(
+                              model: careReceiverDetails[i]!,
                               name: careReceiverDetails[i]!.name,
                               note:
                                   "Known to leave safe zone. Hangs out in ang mo kio park",
@@ -235,12 +237,13 @@ class CaregiverPatients extends StatelessWidget {
       required this.name,
       required this.note,
       required this.status,
-      required this.imageurl});
+      required this.imageurl, required this.model});
 
   final String name;
   final String note;
   final String status;
   final String imageurl;
+  final CarereceiverModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +273,7 @@ class CaregiverPatients extends StatelessWidget {
             print("clicked");
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const PatientDetails()),
+              MaterialPageRoute(builder: (context) => PatientDetails(CarereceiverModel: model,)),
             );
           },
           child: Container(
