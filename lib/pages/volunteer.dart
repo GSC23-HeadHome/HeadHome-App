@@ -1,11 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
+import '../components/profileDialog.dart' show ProfileOverlay;
+import '../components/settingsDialog.dart' show SettingsOverlay;
+import '../main.dart' show MyApp;
 
-class Volunteer extends StatelessWidget {
+
+import 'package:headhome/api/api_services.dart';
+
+
+class Volunteer extends StatefulWidget {
   const Volunteer({super.key, this.volunteerModel});
   final VolunteerModel? volunteerModel;
+
+  @override
+  State<Volunteer> createState() => _VolunteerState();
+}
+
+class _VolunteerState extends State<Volunteer> {
+  late VolunteerModel? _VolunteerModel = {} as VolunteerModel?;
+  late String vId = widget.volunteerModel?.vId ?? "v0004";
+  late String nameValue = widget.volunteerModel?.name ?? "John";
+  late String contactNum = widget.volunteerModel?.contactNum ?? "91234567";
+  late String password = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  void _getData() async {
+    _VolunteerModel = await ApiService.getVolunteer(vId);
+    setState(() {
+      nameValue = _VolunteerModel!.name;
+      contactNum = _VolunteerModel!.contactNum;
+    });
+  }
+
+  Future<String> _updateVolunteerInfo(
+      String vId, String _name, String _contact, String _password) async {
+
+    setState(() {
+      nameValue = _name;
+      contactNum = _contact;
+      password = _password;
+    });
+    //send put request to update caregiver num
+    var response = await ApiService.updateVolunteer(contactNum, vId);
+    print(response.message);
+    return response.message;
+    //get all careReceiver
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,16 +61,22 @@ class Volunteer extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        title: Row(
+        // leading: BackButton(
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //   },
+        //   color: Theme.of(context).colorScheme.primary,
+        // ),
+        title: GestureDetector(
+     onTap: () {
+        Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        pageBuilder: (context, animation1, animation2) =>  MyApp()),);
+     },child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.home, color: Theme.of(context).colorScheme.primary),
+            Icon(MaterialSymbols.home_pin, color: Theme.of(context).colorScheme.primary),
             Padding(
               padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
               child: Text(
@@ -34,7 +88,8 @@ class Volunteer extends StatelessWidget {
               ),
             ),
           ],
-        ),
+          
+        ),)
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -50,7 +105,7 @@ class Volunteer extends StatelessWidget {
                     const Text("Welcome back,",
                         style: TextStyle(
                             fontSize: 18.0, color: Color(0xFF263238))),
-                    Text("Sarah",
+                    Text(nameValue,
                         style: Theme.of(context).textTheme.displayMedium),
                   ],
                 ),
@@ -135,23 +190,18 @@ class Volunteer extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 flex: 5, // 50%
-                child: IconButton(
-                  icon: Icon(
-                    Icons.person_2_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  onPressed: () {},
-                ),
+                child: ProfileOverlay(
+                  name: nameValue,
+                  phoneNum: contactNum,
+                  password: password,
+                  role: "Volunteer",
+                  updateInfo: _updateVolunteerInfo,
+                  id: vId,
+                )
               ),
               Expanded(
                 flex: 5, // 50%
-                child: IconButton(
-                  icon: Icon(
-                    Icons.settings,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  onPressed: () {},
-                ),
+                child: SettingsOverlay(),
               ),
             ],
           ),
