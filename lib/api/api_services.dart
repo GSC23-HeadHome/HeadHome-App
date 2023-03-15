@@ -129,7 +129,7 @@ class ApiService {
     }
   }
 
-  static Future<SosMessage> sendSOS(String contact, String crId) async {
+  static Future<SosMessage> sendSOS(String crId) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos'));
@@ -144,10 +144,10 @@ class ApiService {
 
     http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 200) {
-
+    if (response.statusCode == 202) {
       var res = await response.stream.bytesToString();
       SosMessage model = sosMessageFromJson(res);
+      print("alert sent");
       return model;
     } else {
       throw Exception('Failed to send SOS: ${response.reasonPhrase}');

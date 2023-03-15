@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:provider/provider.dart';
 
+import 'package:headhome/api/api_services.dart';
+
 class PatientDetails extends StatefulWidget {
   const PatientDetails({super.key, this.CarereceiverModel});
   final CarereceiverModel;
@@ -15,8 +17,9 @@ class MyState extends ChangeNotifier {
 
   bool get _alert_sent => alert_sent;
 
-  void respondButton() {
+  void respondButton(CarereceiverModel model) {
     alert_sent = !alert_sent;
+    ApiService.sendSOS(model.crId);
     print("state changed");
     print(alert_sent);
     notifyListeners();
@@ -117,7 +120,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                           ],
                         ),
                       ),
-                      sendAlert(),
+                      sendAlert(model: widget.CarereceiverModel),
 
                       //notes
                       Padding(
@@ -240,7 +243,8 @@ class _PatientDetailsState extends State<PatientDetails> {
 }
 
 class sendAlert extends StatelessWidget {
-  const sendAlert({super.key});
+  const sendAlert({super.key, required this.model});
+  final CarereceiverModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +262,7 @@ class sendAlert extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         //send alert
-                        myState.respondButton();
+                        myState.respondButton(model);
                         print("revert to no response");
                       },
                       style: ElevatedButton.styleFrom(
@@ -329,7 +333,7 @@ class sendAlert extends StatelessWidget {
                             padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
                             child: ElevatedButton(
                               onPressed: () {
-                                //send alert
+                                //do nothing
                               },
                               style: ElevatedButton.styleFrom(
                                   minimumSize: Size(100, 45),
@@ -358,7 +362,7 @@ class sendAlert extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         //send alert
-                        myState.respondButton();
+                        myState.respondButton(model);
                         print("responded");
                       },
                       style: ElevatedButton.styleFrom(
