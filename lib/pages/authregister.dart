@@ -32,7 +32,7 @@ class _AuthRegisterState extends State<AuthRegister> {
       switch (dropdownValue) {
         case "Caregiver":
           await ApiService.createCaregiver(
-            credential.user!.uid,
+            emailValue,
             nameValue,
             "",
             mobileValue,
@@ -41,7 +41,7 @@ class _AuthRegisterState extends State<AuthRegister> {
 
         case "Patient":
           await ApiService.createCarereceiver(
-            credential.user!.uid,
+            emailValue,
             nameValue,
             "",
             mobileValue,
@@ -51,7 +51,7 @@ class _AuthRegisterState extends State<AuthRegister> {
 
         case "Volunteer":
           await ApiService.createVolunteer(
-            credential.user!.uid,
+            emailValue,
             nameValue,
             mobileValue,
           );
