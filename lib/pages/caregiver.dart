@@ -68,6 +68,21 @@ class _CaregiverState extends State<Caregiver> {
     }
   }
 
+  Future<String> _updateCgInfo(String _name, String _contact, String _password) async {
+    //set states of parent widget
+    setState(() {
+      nameValue = _name;
+      contactNum = _contact;
+      password = _password;
+    });
+
+    //send put request to update caregiver num
+    var response = await ApiService.updateCg(contactNum, CgId);
+    print(response.message);
+    return response.message;
+    //get all careReceiver
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,7 +202,7 @@ class _CaregiverState extends State<Caregiver> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            const Expanded(
+            Expanded(
                 flex: 5, // 50%
                 // child: IconButton(
                 //   icon: Icon(
@@ -196,7 +211,13 @@ class _CaregiverState extends State<Caregiver> {
                 //   ),
                 //   onPressed: () {},
                 // ),
-                child: ProfileOverlay()),
+                child: ProfileOverlay(
+                  name: nameValue,
+                  phoneNum: contactNum,
+                  password: password,
+                  role: "Caregiver",
+                  updateCgInfo: _updateCgInfo,
+                )),
             Expanded(
               flex: 5, // 50%
               child: SettingsOverlay(),

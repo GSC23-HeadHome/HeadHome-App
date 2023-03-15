@@ -65,3 +65,23 @@ class CareReceiver {
         "Relationship": relationship,
       };
 }
+
+UpdateCgResponse updateCgResponseFromJson(String str) => UpdateCgResponse.fromJson(json.decode(str));
+
+String updateCgResponseToJson(UpdateCgResponse data) => json.encode(data.toJson());
+
+class UpdateCgResponse {
+    UpdateCgResponse({
+        required this.message,
+    });
+
+    String message;
+
+    factory UpdateCgResponse.fromJson(Map<String, dynamic> json) => UpdateCgResponse(
+        message: json["message"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "message": message,
+    };
+}

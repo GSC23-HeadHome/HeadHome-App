@@ -110,6 +110,24 @@ class ApiService {
       return null;
     }
   }
+
+  static Future<UpdateCgResponse> updateCg(String contact, String cgId) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request('PUT',
+        Uri.parse('https://HeadHome.chayhuixiang.repl.co/caregiver/${cgId}'));
+    request.body = json.encode({"ContactNum": contact});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var res = await response.stream.bytesToString();
+      UpdateCgResponse model = updateCgResponseFromJson(res);
+      return model;
+    } else {
+      throw Exception('Failed to update CG: ${response.reasonPhrase}');
+    }
+  }
   // -------- END OF CAREGIVER METHODS ---------
 
   // ------------ VOLUNTEER METHODS ------------
