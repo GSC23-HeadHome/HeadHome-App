@@ -110,6 +110,71 @@ class ApiService {
       return null;
     }
   }
+
+  static Future<UpdateCgResponse> updateCg(String contact, String cgId) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request('PUT',
+        Uri.parse('https://HeadHome.chayhuixiang.repl.co/caregiver/${cgId}'));
+    request.body = json.encode({"ContactNum": contact});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var res = await response.stream.bytesToString();
+      UpdateCgResponse model = updateCgResponseFromJson(res);
+      return model;
+    } else {
+      throw Exception('Failed to update CG: ${response.reasonPhrase}');
+    }
+  }
+
+  static Future<SosMessage> sendSOS(String crId) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos'));
+    request.body = json.encode({
+      "CrId": crId,
+      "Datetime": 1677280000,
+      "StartLocation": {"Lat": 1.34176, "Lng": 103.846836},
+      "Status": "home",
+      "Volunteer": ""
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 202) {
+      var res = await response.stream.bytesToString();
+      SosMessage model = sosMessageFromJson(res);
+      print("alert sent");
+      return model;
+    } else {
+      throw Exception('Failed to send SOS: ${response.reasonPhrase}');
+    }
+  }
+
+  static Future<AddPatientMessage> addPatient(String cgId, String crId, String relationship) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'PUT',
+        Uri.parse(
+            'https://HeadHome.chayhuixiang.repl.co/caregiver/${cgId}/newcr'));
+    request.body = json.encode({"Id": crId, "Relationship": relationship});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 202) {
+      var res = await response.stream.bytesToString();
+      AddPatientMessage model = addPatientMessageFromJson(res);
+      print("alert sent");
+      return model;
+    } else {
+      throw Exception('Failed to add patient: ${response.reasonPhrase}');
+    }
+  }
+
   // -------- END OF CAREGIVER METHODS ---------
 
   // ------------ VOLUNTEER METHODS ------------

@@ -4,10 +4,94 @@ import '../main.dart' show MyApp;
 import './caregiverPatient.dart' show PatientDetails;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
+import '../components/addPatient.dart' show AddPatientOverlay;
 
-class Caregiver extends StatelessWidget {
+import 'package:headhome/api/api_services.dart';
+
+import 'package:headhome/api/models/caregivercontactmodel.dart';
+import 'package:headhome/api/models/carereceiverdata.dart';
+
+class Caregiver extends StatefulWidget {
   const Caregiver({super.key, this.caregiverModel});
   final CaregiverModel? caregiverModel;
+
+  @override
+  State<Caregiver> createState() => _CaregiverState();
+}
+
+class _CaregiverState extends State<Caregiver> {
+  late CaregiverModel? _CaregiverModel = {} as CaregiverModel?;
+  late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
+  // late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
+  //caregiver details
+  late String CgId = widget.caregiverModel?.cgId ?? "cg0002";
+
+  late String nameValue = widget.caregiverModel?.name ?? "John";
+
+  late String contactNum = widget.caregiverModel?.contactNum ?? "69823042";
+
+  late String password = "69823042";
+
+  late List<CareReceiver> careReceivers = [];
+  late List<CarereceiverModel?> careReceiverDetails = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  void _getData() async {
+    print("getdata function");
+    // if (widget.caregiverModel != null) {
+    //   print("caregiverModel not null");
+    //   _getCaregiverInfo(widget.caregiverModel!.cgId);
+    // }
+    _getCaregiverInfo(CgId);
+  }
+
+  void _getCaregiverInfo(cgId) async {
+    _CaregiverModel = await ApiService.getCaregiver(cgId);
+    setState(() {
+      nameValue = _CaregiverModel!.name;
+      contactNum = _CaregiverModel!.contactNum;
+      careReceivers = _CaregiverModel!.careReceiver;
+    });
+    //get all careReceivers
+    for (var i = 0; i < careReceivers.length; i++) {
+      // TO DO
+      _CarereceiverModel =
+          await ApiService.getCarereceiver(careReceivers[i].id);
+      setState(() {
+        careReceiverDetails.add(_CarereceiverModel);
+      });
+      // add to careReceiverDetails
+    }
+  }
+  
+
+  Future<String> _updateCgInfo(
+      String _name, String _contact, String _password) async {
+    //set states of parent widget
+    setState(() {
+      nameValue = _name;
+      contactNum = _contact;
+      password = _password;
+    });
+
+    //send put request to update caregiver num
+    var response = await ApiService.updateCg(contactNum, CgId);
+    print(response.message);
+    return response.message;
+    //get all careReceiver
+  }
+
+    Future<String> _addNewPatient(String cgId, String crId, String relationship) async {
+
+     var response = await ApiService.addPatient(cgId, crId, relationship);
+    print(response.message);
+    return response.message;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +134,7 @@ class Caregiver extends StatelessWidget {
                   const Text("Welcome back,",
                       style:
                           TextStyle(fontSize: 18.0, color: Color(0xFF263238))),
-                  Text("John",
+                  Text(nameValue,
                       style: Theme.of(context).textTheme.displayMedium),
                 ],
               ),
@@ -77,27 +161,26 @@ class Caregiver extends StatelessWidget {
                         ],
                       ),
                     )),
-                // Expanded(child: SizedBox(width: 200,
-                Column(
-                  children: const [
-                    CaregiverPatients(
-                        name: "Amy Zhang",
-                        note:
-                            "Known to leave safe zone. Hangs out in ang mo kio park",
-                        status: "danger",
-                        imageurl: "https://picsum.photos/id/237/200/300"),
-                    CaregiverPatients(
-                        name: "David Teo",
-                        note: "testtest",
-                        status: "safe",
-                        imageurl: "https://picsum.photos/id/237/200/300"),
-                    CaregiverPatients(
-                        name: "Mary Ang",
-                        note: "testtest",
-                        status: "home",
-                        imageurl: "https://picsum.photos/id/237/200/300")
-                  ],
-                ),
+                SizedBox(
+                  height: 480,
+                  child: ListView.builder(
+                      itemCount: careReceiverDetails.length,
+                      itemBuilder: (BuildContext context, int i) {
+                        return Card(
+                          elevation: 0,
+                          color: Colors.transparent,
+                          surfaceTintColor: Colors.white,
+                          child: CaregiverPatients(
+                              model: careReceiverDetails[i]!,
+                              name: careReceiverDetails[i]!.name,
+                              note:
+                                  "Known to leave safe zone. Hangs out in ang mo kio park",
+                              status: "danger",
+                              //change imageurl to careReceiverDetails[i]!.profilePic
+                              imageurl: "https://picsum.photos/id/237/200/300"),
+                        );
+                      }),
+                )
               ],
             ),
           ],
@@ -107,16 +190,8 @@ class Caregiver extends StatelessWidget {
           height: 80,
           width: 80,
           child: FittedBox(
-            child: FloatingActionButton(
-              //Floating action button on Scaffold
-              onPressed: () {
-                //code to execute on bxutton press
-              },
-              child: Icon(Icons.add),
-              backgroundColor:
-                  Theme.of(context).colorScheme.primary, //icon inside button
-            ),
-          )),
+            child: AddPatientOverlay(addNewPatient: _addNewPatient,)),
+          ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         //bottom navigation bar on scaffold
@@ -130,7 +205,7 @@ class Caregiver extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            const Expanded(
+            Expanded(
                 flex: 5, // 50%
                 // child: IconButton(
                 //   icon: Icon(
@@ -139,7 +214,13 @@ class Caregiver extends StatelessWidget {
                 //   ),
                 //   onPressed: () {},
                 // ),
-                child: ProfileOverlay()),
+                child: ProfileOverlay(
+                  name: nameValue,
+                  phoneNum: contactNum,
+                  password: password,
+                  role: "Caregiver",
+                  updateCgInfo: _updateCgInfo,
+                )),
             Expanded(
               flex: 5, // 50%
               child: SettingsOverlay(),
@@ -157,12 +238,14 @@ class CaregiverPatients extends StatelessWidget {
       required this.name,
       required this.note,
       required this.status,
-      required this.imageurl});
+      required this.imageurl,
+      required this.model});
 
   final String name;
   final String note;
   final String status;
   final String imageurl;
+  final CarereceiverModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +275,10 @@ class CaregiverPatients extends StatelessWidget {
             print("clicked");
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const PatientDetails()),
+              MaterialPageRoute(
+                  builder: (context) => PatientDetails(
+                        CarereceiverModel: model,
+                      )),
             );
           },
           child: Container(

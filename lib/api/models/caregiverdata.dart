@@ -65,3 +65,65 @@ class CareReceiver {
         "Relationship": relationship,
       };
 }
+
+UpdateCgResponse updateCgResponseFromJson(String str) => UpdateCgResponse.fromJson(json.decode(str));
+
+String updateCgResponseToJson(UpdateCgResponse data) => json.encode(data.toJson());
+
+class UpdateCgResponse {
+    UpdateCgResponse({
+        required this.message,
+    });
+
+    String message;
+
+    factory UpdateCgResponse.fromJson(Map<String, dynamic> json) => UpdateCgResponse(
+        message: json["message"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "message": message,
+    };
+}
+
+SosMessage sosMessageFromJson(String str) => SosMessage.fromJson(json.decode(str));
+
+String sosMessageToJson(SosMessage data) => json.encode(data.toJson());
+
+class SosMessage {
+    SosMessage({
+        required this.sosId,
+    });
+
+    String sosId;
+
+    factory SosMessage.fromJson(Map<String, dynamic> json) => SosMessage(
+        sosId: json["SOSId"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "SOSId": sosId,
+    };
+}
+
+AddPatientMessage addPatientMessageFromJson(String str) => AddPatientMessage.fromJson(json.decode(str));
+
+String addPatientMessageToJson(AddPatientMessage data) => json.encode(data.toJson());
+
+class AddPatientMessage {
+    AddPatientMessage({
+        required this.message,
+    });
+
+    String message;
+
+    factory AddPatientMessage.fromJson(Map<String, dynamic> json) => AddPatientMessage(
+        message: json["message"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "message": message,
+    };
+}
+
+

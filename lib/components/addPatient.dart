@@ -1,41 +1,17 @@
 import 'package:flutter/material.dart';
 
-class ProfileOverlay extends StatefulWidget {
-  const ProfileOverlay(
-      {Key? key,
-      required this.name,
-      required this.phoneNum,
-      required this.password,
-      required this.role,
-      required this.updateCgInfo})
+class AddPatientOverlay extends StatefulWidget {
+  const AddPatientOverlay({Key? key, required this.addNewPatient})
       : super(key: key);
 
-  final String name;
-  final String phoneNum;
-  final String password;
-  final String role;
-  final Function(String, String, String) updateCgInfo;
+  final Function(String, String, String) addNewPatient;
 
   @override
-  __ProfileOverlayState createState() => __ProfileOverlayState();
+  __AddPatientOverlayState createState() => __AddPatientOverlayState();
 }
 
-class __ProfileOverlayState extends State<ProfileOverlay> {
-  String localName = '';
-  String localNum = '';
-  String localPassword = '';
-  bool updateSuccess = false;
-  bool updateAttempt = false;
-
-  @override
-  void initState() {
-    super.initState();
-    localName = widget.name;
-    localNum = widget.phoneNum;
-    localPassword = widget.password;
-  }
-
-  void showEditProfile() {
+class __AddPatientOverlayState extends State<AddPatientOverlay> {
+  void showAddPatient() {
     showDialog(
         context: context,
         builder: (context) {
@@ -49,7 +25,7 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
             ),
             title: Center(
               child: Text(
-                "Edit Profile",
+                "Add Patient",
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
@@ -57,7 +33,7 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
               top: 10.0,
             ),
             content: SizedBox(
-              height: 450,
+              height: 315,
               width: 550,
               child: ListView(
                   scrollDirection:
@@ -65,88 +41,58 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                   children: <Widget>[
                     // list of widgets that you want to scroll through
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 30),
+                      padding: const EdgeInsets.fromLTRB(25, 0, 25, 30),
                       child: Column(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
-                            child: Text(widget.name,
-                                textAlign: TextAlign.center,
-                                style:
-                                    Theme.of(context).textTheme.displayMedium),
-                          ),
-                          Text("Caregiver",
+                          Text("AuthId of patient can be found on patient's account.",
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium),
+                              style: Theme.of(context).textTheme.bodySmall),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
+                            padding: const EdgeInsets.fromLTRB(0, 25, 0, 10),
                             child: TextField(
                               decoration: InputDecoration(
-                                labelText: 'Name',
+                                labelText: 'AuthId',
                                 labelStyle: const TextStyle(
                                     fontWeight: FontWeight.bold),
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5.0)),
                                 contentPadding:
                                     const EdgeInsets.fromLTRB(15, 20, 15, 20),
-                                hintText: widget.name,
+                                hintText: "e.g. amyzhang001",
                                 floatingLabelBehavior:
                                     FloatingLabelBehavior.always,
                               ),
                               onChanged: (String? newValue) {
-                                setState(() {
-                                  localName = newValue!;
-                                });
+                                // setState(() {
+                                //   localName = newValue!;
+                                // });
                               },
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
+                            padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
                             child: TextField(
                               decoration: InputDecoration(
-                                labelText: 'Phone Number',
+                                labelText: 'Relationship',
                                 labelStyle: const TextStyle(
                                     fontWeight: FontWeight.bold),
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5.0)),
                                 contentPadding:
                                     const EdgeInsets.fromLTRB(15, 20, 15, 20),
-                                hintText: widget.phoneNum,
+                                hintText: "e.g. Father",
                                 floatingLabelBehavior:
                                     FloatingLabelBehavior.always,
                               ),
                               onChanged: (String? newValue) {
-                                setState(() {
-                                  localNum = newValue!;
-                                });
+                                // setState(() {
+                                //   localNum = newValue!;
+                                // });
                               },
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
-                            child: TextField(
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                labelStyle: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5.0)),
-                                contentPadding:
-                                    const EdgeInsets.fromLTRB(15, 20, 15, 20),
-                                hintText: "******",
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.always,
-                              ),
-                              obscureText: true,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  localPassword = newValue!;
-                                });
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                            padding: const EdgeInsets.fromLTRB(0, 30, 0, 10),
                             child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -170,25 +116,7 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                   ),
                                   ElevatedButton(
                                     onPressed: () async {
-                                      //send alert
-                                      String message =
-                                          await widget.updateCgInfo(localName,
-                                              localNum, localPassword);
-
-                                      print(message);
-
-                                      setState(() {
-                                        updateAttempt = true;
-                                      });
-
-                                      print(updateAttempt);
-
-                                      if (message == "successful") {
-                                        setState(() {
-                                          updateSuccess = true;
-                                        });
-                                      }
-                                      print(updateSuccess);
+                                      //addNewPatient(authid, relationship) 
                                     },
                                     style: ElevatedButton.styleFrom(
                                         minimumSize: Size(120, 50),
@@ -196,7 +124,7 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                             .colorScheme
                                             .primary),
                                     child: Text(
-                                      'Save',
+                                      'Add',
                                       style: TextStyle(color: Colors.white),
                                     ),
                                   )
@@ -217,21 +145,6 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                           //       color:
                           //           updateSuccess ? Colors.green : Colors.red),
                           // ),
-                          Builder(
-                            builder: (BuildContext context) {
-                              return updateAttempt
-                                  ? (updateSuccess
-                                      ? Text(
-                                          "Update Successful",
-                                          style: TextStyle(color: Colors.black),
-                                        )
-                                      : Text(
-                                          "Update Failed. Try Again",
-                                          style: TextStyle(color: Colors.red),
-                                        ))
-                                  : Container();
-                            },
-                          )
                         ],
                       ),
                     ),
@@ -243,15 +156,15 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        Icons.person_2_outlined,
-        color: Theme.of(context).colorScheme.primary,
-      ),
+    return FloatingActionButton(
+      //Floating action button on Scaffold
       onPressed: () {
-        // _showOverlay(context);
-        showEditProfile();
+        //code to execute on bxutton press
+        showAddPatient();
       },
+      child: Icon(Icons.add),
+      backgroundColor:
+          Theme.of(context).colorScheme.primary, //icon inside button
     );
   }
 }
