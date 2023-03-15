@@ -3,9 +3,33 @@ import 'package:headhome/api/models/volunteerdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
 
-class Volunteer extends StatelessWidget {
+import 'package:headhome/api/api_services.dart';
+
+class Volunteer extends StatefulWidget {
   const Volunteer({super.key, this.volunteerModel});
   final VolunteerModel? volunteerModel;
+
+  @override
+  State<Volunteer> createState() => _VolunteerState();
+}
+
+class _VolunteerState extends State<Volunteer> {
+  late VolunteerModel? _VolunteerModel = {} as VolunteerModel?;
+  late String VId = widget.volunteerModel?.vId ?? "v0003";
+  late String nameValue = widget.volunteerModel?.name ?? "John";
+
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  void _getData() async {
+    _VolunteerModel = await ApiService.getVolunteer(VId);
+    setState(() {
+      nameValue = _VolunteerModel!.name;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +74,7 @@ class Volunteer extends StatelessWidget {
                     const Text("Welcome back,",
                         style: TextStyle(
                             fontSize: 18.0, color: Color(0xFF263238))),
-                    Text("Sarah",
+                    Text(nameValue,
                         style: Theme.of(context).textTheme.displayMedium),
                   ],
                 ),
