@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/volunteer.dart' show Volunteer;
 
 class ProfileOverlay extends StatefulWidget {
   const ProfileOverlay(
@@ -162,7 +163,13 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                         minimumSize: const Size(120, 50),
                                         backgroundColor: (Colors.white)),
                                     onPressed: () {
-                                      Navigator.pop(context);
+                                      //Navigator.pop(context);
+                                      Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        pageBuilder: (context, animation1, animation2) =>  Volunteer()),
+
+                  );
                                     },
                                     child: Text(
                                       'Cancel',

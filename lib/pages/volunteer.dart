@@ -4,6 +4,7 @@ import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
+import '../main.dart' show MyApp;
 
 
 import 'package:headhome/api/api_services.dart';
@@ -34,6 +35,7 @@ class _VolunteerState extends State<Volunteer> {
     _VolunteerModel = await ApiService.getVolunteer(vId);
     setState(() {
       nameValue = _VolunteerModel!.name;
+      contactNum = _VolunteerModel!.contactNum;
     });
   }
 
@@ -58,13 +60,19 @@ class _VolunteerState extends State<Volunteer> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        title: Row(
+        // leading: BackButton(
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //   },
+        //   color: Theme.of(context).colorScheme.primary,
+        // ),
+        title: GestureDetector(
+     onTap: () {
+        Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        pageBuilder: (context, animation1, animation2) =>  MyApp()),);
+     },child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.home, color: Theme.of(context).colorScheme.primary),
@@ -79,7 +87,8 @@ class _VolunteerState extends State<Volunteer> {
               ),
             ),
           ],
-        ),
+          
+        ),)
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),

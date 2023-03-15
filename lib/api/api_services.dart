@@ -220,10 +220,10 @@ class ApiService {
   }
 
   static Future<UpdateVolResponse> updateVolunteer(
-      String contact, String VId) async {
+      String contact, String vId) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request('PUT',
-        Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/${VId}'));
+        Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/${vId}'));
     request.body = json.encode({"ContactNum": contact});
     request.headers.addAll(headers);
 
