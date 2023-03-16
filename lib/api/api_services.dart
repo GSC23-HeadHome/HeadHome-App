@@ -38,7 +38,6 @@ class ApiService {
     try {
       var url =
           Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
-      print(url);
       var response = await http.get(url);
       if (response.statusCode == 200) {
         CarereceiverModel model = carereceiverFromJson(response.body);
@@ -48,6 +47,30 @@ class ApiService {
       log(e.toString());
     }
     return null;
+  }
+
+  static Future<http.Response> updateCarereceiver(String id, String name,
+      String address, String contactNum, String cgId, String relation) async {
+    Uri url =
+        Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
+    print(url);
+    Map data = {
+      'Name': name,
+      'Address': address,
+      'ContactNum': contactNum,
+      'CareGiver': [
+        {'id': cgId, 'relationship': relation}
+      ],
+    };
+
+    var body = json.encode(data);
+
+    var response = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+    return response;
   }
 
   // ------- END OF CARERECEIVER METHODS -------
