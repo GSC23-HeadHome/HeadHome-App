@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/utils/extensions.dart';
@@ -21,18 +24,24 @@ class _PatientState extends State<Patient> {
   bool visible = true;
   bool fade = true;
   // Patient Details
-  late String crId = widget.carereceiverModel?.name ?? "Cr0001";
+  late String crId = widget.carereceiverModel?.crId ?? "Cr0001";
   late String nameValue = widget.carereceiverModel?.name ?? "Amy Zhang";
   late String phoneNumberValue =
       widget.carereceiverModel?.contactNum ?? "69823042";
   late String authenticationID =
       widget.carereceiverModel?.authId ?? "amyzhang001";
-  late String passwordValue = "12345678";
-  late String priContactUsername = "alice123";
-  late String priContactRel = "Eldest Daughter";
-  late String priContactNo = "91234567";
-  late String homeAddress = widget.carereceiverModel?.address ??
-      "Blk 123 Clementi Rd #12-34 S(123456)";
+  // late String passwordValue = "12345678";
+  late String priContactUsername = widget.carereceiverModel!.careGiver.isEmpty ? "cg0002" : 
+      widget.carereceiverModel?.careGiver[0].id ?? "cg0002";
+  late String priContactRel = widget.carereceiverModel!.careGiver.isEmpty ? "friend" : 
+      widget.carereceiverModel?.careGiver[0].relationship ?? "friend";
+  late String priContactNo = "-";
+  late String homeAddress = widget.carereceiverModel?.address ?? "-";
+
+  String tempName = "";
+  String tempPhoneNum = "";
+  String tempAddress = "";
+  String tempRel = "";
 
   void showPatientDetails() {
     showDialog(
@@ -222,7 +231,30 @@ class _PatientState extends State<Patient> {
                         ),
                         onChanged: (String? newValue) {
                           setState(() {
-                            nameValue = newValue!;
+                            tempName = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          hintText: homeAddress,
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            tempAddress = newValue!;
                           });
                         },
                       ),
@@ -245,7 +277,7 @@ class _PatientState extends State<Patient> {
                         ),
                         onChanged: (String? newValue) {
                           setState(() {
-                            phoneNumberValue = newValue!;
+                            tempPhoneNum = newValue!;
                           });
                         },
                       ),
@@ -253,29 +285,29 @@ class _PatientState extends State<Patient> {
                     const SizedBox(
                       height: 20,
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Primary Contact Username',
-                          labelStyle:
-                              const TextStyle(fontWeight: FontWeight.bold),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                          contentPadding: const EdgeInsets.all(10),
-                          hintText: priContactUsername,
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                        ),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            priContactUsername = newValue!;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    // Container(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: TextField(
+                    //     decoration: InputDecoration(
+                    //       labelText: 'Primary Contact Username',
+                    //       labelStyle:
+                    //           const TextStyle(fontWeight: FontWeight.bold),
+                    //       border: OutlineInputBorder(
+                    //           borderRadius: BorderRadius.circular(5.0)),
+                    //       contentPadding: const EdgeInsets.all(10),
+                    //       hintText: priContactUsername,
+                    //       floatingLabelBehavior: FloatingLabelBehavior.always,
+                    //     ),
+                    //     onChanged: (String? newValue) {
+                    //       setState(() {
+                    //         priContactUsername = newValue!;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
+                    // const SizedBox(
+                    //   height: 20,
+                    // ),
                     Container(
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(
@@ -291,37 +323,37 @@ class _PatientState extends State<Patient> {
                         ),
                         onChanged: (String? newValue) {
                           setState(() {
-                            priContactRel = newValue!;
+                            tempRel = newValue!;
                           });
                         },
                       ),
                     ),
+                    // const SizedBox(
+                    //   height: 20,
+                    // ),
+                    // Container(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: TextField(
+                    //     decoration: InputDecoration(
+                    //       labelText: 'Password',
+                    //       labelStyle:
+                    //           const TextStyle(fontWeight: FontWeight.bold),
+                    //       border: OutlineInputBorder(
+                    //           borderRadius: BorderRadius.circular(5.0)),
+                    //       contentPadding: const EdgeInsets.all(10),
+                    //       hintText: passwordValue,
+                    //       floatingLabelBehavior: FloatingLabelBehavior.always,
+                    //     ),
+                    //     obscureText: true,
+                    //     onChanged: (String? newValue) {
+                    //       setState(() {
+                    //         passwordValue = newValue!;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
                     const SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          labelStyle:
-                              const TextStyle(fontWeight: FontWeight.bold),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                          contentPadding: const EdgeInsets.all(10),
-                          hintText: passwordValue,
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                        ),
-                        obscureText: true,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            passwordValue = newValue!;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
+                      height: 100,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -334,6 +366,12 @@ class _PatientState extends State<Patient> {
                                 borderRadius: BorderRadius.circular(5.0)),
                           ),
                           onPressed: () {
+                            setState(() {
+                              tempName = "";
+                              tempPhoneNum = "";
+                              tempAddress = "";
+                              tempRel = "";
+                            });
                             Navigator.pop(context);
                           },
                           child: const Text(
@@ -352,6 +390,21 @@ class _PatientState extends State<Patient> {
                                 borderRadius: BorderRadius.circular(5.0)),
                           ),
                           onPressed: () {
+                            setState(() {
+                              nameValue = tempName == "" ? nameValue : tempName;
+                              phoneNumberValue = tempPhoneNum == ""
+                                  ? phoneNumberValue
+                                  : tempPhoneNum;
+                              homeAddress =
+                                  tempAddress == "" ? homeAddress : tempAddress;
+                              priContactRel =
+                                  tempRel == "" ? priContactRel : tempRel;
+                              tempName = "";
+                              tempPhoneNum = "";
+                              tempAddress = "";
+                              tempRel = "";
+                            });
+                            _updateData();
                             Navigator.pop(context);
                           },
                           child: const Text(
@@ -380,7 +433,7 @@ class _PatientState extends State<Patient> {
 
   void _getData() async {
     if (widget.carereceiverModel != null &&
-        widget.carereceiverModel!.careGiver.length != 0) {
+        widget.carereceiverModel!.careGiver.isNotEmpty) {
       _getContact(widget.carereceiverModel!.careGiver[0].id);
     }
   }
@@ -390,6 +443,12 @@ class _PatientState extends State<Patient> {
     setState(() {
       priContactNo = _cgcontactnumModel!.cgContactNum;
     });
+  }
+
+  void _updateData() async {
+    var response = await ApiService.updateCarereceiver(crId, nameValue,
+        homeAddress, phoneNumberValue, priContactUsername, priContactRel);
+    debugPrint(response.body);
   }
 
   @override
