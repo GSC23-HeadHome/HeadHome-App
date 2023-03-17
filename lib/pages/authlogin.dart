@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
+import 'package:headhome/pages/authregister.dart';
 import 'package:headhome/pages/patient.dart';
 import 'package:headhome/pages/caregiver.dart';
 import 'package:headhome/pages/volunteer.dart';
@@ -205,6 +206,23 @@ class _AuthLoginState extends State<AuthLogin> {
                       loginAccount(context);
                     },
                     child: const Text("Login"),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize:
+                          const Size(double.infinity, 50), //////// HERE
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext bctx) => const AuthRegister(),
+                        ),
+                      );
+                    },
+                    child: const Text("Register Now"),
                   )
                 ],
               ),
