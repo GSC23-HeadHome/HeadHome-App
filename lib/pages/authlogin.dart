@@ -27,11 +27,10 @@ class _AuthLoginState extends State<AuthLogin> {
         password: passwordValue,
       );
       if (credential.user != null) {
-        String uid = credential.user!.uid;
         switch (dropdownValue) {
           case "Patient":
             CarereceiverModel? carereceiverModel =
-                await ApiService.getCarereceiver(uid);
+                await ApiService.getCarereceiver(emailValue);
             if (carereceiverModel != null && context.mounted) {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -46,7 +45,8 @@ class _AuthLoginState extends State<AuthLogin> {
             }
 
           case "Volunteer":
-            VolunteerModel? volunteerModel = await ApiService.getVolunteer(uid);
+            VolunteerModel? volunteerModel =
+                await ApiService.getVolunteer(emailValue);
             if (volunteerModel != null && context.mounted) {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -61,7 +61,8 @@ class _AuthLoginState extends State<AuthLogin> {
             }
 
           case "Caregiver":
-            CaregiverModel? caregiverModel = await ApiService.getCaregiver(uid);
+            CaregiverModel? caregiverModel =
+                await ApiService.getCaregiver(emailValue);
             if (caregiverModel != null && context.mounted) {
               Navigator.of(context).push(
                 MaterialPageRoute(

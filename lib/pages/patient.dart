@@ -379,7 +379,8 @@ class _PatientState extends State<Patient> {
   }
 
   void _getData() async {
-    if (widget.carereceiverModel != null) {
+    if (widget.carereceiverModel != null &&
+        widget.carereceiverModel!.careGiver.length != 0) {
       _getContact(widget.carereceiverModel!.careGiver[0].id);
     }
   }

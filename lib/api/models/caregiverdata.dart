@@ -31,8 +31,9 @@ class CaregiverModel {
         name: json["Name"],
         address: json["Address"],
         contactNum: json["ContactNum"],
-        careReceiver: List<CareReceiver>.from(
-            json["CareReceiver"].map((x) => CareReceiver.fromJson(x))),
+        careReceiver: List<CareReceiver>.from(json["CareReceiver"] == null
+            ? []
+            : json["CareReceiver"].map((x) => CareReceiver.fromJson(x))),
         profilePic: json["ProfilePic"],
       );
 

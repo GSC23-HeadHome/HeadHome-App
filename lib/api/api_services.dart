@@ -181,7 +181,7 @@ class ApiService {
   // ------------ VOLUNTEER METHODS ------------
   static Future<http.Response> createVolunteer(
       String id, String name, String contactNum) async {
-    Uri url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.caregiver}');
+    Uri url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.volunteers}');
 
     int certificationStart = 1609459200 + Random().nextInt(5097600);
     int certificationEnd = 1672531200 + Random().nextInt(5097600);
@@ -234,7 +234,8 @@ class ApiService {
       UpdateVolResponse model = updateVolResponseFromJson(res);
       return model;
     } else {
-      throw Exception('Failed to update volunteer info: ${response.reasonPhrase}');
+      throw Exception(
+          'Failed to update volunteer info: ${response.reasonPhrase}');
     }
   }
 
