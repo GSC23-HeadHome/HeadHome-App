@@ -42,6 +42,7 @@ dependencies:
   flutter_material_symbols: ^0.0.4
   http: ^0.13.5
   collection: any
+  flutter_phone_direct_caller: ^2.1.1
 
 dev_dependencies:
   flutter_test:
