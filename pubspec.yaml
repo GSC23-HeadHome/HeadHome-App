@@ -45,6 +45,8 @@ dependencies:
   cloud_firestore: ^4.4.5
   geolocator: ^9.0.2
   flutter_native_splash: ^2.2.19
+  flutter_phone_direct_caller: ^2.1.1
+  firebase_storage: ^11.0.16
 
 dev_dependencies:
   flutter_test:

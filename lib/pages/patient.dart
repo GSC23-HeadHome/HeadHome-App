@@ -1,7 +1,13 @@
+// import 'dart:convert';
+// import 'dart:math';
+
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
-import 'package:headhome/utils/extensions.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
+import 'package:headhome/utils/extensions.dart';
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
@@ -15,24 +21,32 @@ class Patient extends StatefulWidget {
 }
 
 class _PatientState extends State<Patient> {
-  late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
   late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
   // UI
   bool visible = true;
   bool fade = true;
   // Patient Details
-  late String crId = widget.carereceiverModel?.name ?? "Cr0001";
+  late String crId = widget.carereceiverModel?.crId ?? "Cr0001";
   late String nameValue = widget.carereceiverModel?.name ?? "Amy Zhang";
   late String phoneNumberValue =
       widget.carereceiverModel?.contactNum ?? "69823042";
   late String authenticationID =
       widget.carereceiverModel?.authId ?? "amyzhang001";
-  late String passwordValue = "12345678";
-  late String priContactUsername = "alice123";
-  late String priContactRel = "Eldest Daughter";
-  late String priContactNo = "91234567";
-  late String homeAddress = widget.carereceiverModel?.address ??
-      "Blk 123 Clementi Rd #12-34 S(123456)";
+  late String priContactUsername = widget.carereceiverModel!.careGiver.isEmpty
+      ? "cg0002"
+      : widget.carereceiverModel?.careGiver[0].id ?? "cg0002";
+  late String priContactRel = widget.carereceiverModel!.careGiver.isEmpty
+      ? "friend"
+      : widget.carereceiverModel?.careGiver[0].relationship ?? "friend";
+  late String priContactNo = "-";
+  late String homeAddress = widget.carereceiverModel?.address ?? "-";
+  late String profilePic = widget.carereceiverModel?.profilePic ?? "";
+  late Uint8List profileBytes;
+
+  String tempName = "";
+  String tempPhoneNum = "";
+  String tempAddress = "";
+  String tempRel = "";
 
   void showPatientDetails() {
     showDialog(
@@ -78,10 +92,10 @@ class _PatientState extends State<Patient> {
                     const SizedBox(
                       height: 10,
                     ),
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 100,
-                      backgroundImage:
-                          NetworkImage("https://picsum.photos/id/237/200/300"),
+                      backgroundImage: MemoryImage(profileBytes),
+                      // NetworkImage("https://picsum.photos/id/237/200/300"),
                     ),
                     const SizedBox(
                       height: 5,
@@ -222,7 +236,30 @@ class _PatientState extends State<Patient> {
                         ),
                         onChanged: (String? newValue) {
                           setState(() {
-                            nameValue = newValue!;
+                            tempName = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          hintText: homeAddress,
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            tempAddress = newValue!;
                           });
                         },
                       ),
@@ -245,7 +282,7 @@ class _PatientState extends State<Patient> {
                         ),
                         onChanged: (String? newValue) {
                           setState(() {
-                            phoneNumberValue = newValue!;
+                            tempPhoneNum = newValue!;
                           });
                         },
                       ),
@@ -253,29 +290,29 @@ class _PatientState extends State<Patient> {
                     const SizedBox(
                       height: 20,
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Primary Contact Username',
-                          labelStyle:
-                              const TextStyle(fontWeight: FontWeight.bold),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                          contentPadding: const EdgeInsets.all(10),
-                          hintText: priContactUsername,
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                        ),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            priContactUsername = newValue!;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    // Container(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: TextField(
+                    //     decoration: InputDecoration(
+                    //       labelText: 'Primary Contact Username',
+                    //       labelStyle:
+                    //           const TextStyle(fontWeight: FontWeight.bold),
+                    //       border: OutlineInputBorder(
+                    //           borderRadius: BorderRadius.circular(5.0)),
+                    //       contentPadding: const EdgeInsets.all(10),
+                    //       hintText: priContactUsername,
+                    //       floatingLabelBehavior: FloatingLabelBehavior.always,
+                    //     ),
+                    //     onChanged: (String? newValue) {
+                    //       setState(() {
+                    //         priContactUsername = newValue!;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
+                    // const SizedBox(
+                    //   height: 20,
+                    // ),
                     Container(
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(
@@ -291,37 +328,37 @@ class _PatientState extends State<Patient> {
                         ),
                         onChanged: (String? newValue) {
                           setState(() {
-                            priContactRel = newValue!;
+                            tempRel = newValue!;
                           });
                         },
                       ),
                     ),
+                    // const SizedBox(
+                    //   height: 20,
+                    // ),
+                    // Container(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: TextField(
+                    //     decoration: InputDecoration(
+                    //       labelText: 'Password',
+                    //       labelStyle:
+                    //           const TextStyle(fontWeight: FontWeight.bold),
+                    //       border: OutlineInputBorder(
+                    //           borderRadius: BorderRadius.circular(5.0)),
+                    //       contentPadding: const EdgeInsets.all(10),
+                    //       hintText: passwordValue,
+                    //       floatingLabelBehavior: FloatingLabelBehavior.always,
+                    //     ),
+                    //     obscureText: true,
+                    //     onChanged: (String? newValue) {
+                    //       setState(() {
+                    //         passwordValue = newValue!;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
                     const SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          labelStyle:
-                              const TextStyle(fontWeight: FontWeight.bold),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                          contentPadding: const EdgeInsets.all(10),
-                          hintText: passwordValue,
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                        ),
-                        obscureText: true,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            passwordValue = newValue!;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
+                      height: 100,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -334,6 +371,12 @@ class _PatientState extends State<Patient> {
                                 borderRadius: BorderRadius.circular(5.0)),
                           ),
                           onPressed: () {
+                            setState(() {
+                              tempName = "";
+                              tempPhoneNum = "";
+                              tempAddress = "";
+                              tempRel = "";
+                            });
                             Navigator.pop(context);
                           },
                           child: const Text(
@@ -352,6 +395,21 @@ class _PatientState extends State<Patient> {
                                 borderRadius: BorderRadius.circular(5.0)),
                           ),
                           onPressed: () {
+                            setState(() {
+                              nameValue = tempName == "" ? nameValue : tempName;
+                              phoneNumberValue = tempPhoneNum == ""
+                                  ? phoneNumberValue
+                                  : tempPhoneNum;
+                              homeAddress =
+                                  tempAddress == "" ? homeAddress : tempAddress;
+                              priContactRel =
+                                  tempRel == "" ? priContactRel : tempRel;
+                              tempName = "";
+                              tempPhoneNum = "";
+                              tempAddress = "";
+                              tempRel = "";
+                            });
+                            _updateData();
                             Navigator.pop(context);
                           },
                           child: const Text(
@@ -375,21 +433,51 @@ class _PatientState extends State<Patient> {
   @override
   void initState() {
     super.initState();
+    final storage = FirebaseStorage.instance;
     _getData();
+    _getProfileImg();
   }
 
   void _getData() async {
     if (widget.carereceiverModel != null &&
-        widget.carereceiverModel!.careGiver.length != 0) {
+        widget.carereceiverModel!.careGiver.isNotEmpty) {
       _getContact(widget.carereceiverModel!.careGiver[0].id);
+    } else {
+      debugPrint("No Contact");
     }
   }
 
   void _getContact(cgId) async {
+    debugPrint("Getting Contact");
     _cgcontactnumModel = await ApiService.getCgContact(cgId, crId);
     setState(() {
       priContactNo = _cgcontactnumModel!.cgContactNum;
     });
+  }
+
+  void _updateData() async {
+    var response = await ApiService.updateCarereceiver(crId, nameValue,
+        homeAddress, phoneNumberValue, priContactUsername, priContactRel);
+    debugPrint(response.body);
+  }
+
+  void _getProfileImg() async {
+    Reference? storageRef = FirebaseStorage.instance.ref();
+    final profileRef = storageRef.child("ProfileImg");
+    final imageRef = profileRef.child(profilePic);
+    try {
+      const oneMegabyte = 1024 * 1024;
+      final Uint8List? data = await imageRef.getData(oneMegabyte);
+      setState(() {
+        profileBytes = data!;
+      });
+    } on FirebaseException catch (e) {
+      debugPrint("Error getting profile");
+    }
+  }
+
+  _callNumber() async {
+    bool? res = await FlutterPhoneDirectCaller.callNumber(priContactNo);
   }
 
   @override
@@ -585,8 +673,9 @@ class _PatientState extends State<Patient> {
             child: FloatingActionButton(
               //Floating action button on Scaffold
               onPressed: () {
-                //code to execute on bxutton press
-                print("Called for help");
+                //code to execute on button press
+                debugPrint("Calling caregiver");
+                _callNumber();
               },
               backgroundColor:
                   Theme.of(context).colorScheme.primary, //icon inside button
