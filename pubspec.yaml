@@ -43,6 +43,7 @@ dependencies:
   http: ^0.13.5
   collection: any
   flutter_phone_direct_caller: ^2.1.1
+  firebase_storage: ^11.0.16
 
 dev_dependencies:
   flutter_test:
