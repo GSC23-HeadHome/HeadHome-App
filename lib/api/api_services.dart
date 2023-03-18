@@ -40,6 +40,7 @@ class ApiService {
           Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
       print(url);
       var response = await http.get(url);
+      print(response.body);
       if (response.statusCode == 200) {
         CarereceiverModel model = carereceiverFromJson(response.body);
         return model;

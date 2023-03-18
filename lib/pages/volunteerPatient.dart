@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:headhome/api/models/carereceiverdata.dart';
 
-class PatientPage extends StatelessWidget {
-  const PatientPage({super.key});
+class PatientPage extends StatefulWidget {
+  const PatientPage({super.key, required this.carereceiverModel});
+  final CarereceiverModel carereceiverModel;
+  @override
+  State<PatientPage> createState() => _PatientPageState();
+}
 
+class _PatientPageState extends State<PatientPage> {
   @override
   Widget build(BuildContext context) {
     bool reached = false;

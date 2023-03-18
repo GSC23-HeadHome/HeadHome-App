@@ -15,18 +15,17 @@ final FirebaseFirestore db = FirebaseFirestore.instance;
 const String placeholderImageUrl = "https://picsum.photos/id/237/200/300";
 
 class Volunteer extends StatefulWidget {
-  const Volunteer({super.key, this.volunteerModel});
-  final VolunteerModel? volunteerModel;
+  const Volunteer({super.key, required this.volunteerModel});
+  final VolunteerModel volunteerModel;
 
   @override
   State<Volunteer> createState() => _VolunteerState();
 }
 
 class _VolunteerState extends State<Volunteer> {
-  late VolunteerModel? _volunteerModel = {} as VolunteerModel?;
-  late String vId = widget.volunteerModel?.vId ?? "v0004";
-  late String nameValue = widget.volunteerModel?.name ?? "John";
-  late String contactNum = widget.volunteerModel?.contactNum ?? "91234567";
+  late String vId = widget.volunteerModel.vId;
+  late String nameValue = widget.volunteerModel.name;
+  late String contactNum = widget.volunteerModel.contactNum;
   late String password = "";
   Position? _currentPosition;
 
@@ -41,12 +40,9 @@ class _VolunteerState extends State<Volunteer> {
 
   void _getData() async {
     debugPrint("Getting Data...");
-    _volunteerModel = await ApiService.getVolunteer(vId);
     Position fetchedPosition = await Geolocator.getCurrentPosition();
     debugPrint("FetchedLocationData: $fetchedPosition");
     setState(() {
-      nameValue = _volunteerModel!.name;
-      contactNum = _volunteerModel!.contactNum;
       _currentPosition = fetchedPosition;
     });
   }
@@ -182,11 +178,12 @@ class _VolunteerState extends State<Volunteer> {
                               double distance = Geolocator.distanceBetween(
                                   data["start_location"]["lat"],
                                   data["start_location"]["lng"],
-                                  _currentPosition?.latitude ??
-                                      data["start_location"]["lat"],
-                                  _currentPosition?.longitude ??
-                                      data["start_location"]["lng"]);
-                              debugPrint("Calculated Distance: $distance");
+                                  _currentPosition == null
+                                      ? data["start_location"]["lat"]
+                                      : _currentPosition!.latitude,
+                                  _currentPosition == null
+                                      ? data["start_location"]["lng"]
+                                      : _currentPosition!.longitude);
                               return PatientDetails(
                                 distance: distance,
                                 crId: data["cr_id"],
@@ -241,7 +238,7 @@ class _VolunteerState extends State<Volunteer> {
 
 class PatientDetails extends StatefulWidget {
   final String crId;
-  final double distance;
+  final num distance;
 
   const PatientDetails({
     super.key,
@@ -259,6 +256,7 @@ class _PatientDetailsState extends State<PatientDetails> {
   void fetchPatient() async {
     CarereceiverModel? fetchedModel =
         await ApiService.getCarereceiver(widget.crId);
+    debugPrint("Getting carereceiver: $fetchedModel");
     setState(() {
       _carereceiverModel = fetchedModel;
     });
@@ -322,7 +320,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                         ])),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                      child: Text("${widget.distance}m away",
+                      child: Text("${widget.distance.round()}m away",
                           style: TextStyle(fontSize: 12.0)),
                     ),
                   ],
@@ -334,11 +332,14 @@ class _PatientDetailsState extends State<PatientDetails> {
                   padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const PatientPage()),
-                      );
+                      if (_carereceiverModel != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PatientPage(
+                                  carereceiverModel: _carereceiverModel!)),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                         minimumSize: Size(100, 45),
