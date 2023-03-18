@@ -1,10 +1,13 @@
-import 'dart:convert';
-import 'dart:math';
+// import 'dart:convert';
+// import 'dart:math';
 
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
-import 'package:headhome/utils/extensions.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
+import 'package:headhome/utils/extensions.dart';
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
@@ -18,7 +21,6 @@ class Patient extends StatefulWidget {
 }
 
 class _PatientState extends State<Patient> {
-  late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
   late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
   // UI
   bool visible = true;
@@ -30,13 +32,16 @@ class _PatientState extends State<Patient> {
       widget.carereceiverModel?.contactNum ?? "69823042";
   late String authenticationID =
       widget.carereceiverModel?.authId ?? "amyzhang001";
-  // late String passwordValue = "12345678";
-  late String priContactUsername = widget.carereceiverModel!.careGiver.isEmpty ? "cg0002" : 
-      widget.carereceiverModel?.careGiver[0].id ?? "cg0002";
-  late String priContactRel = widget.carereceiverModel!.careGiver.isEmpty ? "friend" : 
-      widget.carereceiverModel?.careGiver[0].relationship ?? "friend";
+  late String priContactUsername = widget.carereceiverModel!.careGiver.isEmpty
+      ? "cg0002"
+      : widget.carereceiverModel?.careGiver[0].id ?? "cg0002";
+  late String priContactRel = widget.carereceiverModel!.careGiver.isEmpty
+      ? "friend"
+      : widget.carereceiverModel?.careGiver[0].relationship ?? "friend";
   late String priContactNo = "-";
   late String homeAddress = widget.carereceiverModel?.address ?? "-";
+  late String profilePic = widget.carereceiverModel?.profilePic ?? "";
+  late Uint8List profileBytes;
 
   String tempName = "";
   String tempPhoneNum = "";
@@ -87,10 +92,10 @@ class _PatientState extends State<Patient> {
                     const SizedBox(
                       height: 10,
                     ),
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 100,
-                      backgroundImage:
-                          NetworkImage("https://picsum.photos/id/237/200/300"),
+                      backgroundImage: MemoryImage(profileBytes),
+                      // NetworkImage("https://picsum.photos/id/237/200/300"),
                     ),
                     const SizedBox(
                       height: 5,
@@ -428,17 +433,22 @@ class _PatientState extends State<Patient> {
   @override
   void initState() {
     super.initState();
+    final storage = FirebaseStorage.instance;
     _getData();
+    _getProfileImg();
   }
 
   void _getData() async {
     if (widget.carereceiverModel != null &&
         widget.carereceiverModel!.careGiver.isNotEmpty) {
       _getContact(widget.carereceiverModel!.careGiver[0].id);
+    } else {
+      debugPrint("No Contact");
     }
   }
 
   void _getContact(cgId) async {
+    debugPrint("Getting Contact");
     _cgcontactnumModel = await ApiService.getCgContact(cgId, crId);
     setState(() {
       priContactNo = _cgcontactnumModel!.cgContactNum;
@@ -449,6 +459,25 @@ class _PatientState extends State<Patient> {
     var response = await ApiService.updateCarereceiver(crId, nameValue,
         homeAddress, phoneNumberValue, priContactUsername, priContactRel);
     debugPrint(response.body);
+  }
+
+  void _getProfileImg() async {
+    Reference? storageRef = FirebaseStorage.instance.ref();
+    final profileRef = storageRef.child("ProfileImg");
+    final imageRef = profileRef.child(profilePic);
+    try {
+      const oneMegabyte = 1024 * 1024;
+      final Uint8List? data = await imageRef.getData(oneMegabyte);
+      setState(() {
+        profileBytes = data!;
+      });
+    } on FirebaseException catch (e) {
+      debugPrint("Error getting profile");
+    }
+  }
+
+  _callNumber() async {
+    bool? res = await FlutterPhoneDirectCaller.callNumber(priContactNo);
   }
 
   @override
@@ -644,8 +673,9 @@ class _PatientState extends State<Patient> {
             child: FloatingActionButton(
               //Floating action button on Scaffold
               onPressed: () {
-                //code to execute on bxutton press
-                print("Called for help");
+                //code to execute on button press
+                debugPrint("Calling caregiver");
+                _callNumber();
               },
               backgroundColor:
                   Theme.of(context).colorScheme.primary, //icon inside button

@@ -40,7 +40,7 @@ class CarereceiverModel {
         contactNum: json["ContactNum"],
         safezoneCtr: SafezoneCtr.fromJson(json["SafezoneCtr"]),
         safezoneRadius: json["SafezoneRadius"],
-        careGiver: List<CareGiver>.from(json["Caregiver"] == null
+        careGiver: List<CareGiver>.from(json["CareGiver"] == null
             ? []
             : json["CareGiver"].map((x) => CareGiver.fromJson(x))),
         profilePic: json["ProfilePic"],
