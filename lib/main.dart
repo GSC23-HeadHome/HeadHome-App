@@ -2,23 +2,70 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:geolocator/geolocator.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:headhome/pages/authlogin.dart';
-import 'package:headhome/pages/authregister.dart';
-import './pages/caregiver.dart' show Caregiver;
-import './pages/patient.dart' show Patient;
-import './pages/volunteer.dart' show Volunteer;
 import 'package:flutter_blue/flutter_blue.dart';
 import 'constants.dart';
 import 'package:collection/collection.dart';
+
+Future<bool> locationEnabled() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    debugPrint('Location services are disabled.');
+    return false;
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      debugPrint('Location permissions are denied');
+      return false;
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    debugPrint(
+        'Location permissions are permanently denied, we cannot request permissions.');
+    return false;
+  }
+
+  return true;
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  bool isLocationEnabled = await locationEnabled();
+  runApp(isLocationEnabled ? const MyApp() : const LocationDisabledPage());
+}
+
+class LocationDisabledPage extends StatelessWidget {
+  const LocationDisabledPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text("Please Enable Location Services"),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -134,108 +181,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              ' display large',
-              style: Theme.of(context).textTheme.displayLarge,
-            ),
-            Text(
-              'display medium',
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            Text(
-              'title small',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            Text(
-              'body large',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            Text(
-              'body medium',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            Text(
-              'body small',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Patient()),
-                  );
-                },
-                child: const Text('Patient Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Caregiver(),
-                    ),
-                  );
-                },
-                child: const Text('Caregiver Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Volunteer(),
-                    ),
-                  );
-                },
-                child: const Text('Volunteer Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AuthRegister()),
-                  );
-                },
-                child: Text('Register Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AuthLogin()),
-                  );
-                },
-                child: Text('Login Page')),
-            Text(
-              'Device: ${_device == null ? "..." : _device?.name}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      ),
-    );
+    return const AuthLogin();
   }
 }

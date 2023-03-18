@@ -2,11 +2,12 @@
     package="com.example.headhome">
         <uses-permission android:name="android.permission.BLUETOOTH" />  
         <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />  
-        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>  
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
    <application
         android:label="headhome"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

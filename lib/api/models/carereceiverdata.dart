@@ -86,8 +86,8 @@ class SafezoneCtr {
     required this.lng,
   });
 
-  int lat;
-  int lng;
+  double lat;
+  double lng;
 
   factory SafezoneCtr.fromJson(Map<String, dynamic> json) => SafezoneCtr(
         lat: json["Lat"],

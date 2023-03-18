@@ -9,7 +9,8 @@ class ProfileOverlay extends StatefulWidget {
       required this.phoneNum,
       required this.password,
       required this.role,
-      required this.updateInfo, required this.id})
+      required this.updateInfo,
+      required this.id})
       : super(key: key);
 
   final String name;
@@ -164,23 +165,7 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                         minimumSize: const Size(120, 50),
                                         backgroundColor: (Colors.white)),
                                     onPressed: () {
-
-                                      if (widget.role == "Volunteer")
-                                      //Navigator.pop(context);
-                                      {Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                        pageBuilder: (context, animation1, animation2) =>  Volunteer()),
-
-                  );}
-                  else if (widget.role == "Caregiver"){
-                    Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                        pageBuilder: (context, animation1, animation2) =>  Caregiver()),
-
-                  );
-                  }
+                                      Navigator.pop(context);
                                     },
                                     child: Text(
                                       'Cancel',
@@ -190,9 +175,11 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                   ElevatedButton(
                                     onPressed: () async {
                                       //update info
-                                      String message =
-                                          await widget.updateInfo(widget.id, localName,
-                                              localNum, localPassword);
+                                      String message = await widget.updateInfo(
+                                          widget.id,
+                                          localName,
+                                          localNum,
+                                          localPassword);
 
                                       print(message);
 
@@ -204,8 +191,10 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                         setState(() {
                                           updateSuccess = true;
                                         });
+                                        if (mounted) {
+                                          Navigator.of(context).pop();
+                                        }
                                       }
-
                                     },
                                     style: ElevatedButton.styleFrom(
                                         minimumSize: Size(120, 50),

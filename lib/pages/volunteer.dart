@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
+import '../api/models/carereceiverdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
-import '../main.dart' show MyApp;
-
-
 import 'package:headhome/api/api_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 
+final FirebaseFirestore db = FirebaseFirestore.instance;
+const String placeholderImageUrl = "https://picsum.photos/id/237/200/300";
 
 class Volunteer extends StatefulWidget {
-  const Volunteer({super.key, this.volunteerModel});
-  final VolunteerModel? volunteerModel;
+  const Volunteer({super.key, required this.volunteerModel});
+  final VolunteerModel volunteerModel;
 
   @override
   State<Volunteer> createState() => _VolunteerState();
 }
 
 class _VolunteerState extends State<Volunteer> {
-  late VolunteerModel? _VolunteerModel = {} as VolunteerModel?;
-  late String vId = widget.volunteerModel?.vId ?? "v0004";
-  late String nameValue = widget.volunteerModel?.name ?? "John";
-  late String contactNum = widget.volunteerModel?.contactNum ?? "91234567";
+  late String vId = widget.volunteerModel.vId;
+  late String nameValue = widget.volunteerModel.name;
+  late String contactNum = widget.volunteerModel.contactNum;
   late String password = "";
+  Position? _currentPosition;
+
+  final Stream<QuerySnapshot> _soslogStream =
+      FirebaseFirestore.instance.collection('sos_log').snapshots();
 
   @override
   void initState() {
@@ -33,16 +38,16 @@ class _VolunteerState extends State<Volunteer> {
   }
 
   void _getData() async {
-    _VolunteerModel = await ApiService.getVolunteer(vId);
+    debugPrint("Getting Data...");
+    Position fetchedPosition = await Geolocator.getCurrentPosition();
+    debugPrint("FetchedLocationData: $fetchedPosition");
     setState(() {
-      nameValue = _VolunteerModel!.name;
-      contactNum = _VolunteerModel!.contactNum;
+      _currentPosition = fetchedPosition;
     });
   }
 
   Future<String> _updateVolunteerInfo(
       String vId, String _name, String _contact, String _password) async {
-
     setState(() {
       nameValue = _name;
       contactNum = _contact;
@@ -59,38 +64,40 @@ class _VolunteerState extends State<Volunteer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        // leading: BackButton(
-        //   onPressed: () {
-        //     Navigator.pop(context);
-        //   },
-        //   color: Theme.of(context).colorScheme.primary,
-        // ),
-        title: GestureDetector(
-     onTap: () {
-        Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                        pageBuilder: (context, animation1, animation2) =>  MyApp()),);
-     },child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(MaterialSymbols.home_pin, color: Theme.of(context).colorScheme.primary),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
-              child: Text(
-                "HeadHome",
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Theme.of(context).colorScheme.primary,
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          // leading: BackButton(
+          //   onPressed: () {
+          //     Navigator.pop(context);
+          //   },
+          //   color: Theme.of(context).colorScheme.primary,
+          // ),
+          title: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) => MyApp()),
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(MaterialSymbols.home_pin,
+                    color: Theme.of(context).colorScheme.primary),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
+                  child: Text(
+                    "HeadHome",
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-          
-        ),)
-      ),
+          )),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
         child: Center(
@@ -115,7 +122,7 @@ class _VolunteerState extends State<Volunteer> {
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(6)),
+                    borderRadius: const BorderRadius.all(Radius.circular(6)),
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   height: 200,
@@ -148,24 +155,42 @@ class _VolunteerState extends State<Volunteer> {
                 child: Scrollbar(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: ListView(
-                      scrollDirection:
-                          Axis.vertical, // set the direction of scrolling
-                      children: <Widget>[
-                        // list of widgets that you want to scroll through
-                        PatientDetails(
-                            name: "Sarah",
-                            distance: "250m away",
-                            imageurl: "https://picsum.photos/id/237/200/300"),
-                        PatientDetails(
-                            name: "Amy",
-                            distance: "250m away",
-                            imageurl: "https://picsum.photos/id/237/200/300"),
-                        PatientDetails(
-                            name: "Bryan",
-                            distance: "250m away",
-                            imageurl: "https://picsum.photos/id/237/200/300")
-                      ],
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: _soslogStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const Text("Something went wrong");
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text("Loading...");
+                        }
+
+                        return ListView(
+                          scrollDirection:
+                              Axis.vertical, // set the direction of scrolling
+                          children: snapshot.data!.docs.map(
+                            (document) {
+                              Map<String, dynamic> data =
+                                  document.data()! as Map<String, dynamic>;
+                              debugPrint("$data");
+                              double distance = Geolocator.distanceBetween(
+                                  data["start_location"]["lat"],
+                                  data["start_location"]["lng"],
+                                  _currentPosition == null
+                                      ? data["start_location"]["lat"]
+                                      : _currentPosition!.latitude,
+                                  _currentPosition == null
+                                      ? data["start_location"]["lng"]
+                                      : _currentPosition!.longitude);
+                              return PatientDetails(
+                                distance: distance,
+                                crId: data["cr_id"],
+                              );
+                            },
+                          ).toList(),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -189,16 +214,15 @@ class _VolunteerState extends State<Volunteer> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Expanded(
-                flex: 5, // 50%
-                child: ProfileOverlay(
-                  name: nameValue,
-                  phoneNum: contactNum,
-                  password: password,
-                  role: "Volunteer",
-                  updateInfo: _updateVolunteerInfo,
-                  id: vId,
-                )
-              ),
+                  flex: 5, // 50%
+                  child: ProfileOverlay(
+                    name: nameValue,
+                    phoneNum: contactNum,
+                    password: password,
+                    role: "Volunteer",
+                    updateInfo: _updateVolunteerInfo,
+                    id: vId,
+                  )),
               Expanded(
                 flex: 5, // 50%
                 child: SettingsOverlay(),
@@ -211,16 +235,37 @@ class _VolunteerState extends State<Volunteer> {
   }
 }
 
-class PatientDetails extends StatelessWidget {
-  final String name;
-  final String distance;
-  final String imageurl;
+class PatientDetails extends StatefulWidget {
+  final String crId;
+  final num distance;
 
-  const PatientDetails(
-      {super.key,
-      required this.name,
-      required this.distance,
-      required this.imageurl});
+  const PatientDetails({
+    super.key,
+    required this.crId,
+    required this.distance,
+  });
+
+  @override
+  State<PatientDetails> createState() => _PatientDetailsState();
+}
+
+class _PatientDetailsState extends State<PatientDetails> {
+  CarereceiverModel? _carereceiverModel;
+
+  void fetchPatient() async {
+    CarereceiverModel? fetchedModel =
+        await ApiService.getCarereceiver(widget.crId);
+    debugPrint("Getting carereceiver: $fetchedModel");
+    setState(() {
+      _carereceiverModel = fetchedModel;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPatient();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +293,10 @@ class PatientDetails extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: CircleAvatar(
                       radius: 20,
-                      backgroundImage: NetworkImage(imageurl),
+                      backgroundImage: _carereceiverModel != null &&
+                              _carereceiverModel?.profilePic != ""
+                          ? NetworkImage(_carereceiverModel!.profilePic)
+                          : const NetworkImage(placeholderImageUrl),
                     ),
                   )),
               Expanded(
@@ -260,7 +308,9 @@ class PatientDetails extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
                         child: Wrap(children: [
                           Text(
-                            name,
+                            _carereceiverModel == null
+                                ? ""
+                                : _carereceiverModel!.name,
                             style: TextStyle(
                                 fontSize: 16.0,
                                 color: Color(0xFF263238),
@@ -269,7 +319,8 @@ class PatientDetails extends StatelessWidget {
                         ])),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                      child: Text(distance, style: TextStyle(fontSize: 12.0)),
+                      child: Text("${widget.distance.round()}m away",
+                          style: TextStyle(fontSize: 12.0)),
                     ),
                   ],
                 ),
@@ -280,11 +331,14 @@ class PatientDetails extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const PatientPage()),
-                      );
+                      if (_carereceiverModel != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PatientPage(
+                                  carereceiverModel: _carereceiverModel!)),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                         minimumSize: Size(100, 45),
