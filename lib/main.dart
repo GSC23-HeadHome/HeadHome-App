@@ -5,13 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:headhome/pages/authlogin.dart';
-import 'package:headhome/pages/authregister.dart';
-import './pages/caregiver.dart' show Caregiver;
-import './pages/patient.dart' show Patient;
-import './pages/volunteer.dart' show Volunteer;
 import 'package:flutter_blue/flutter_blue.dart';
 import 'constants.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -134,108 +131,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              ' display large',
-              style: Theme.of(context).textTheme.displayLarge,
-            ),
-            Text(
-              'display medium',
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            Text(
-              'title small',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            Text(
-              'body large',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            Text(
-              'body medium',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            Text(
-              'body small',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Patient()),
-                  );
-                },
-                child: const Text('Patient Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Caregiver(),
-                    ),
-                  );
-                },
-                child: const Text('Caregiver Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Volunteer(),
-                    ),
-                  );
-                },
-                child: const Text('Volunteer Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AuthRegister()),
-                  );
-                },
-                child: Text('Register Page')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AuthLogin()),
-                  );
-                },
-                child: Text('Login Page')),
-            Text(
-              'Device: ${_device == null ? "..." : _device?.name}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      ),
-    );
+    return const AuthLogin();
   }
 }
