@@ -54,7 +54,14 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   bool isLocationEnabled = await locationEnabled();
-  runApp(isLocationEnabled ? const MyApp() : const LocationDisabledPage());
+  if (!isLocationEnabled) {
+    await Geolocator.openLocationSettings();
+  }
+  runApp(
+    MyApp(
+      isLocationEnabled: isLocationEnabled,
+    ),
+  );
 }
 
 class LocationDisabledPage extends StatelessWidget {
@@ -62,14 +69,17 @@ class LocationDisabledPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Please Enable Location Services"),
+    return const Scaffold(
+      body: Center(
+        child: Text("Please Enable Location Services and restart the app!"),
+      ),
     );
   }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.isLocationEnabled});
+  final bool? isLocationEnabled;
 
   // This widget is the root of your application.
   @override
@@ -105,14 +115,15 @@ class MyApp extends StatelessWidget {
           bodySmall: TextStyle(fontSize: 12.0),
         ),
       ),
-      home: const MyHomePage(title: "Temp Navigator"),
+      home: isLocationEnabled != null && isLocationEnabled!
+          ? const MyHomePage()
+          : const LocationDisabledPage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
