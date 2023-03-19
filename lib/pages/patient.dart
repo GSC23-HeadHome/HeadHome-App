@@ -478,6 +478,11 @@ class _PatientState extends State<Patient> {
 
   _callNumber() async {
     bool? res = await FlutterPhoneDirectCaller.callNumber(priContactNo);
+    if (res!) {
+      debugPrint("Working");
+    } else {
+      debugPrint("Not working");
+    }
   }
 
   @override
