@@ -505,7 +505,7 @@ class _PatientState extends State<Patient> {
         crId,
         position,
         widget.carereceiverModel!.safezoneCtr.lat.toString(),
-        widget.carereceiverModel!.safezoneCtr.lat.toString());
+        widget.carereceiverModel!.safezoneCtr.lng.toString());
     debugPrint(response.body);
     _timerHandler();
   }
@@ -521,7 +521,7 @@ class _PatientState extends State<Patient> {
     var response = await ApiService.routingHelp(
         position,
         widget.carereceiverModel!.safezoneCtr.lat.toString(),
-        widget.carereceiverModel!.safezoneCtr.lat.toString());
+        widget.carereceiverModel!.safezoneCtr.lng.toString());
     debugPrint(response.body);
   }
 
