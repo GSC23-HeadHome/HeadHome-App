@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
 import 'dart:math' hide log;
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:headhome/api/models/volunteerdata.dart';
-import 'package:http/http.dart' as http;
-import 'package:headhome/constants.dart';
-import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
+import 'package:headhome/api/models/carereceiverdata.dart';
+import 'package:headhome/api/models/soslogdata.dart';
+import 'package:headhome/api/models/volunteerdata.dart';
+import 'package:headhome/constants.dart';
+import 'package:http/http.dart' as http;
 
 class ApiService {
   // ---------- CARERECEIVER METHODS ----------
@@ -109,7 +109,7 @@ class ApiService {
         DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     Uri url = Uri.parse(
         '${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id/help');
-    
+
     Map data = {
       "CrId": id,
       "Body": "Outside of safezone for too long / Routing service triggered",
@@ -337,4 +337,31 @@ class ApiService {
   }
 
   // -------- END OF VOLUNTEER METHODS ---------
+
+  // ------------- SOS LOG METHODS -------------
+
+  static Future<AcceptSOSResponse?> acceptSOS(
+      String sosId, String authID, String vId) async {
+    var headers = {'Content-Type': 'application/json'};
+    String url = '${ApiConstants.baseUrl}/${ApiConstants.sos}/accept';
+    log(url);
+    var request = http.Request('PUT', Uri.parse(url));
+    request.body = json.encode({"SOSId": sosId, "AuthID": authID, "VId": vId});
+    request.headers.addAll(headers);
+    try {
+      http.StreamedResponse response = await request.send();
+      if (response.statusCode == 200) {
+        var res = await response.stream.bytesToString();
+        AcceptSOSResponse model = acceptSOSFromJson(res);
+        return model;
+      } else {
+        throw Exception('Failed to accept SOS: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
+  }
+
+  // --------- END OF SOS LOG METHODS ----------
 }
