@@ -1,11 +1,13 @@
 // import 'dart:convert';
 // import 'dart:math';
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:headhome/utils/extensions.dart';
 import 'package:headhome/api/api_services.dart';
@@ -436,6 +438,8 @@ class _PatientState extends State<Patient> {
     final storage = FirebaseStorage.instance;
     _getData();
     _getProfileImg();
+    _getLocation();
+    _requestHelp();
   }
 
   void _getData() async {
@@ -476,8 +480,59 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  void _getLocation() async {
+    Position position = await Geolocator.getCurrentPosition();
+    double distFromSafe = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        widget.carereceiverModel!.safezoneCtr.lat,
+        widget.carereceiverModel!.safezoneCtr.lng);
+    String status = distFromSafe > widget.carereceiverModel!.safezoneRadius
+        ? "warning"
+        : distFromSafe > 30
+            ? "safezone"
+            : "home";
+    var response =
+        await ApiService.updateCarereceiverLoc(crId, position, status);
+    debugPrint(response.body);
+  }
+
+  void _requestHelp() async {
+    Position position = await Geolocator.getCurrentPosition();
+    debugPrint(position.latitude.toString());
+    debugPrint(position.longitude.toString());
+    var response = await ApiService.requestHelp(
+        crId,
+        position,
+        widget.carereceiverModel!.safezoneCtr.lat.toString(),
+        widget.carereceiverModel!.safezoneCtr.lng.toString());
+    debugPrint(response.body);
+    _timerHandler();
+  }
+
+  Future<void> _timerHandler() async {
+    Timer.periodic(const Duration(minutes: 5), (timer) {
+      _routingHelp();
+    });
+  }
+
+  void _routingHelp() async {
+    Position position = await Geolocator.getCurrentPosition();
+    var response = await ApiService.routingHelp(
+        position,
+        widget.carereceiverModel!.safezoneCtr.lat.toString(),
+        widget.carereceiverModel!.safezoneCtr.lng.toString());
+    debugPrint(response.body);
+  }
+
   _callNumber() async {
-    bool? res = await FlutterPhoneDirectCaller.callNumber(priContactNo);
+    bool? res = await FlutterPhoneDirectCaller.callNumber(
+        priContactNo.replaceAll(' ', ''));
+    if (res!) {
+      debugPrint("Working");
+    } else {
+      debugPrint("Not working");
+    }
   }
 
   @override
