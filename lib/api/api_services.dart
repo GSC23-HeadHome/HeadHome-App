@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:math' hide log;
 
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import 'package:http/http.dart' as http;
 import 'package:headhome/constants.dart';
@@ -67,6 +70,76 @@ class ApiService {
     var body = json.encode(data);
 
     var response = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+    return response;
+  }
+
+  static Future<http.Response> updateCarereceiverLoc(
+      String id, Position pos, String status) async {
+    int datetime =
+        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+    String travelLogId = id + datetime.toString();
+    Uri url = Uri.parse(
+        '${ApiConstants.baseUrl}/${ApiConstants.travellog}/$travelLogId');
+    debugPrint(pos.latitude.toString());
+    debugPrint(pos.longitude.toString());
+    Map data = {
+      "CrId": id,
+      "Datetime": datetime,
+      "CurrentLocation": {"Lat": pos.latitude, "Lng": pos.longitude},
+      "Status": status
+    };
+
+    var body = json.encode(data);
+
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+    return response;
+  }
+
+  static Future<http.Response> requestHelp(
+      String id, Position startPos, String endLat, String endLng) async {
+    int datetime =
+        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+    Uri url = Uri.parse(
+        '${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id/help');
+    
+    Map data = {
+      "CrId": id,
+      "Body": "Outside of safezone for too long / Routing service triggered",
+      "Start": '${startPos.latitude},${startPos.longitude}',
+      "End": '$endLat,$endLng',
+      "Datetime": datetime,
+    };
+
+    var body = json.encode(data);
+
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+    return response;
+  }
+
+  static Future<http.Response> routingHelp(
+      Position startPos, String endLat, String endLng) async {
+    Uri url =
+        Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/route');
+    Map data = {
+      "Start": '${startPos.latitude},${startPos.longitude}',
+      "End": '$endLat,$endLng',
+    };
+
+    var body = json.encode(data);
+
+    var response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: body,
