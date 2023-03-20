@@ -1,23 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:headhome/api/api_services.dart';
+import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
+import 'package:headhome/api/models/soslogdata.dart';
+import 'package:headhome/api/models/volunteerdata.dart';
 
 class PatientPage extends StatefulWidget {
-  const PatientPage({super.key, required this.carereceiverModel});
+  const PatientPage(
+      {super.key,
+      required this.carereceiverModel,
+      required this.imageUrl,
+      required this.sosLogModel,
+      required this.volunteerModel});
   final CarereceiverModel carereceiverModel;
+  final String imageUrl;
+  final Map<String, dynamic> sosLogModel;
+  final VolunteerModel volunteerModel;
+
   @override
   State<PatientPage> createState() => _PatientPageState();
 }
 
 class _PatientPageState extends State<PatientPage> {
+  String _priContactNo = "-";
+
+  void fetchCgNumber() async {
+    final Cgcontactnum? fetchedContactNo = await ApiService.getCgContact(
+        widget.carereceiverModel.careGiver[0].id,
+        widget.carereceiverModel.crId);
+    if (fetchedContactNo != null) {
+      setState(() {
+        _priContactNo = fetchedContactNo.cgContactNum;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCgNumber();
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool reached = false;
-    var pageui;
+    bool authenticated = false;
 
-    if (reached == false) {
-      pageui = findPatient();
-    } else {
-      pageui = findHome();
+    void updateAuthenticated(bool newAuthenticated) {
+      setState(() {
+        authenticated = newAuthenticated;
+      });
     }
 
     return Scaffold(
@@ -68,10 +100,9 @@ class _PatientPageState extends State<PatientPage> {
                         ],
                       ),
                     ),
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 80,
-                      backgroundImage:
-                          NetworkImage("https://picsum.photos/id/237/200/300"),
+                      backgroundImage: NetworkImage(widget.imageUrl),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
@@ -94,7 +125,15 @@ class _PatientPageState extends State<PatientPage> {
                         ],
                       ),
                     ),
-                    pageui
+                    authenticated
+                        ? findPatient(
+                            priContactNo: _priContactNo,
+                            sosLogModel: widget.sosLogModel,
+                            volunteerModel: widget.volunteerModel,
+                            updateAuthenticated: updateAuthenticated)
+                        : findHome(
+                            priContactNo: _priContactNo,
+                          ),
                   ],
                 ),
               ),
@@ -108,8 +147,10 @@ class _PatientPageState extends State<PatientPage> {
           child: FittedBox(
             child: FloatingActionButton(
               //Floating action button on Scaffold
-              onPressed: () {
+              onPressed: () async {
                 //code to execute on bxutton press
+                await FlutterPhoneDirectCaller.callNumber(
+                    widget.carereceiverModel.contactNum);
               },
               child: Icon(Icons.call),
               backgroundColor:
@@ -129,8 +170,32 @@ class _PatientPageState extends State<PatientPage> {
   }
 }
 
-class findPatient extends StatelessWidget {
-  const findPatient({super.key});
+class findPatient extends StatefulWidget {
+  findPatient({
+    super.key,
+    required this.priContactNo,
+    required this.sosLogModel,
+    required this.volunteerModel,
+    required this.updateAuthenticated,
+  });
+  final String priContactNo;
+  final Map<String, dynamic> sosLogModel;
+  final VolunteerModel volunteerModel;
+  final void Function(bool) updateAuthenticated;
+
+  @override
+  State<findPatient> createState() => _findPatientState();
+}
+
+class _findPatientState extends State<findPatient> {
+  final authIdController = TextEditingController();
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    authIdController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,14 +212,29 @@ class findPatient extends StatelessWidget {
                 children: [
                   Text("Enter Patient's Authentication ID",
                       style: Theme.of(context).textTheme.bodyMedium),
-                  Spacer(),
                 ],
               ),
             ),
             Container(
               child: TextField(
+                controller: authIdController,
                 decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
+                  suffixIcon: IconButton(
+                    icon: const Icon(
+                      Icons.send_outlined,
+                    ),
+                    onPressed: () async {
+                      AcceptSOSResponse? response = await ApiService.acceptSOS(
+                          widget.sosLogModel["sos_id"],
+                          authIdController.text,
+                          widget.volunteerModel.vId);
+                      debugPrint("$response");
+                      if (response != null) {
+                        widget.updateAuthenticated(true);
+                      }
+                    },
+                  ),
+                  border: OutlineInputBorder(
                     borderSide:
                         BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
                     borderRadius: BorderRadius.circular(6),
@@ -235,10 +315,10 @@ class findPatient extends StatelessWidget {
                                       fontWeight: FontWeight.w600),
                                 ),
                               ])),
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(20, 5, 0, 20),
-                            child: Text("91234567",
-                                style: TextStyle(fontSize: 12.0)),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                            child: Text(widget.priContactNo,
+                                style: const TextStyle(fontSize: 12.0)),
                           ),
                         ],
                       ),
@@ -248,14 +328,18 @@ class findPatient extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             //send alert
+                            if (widget.priContactNo != "-") {
+                              await FlutterPhoneDirectCaller.callNumber(
+                                  widget.priContactNo);
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                               minimumSize: Size(100, 45),
                               backgroundColor:
                                   Theme.of(context).colorScheme.primary),
-                          child: Text(
+                          child: const Text(
                             'Contact',
                             style: TextStyle(color: Colors.white),
                           ),
@@ -274,7 +358,8 @@ class findPatient extends StatelessWidget {
 }
 
 class findHome extends StatelessWidget {
-  const findHome({super.key});
+  const findHome({super.key, required this.priContactNo});
+  final String priContactNo;
 
   @override
   Widget build(BuildContext context) {
@@ -354,7 +439,7 @@ class findHome extends StatelessWidget {
                               ])),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                            child: Text("91234567",
+                            child: Text(priContactNo,
                                 style: TextStyle(fontSize: 12.0)),
                           ),
                         ],

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' hide log;
 
+import 'package:headhome/api/models/soslogdata.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import 'package:http/http.dart' as http;
 import 'package:headhome/constants.dart';
@@ -264,4 +265,31 @@ class ApiService {
   }
 
   // -------- END OF VOLUNTEER METHODS ---------
+
+  // ------------- SOS LOG METHODS -------------
+
+  static Future<AcceptSOSResponse?> acceptSOS(
+      String sosId, String authID, String vId) async {
+    var headers = {'Content-Type': 'application/json'};
+    String url = '${ApiConstants.baseUrl}/${ApiConstants.sos}/accept';
+    log(url);
+    var request = http.Request('PUT', Uri.parse(url));
+    request.body = json.encode({"SOSId": sosId, "AuthID": authID, "VId": vId});
+    request.headers.addAll(headers);
+    try {
+      http.StreamedResponse response = await request.send();
+      if (response.statusCode == 200) {
+        var res = await response.stream.bytesToString();
+        AcceptSOSResponse model = acceptSOSFromJson(res);
+        return model;
+      } else {
+        throw Exception('Failed to accept SOS: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
+  }
+
+  // --------- END OF SOS LOG METHODS ----------
 }

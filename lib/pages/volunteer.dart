@@ -9,9 +9,10 @@ import '../components/settingsDialog.dart' show SettingsOverlay;
 import 'package:headhome/api/api_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 final FirebaseFirestore db = FirebaseFirestore.instance;
-const String placeholderImageUrl = "https://picsum.photos/id/237/200/300";
+final Reference ref = FirebaseStorage.instance.ref();
 
 class Volunteer extends StatefulWidget {
   const Volunteer({super.key, required this.volunteerModel});
@@ -38,7 +39,6 @@ class _VolunteerState extends State<Volunteer> {
   }
 
   void _getData() async {
-    debugPrint("Getting Data...");
     Position fetchedPosition = await Geolocator.getCurrentPosition();
     debugPrint("FetchedLocationData: $fetchedPosition");
     setState(() {
@@ -173,7 +173,6 @@ class _VolunteerState extends State<Volunteer> {
                             (document) {
                               Map<String, dynamic> data =
                                   document.data()! as Map<String, dynamic>;
-                              debugPrint("$data");
                               double distance = Geolocator.distanceBetween(
                                   data["start_location"]["lat"],
                                   data["start_location"]["lng"],
@@ -185,7 +184,8 @@ class _VolunteerState extends State<Volunteer> {
                                       : _currentPosition!.longitude);
                               return PatientDetails(
                                 distance: distance,
-                                crId: data["cr_id"],
+                                sosLogModel: data,
+                                volunteerModel: widget.volunteerModel,
                               );
                             },
                           ).toList(),
@@ -236,13 +236,15 @@ class _VolunteerState extends State<Volunteer> {
 }
 
 class PatientDetails extends StatefulWidget {
-  final String crId;
   final num distance;
+  final Map<String, dynamic> sosLogModel;
+  final VolunteerModel volunteerModel;
 
   const PatientDetails({
     super.key,
-    required this.crId,
+    required this.sosLogModel,
     required this.distance,
+    required this.volunteerModel,
   });
 
   @override
@@ -251,14 +253,26 @@ class PatientDetails extends StatefulWidget {
 
 class _PatientDetailsState extends State<PatientDetails> {
   CarereceiverModel? _carereceiverModel;
+  String imageUrl = "https://picsum.photos/id/237/200/300";
 
   void fetchPatient() async {
     CarereceiverModel? fetchedModel =
-        await ApiService.getCarereceiver(widget.crId);
-    debugPrint("Getting carereceiver: $fetchedModel");
-    setState(() {
-      _carereceiverModel = fetchedModel;
-    });
+        await ApiService.getCarereceiver(widget.sosLogModel["cr_id"]);
+
+    if (fetchedModel != null) {
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child("ProfileImg/${fetchedModel.profilePic}");
+      final String url = await ref.getDownloadURL();
+      setState(() {
+        _carereceiverModel = fetchedModel;
+        imageUrl = url;
+      });
+    } else {
+      setState(() {
+        _carereceiverModel = fetchedModel;
+      });
+    }
   }
 
   @override
@@ -293,10 +307,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: CircleAvatar(
                       radius: 20,
-                      backgroundImage: _carereceiverModel != null &&
-                              _carereceiverModel?.profilePic != ""
-                          ? NetworkImage(_carereceiverModel!.profilePic)
-                          : const NetworkImage(placeholderImageUrl),
+                      backgroundImage: NetworkImage(imageUrl),
                     ),
                   )),
               Expanded(
@@ -336,7 +347,10 @@ class _PatientDetailsState extends State<PatientDetails> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => PatientPage(
-                                  carereceiverModel: _carereceiverModel!)),
+                                  carereceiverModel: _carereceiverModel!,
+                                  sosLogModel: widget.sosLogModel,
+                                  volunteerModel: widget.volunteerModel,
+                                  imageUrl: imageUrl)),
                         );
                       }
                     },
