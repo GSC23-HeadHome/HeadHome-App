@@ -77,7 +77,10 @@ class _VolunteerState extends State<Volunteer> {
               Navigator.push(
                 context,
                 PageRouteBuilder(
-                    pageBuilder: (context, animation1, animation2) => MyApp()),
+                    pageBuilder: (context, animation1, animation2) =>
+                        const MyApp(
+                          isLocationEnabled: true,
+                        )),
               );
             },
             child: Row(

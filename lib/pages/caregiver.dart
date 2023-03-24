@@ -6,11 +6,9 @@ import './caregiverPatient.dart' show PatientDetails;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
 import '../components/addPatient.dart' show AddPatientOverlay;
-
 import 'package:headhome/api/api_services.dart';
-
-import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Caregiver extends StatefulWidget {
   const Caregiver({super.key, this.caregiverModel});
@@ -24,6 +22,7 @@ class _CaregiverState extends State<Caregiver> {
   late CaregiverModel? _CaregiverModel = {} as CaregiverModel?;
   late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
   // late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
+
   //caregiver details
   late String CgId = widget.caregiverModel?.cgId ?? "cg0002";
 
@@ -40,14 +39,36 @@ class _CaregiverState extends State<Caregiver> {
   void initState() {
     super.initState();
     _getData();
+    _registerNotification();
+  }
+
+  void _registerNotification() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.subscribeToTopic("adrian.lim");
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      debugPrint(
+          'User granted permission with FCMToken: ${await messaging.getToken()}');
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint(message.notification?.title);
+        debugPrint(message.notification?.body);
+      });
+    } else {
+      debugPrint('User declined or has not accepted permission');
+    }
   }
 
   void _getData() async {
-    print("getdata function");
-    // if (widget.caregiverModel != null) {
-    //   print("caregiverModel not null");
-    //   _getCaregiverInfo(widget.caregiverModel!.cgId);
-    // }
     _getCaregiverInfo(CgId);
   }
 
@@ -69,7 +90,6 @@ class _CaregiverState extends State<Caregiver> {
       // add to careReceiverDetails
     }
   }
-  
 
   Future<String> _updateCgInfo(
       String _cgid, String _name, String _contact, String _password) async {
@@ -87,9 +107,9 @@ class _CaregiverState extends State<Caregiver> {
     //get all careReceiver
   }
 
-    Future<String> _addNewPatient(String cgId, String crId, String relationship) async {
-
-     var response = await ApiService.addPatient(cgId, crId, relationship);
+  Future<String> _addNewPatient(
+      String cgId, String crId, String relationship) async {
+    var response = await ApiService.addPatient(cgId, crId, relationship);
     print(response.message);
     return response.message;
   }
@@ -107,28 +127,33 @@ class _CaregiverState extends State<Caregiver> {
         //   color: Theme.of(context).colorScheme.primary,
         // ),
         title: GestureDetector(
-     onTap: () {
-        Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                        pageBuilder: (context, animation1, animation2) =>  MyApp()),);
-     },child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(MaterialSymbols.home_pin, color: Theme.of(context).colorScheme.primary),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
-              child: Text(
-                "HeadHome",
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Theme.of(context).colorScheme.primary,
+          onTap: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) => const MyApp(
+                        isLocationEnabled: true,
+                      )),
+            );
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(MaterialSymbols.home_pin,
+                  color: Theme.of(context).colorScheme.primary),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
+                child: Text(
+                  "HeadHome",
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
-            ),
-          ],
-          
-        ),),
+            ],
+          ),
+        ),
       ),
       body: Center(
         child: Column(
@@ -195,11 +220,13 @@ class _CaregiverState extends State<Caregiver> {
         ),
       ),
       floatingActionButton: Container(
-          height: 80,
-          width: 80,
-          child: FittedBox(
-            child: AddPatientOverlay(addNewPatient: _addNewPatient,)),
-          ),
+        height: 80,
+        width: 80,
+        child: FittedBox(
+            child: AddPatientOverlay(
+          addNewPatient: _addNewPatient,
+        )),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         //bottom navigation bar on scaffold
@@ -223,7 +250,6 @@ class _CaregiverState extends State<Caregiver> {
                 //   onPressed: () {},
                 // ),
                 child: ProfileOverlay(
-                  
                   name: nameValue,
                   phoneNum: contactNum,
                   password: password,

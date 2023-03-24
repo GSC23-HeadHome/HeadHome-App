@@ -9,6 +9,7 @@ import 'package:headhome/pages/authlogin.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'constants.dart';
 import 'package:collection/collection.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<bool> locationEnabled() async {
   bool serviceEnabled;
@@ -57,6 +58,19 @@ void main() async {
   if (!isLocationEnabled) {
     await Geolocator.openLocationSettings();
   }
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
   runApp(
     MyApp(
       isLocationEnabled: isLocationEnabled,
@@ -77,11 +91,23 @@ class LocationDisabledPage extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key, this.isLocationEnabled});
   final bool? isLocationEnabled;
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -116,7 +142,7 @@ class MyApp extends StatelessWidget {
           bodySmall: TextStyle(fontSize: 12.0),
         ),
       ),
-      home: isLocationEnabled != null && isLocationEnabled!
+      home: widget.isLocationEnabled != null && widget.isLocationEnabled!
           ? const MyHomePage()
           : const LocationDisabledPage(),
     );
@@ -142,9 +168,9 @@ class _MyHomePageState extends State<MyHomePage> {
     flutterBlue.startScan(timeout: const Duration(seconds: 4));
     flutterBlue.scanResults.listen((results) async {
       // do something with scan results
-      for (ScanResult r in results) {
-        debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
-      }
+      // for (ScanResult r in results) {
+      //   debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
+      // }
       _device = results
           .firstWhereOrNull(
               (result) => result.device.name == BluetoothConstants.deviceName)
