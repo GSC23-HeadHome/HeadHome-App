@@ -49,7 +49,7 @@ class _PatientState extends State<Patient> {
   late String profilePic = widget.carereceiverModel?.profilePic ?? "";
   late Uint8List profileBytes;
   late LatLng currentPosition;
-  Set<Polyline> polylines = {};
+  Set<String> polylines = {};
 
   String tempName = "";
   String tempPhoneNum = "";
@@ -590,8 +590,8 @@ class _PatientState extends State<Patient> {
       ),
       body: Stack(children: [
         Container(
-          child: const GmapsWidget(
-            polylines: polylines,
+          child:  GmapsWidget(
+            polylineStrs: polylines,
             center: currentPosition, 
             bearing: 120.0,
           )
