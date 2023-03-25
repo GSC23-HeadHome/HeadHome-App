@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/constants.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +30,11 @@ class MyState extends ChangeNotifier {
     print(alert_sent);
     notifyListeners();
   }
+
+  void initAlertSent(bool sent) {
+    alert_sent = sent;
+    notifyListeners();
+  }
 }
 
 class _PatientDetailsState extends State<PatientDetails> {
@@ -36,9 +43,19 @@ class _PatientDetailsState extends State<PatientDetails> {
 
   bool _showAlertButton = false;
 
+  Future<void> _getCRSOSLog() async {
+    await widget.carereceiverModel.getCRSOSLog();
+    if (widget.carereceiverModel.soslog != null) {
+      _myState.initAlertSent(
+          widget.carereceiverModel.soslog!.status == "lost" ||
+              widget.carereceiverModel.soslog!.status == "guided");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _getCRSOSLog();
     if (widget.carereceiverModel.travellog != null) {
       _showAlertButton =
           widget.carereceiverModel.travellog!.status == "safezone unsafe" ||
@@ -59,7 +76,7 @@ class _PatientDetailsState extends State<PatientDetails> {
     // }
 
     return ChangeNotifierProvider(
-      create: (_) => MyState(),
+      create: (_) => _myState,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -130,13 +147,25 @@ class _PatientDetailsState extends State<PatientDetails> {
                                     padding:
                                         const EdgeInsets.fromLTRB(0, 0, 8, 0),
                                     child: Icon(
-                                      Icons.crisis_alert_sharp,
+                                      widget.carereceiverModel.travellog !=
+                                                  null &&
+                                              widget.carereceiverModel
+                                                      .travellog!.status ==
+                                                  "safezone unsafe"
+                                          ? Icons.priority_high
+                                          : Icons.crisis_alert_sharp,
                                       color:
                                           Theme.of(context).colorScheme.error,
                                     ),
                                   ),
                                   Text(
-                                    "Out of Safe Zone",
+                                    widget.carereceiverModel.travellog !=
+                                                null &&
+                                            widget.carereceiverModel.travellog!
+                                                    .status ==
+                                                "safezone unsafe"
+                                        ? "Patient needs help"
+                                        : "Out of Safe Zone",
                                     style: TextStyle(
                                         fontSize: 16.0,
                                         color: Theme.of(context)
@@ -165,9 +194,8 @@ class _PatientDetailsState extends State<PatientDetails> {
                                             .textTheme
                                             .titleSmall),
                                   ),
-                                  const Text(
-                                      "Known to travel out of safe zone. Likes to hang out at Bishan Park.",
-                                      style: TextStyle(
+                                  Text(widget.carereceiverModel.notes,
+                                      style: const TextStyle(
                                           fontSize: 14.0,
                                           color: Color(0xFF263238))),
                                 ],
@@ -275,14 +303,18 @@ class _PatientDetailsState extends State<PatientDetails> {
 }
 
 class sendAlert extends StatelessWidget {
-  const sendAlert({super.key, required this.model});
+  sendAlert({super.key, required this.model});
   final CarereceiverModel model;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<MyState>(builder: (context, myState, child) {
-      print("updated child");
-      print(myState._alert_sent);
+      if (model.soslog != null) {
+        print("Model: ${model.soslog!.vId}");
+      } else {
+        print("Model: null");
+      }
+      print("updated child with: ${myState._alert_sent}");
       return myState._alert_sent
           ? Column(
               children: [
@@ -293,9 +325,7 @@ class sendAlert extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                     child: ElevatedButton(
                       onPressed: () {
-                        //send alert
-                        myState.respondButton(model);
-                        print("revert to no response");
+                        // Do nothing as alert cannot be unsent
                       },
                       style: ElevatedButton.styleFrom(
                           minimumSize: Size(200, 50),
@@ -308,80 +338,93 @@ class sendAlert extends StatelessWidget {
                   ),
                 ),
                 //text below button
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-                  child: Text(
-                    '1 Volunteer(s) Responded',
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-                  child: Container(
-                    width: 350,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          spreadRadius: 3,
-                          blurRadius: 6,
-                          offset: Offset(0, 5), // changes position of shadow
+                model.soslog != null && model.soslog!.vId != ""
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+                        child: Text(
+                          '1 Volunteer(s) Responded',
+                          style: Theme.of(context).textTheme.bodySmall,
+                          textAlign: TextAlign.center,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 6, // 60%
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      )
+                    : Container(),
+                model.soslog != null && model.soslog!.vId != ""
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                        child: Container(
+                          width: 350,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(6)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                spreadRadius: 3,
+                                blurRadius: 6,
+                                offset: const Offset(
+                                    0, 5), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          child: Row(
                             children: [
-                              Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(20, 20, 0, 20),
-                                  child: Wrap(children: const [
-                                    Text(
-                                      "Sarah",
-                                      style: TextStyle(
-                                          fontSize: 16.0,
-                                          color: Color(0xFF263238),
-                                          fontWeight: FontWeight.w600),
+                              Expanded(
+                                flex: 6, // 60%
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 20, 0, 20),
+                                      child: Wrap(
+                                        children: [
+                                          Text(
+                                            model.soslog == null
+                                                ? ""
+                                                : model.soslog!.volunteer,
+                                            style: const TextStyle(
+                                                fontSize: 16.0,
+                                                color: Color(0xFF263238),
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ])),
-                              // const Padding(
-                              //   padding: EdgeInsets.fromLTRB(20, 5, 0, 20),
-                              //   child: Text("250m away",
-                              //       style: TextStyle(fontSize: 12.0)),
-                              // ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                flex: 4, // 40%
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      //do nothing
+                                      FlutterPhoneDirectCaller.callNumber(
+                                          model.soslog == null
+                                              ? ""
+                                              : model
+                                                  .soslog!.volunteerContactNum);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        minimumSize: const Size(100, 45),
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
+                                    child: const Text(
+                                      'Contact',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        Expanded(
-                          flex: 4, // 40%
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                //do nothing
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  minimumSize: Size(100, 45),
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary),
-                              child: Text(
-                                'Contact',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                      )
+                    : Container(),
               ],
             )
           : Column(

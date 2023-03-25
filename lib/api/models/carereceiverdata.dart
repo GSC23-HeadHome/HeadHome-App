@@ -24,6 +24,7 @@ class CarereceiverModel {
     required this.careGiver,
     required this.profilePic,
     required this.authId,
+    required this.notes,
   });
 
   String crId;
@@ -37,6 +38,7 @@ class CarereceiverModel {
   String authId;
   TravelLogModel? travellog;
   SosLogModel? soslog;
+  String notes;
 
   factory CarereceiverModel.fromJson(Map<String, dynamic> json) =>
       CarereceiverModel(
@@ -49,6 +51,7 @@ class CarereceiverModel {
         careGiver: List<CareGiver>.from(json["CareGiver"] == null
             ? []
             : json["CareGiver"].map((x) => CareGiver.fromJson(x))),
+        notes: json["Notes"],
         profilePic: json["ProfilePic"],
         authId: json["AuthID"],
       );
@@ -63,6 +66,7 @@ class CarereceiverModel {
         "CareGiver": List<dynamic>.from(careGiver.map((x) => x.toJson())),
         "ProfilePic": profilePic,
         "AuthID": authId,
+        "Notes": notes,
       };
 
   Future<void> getCRTravelLog() async {

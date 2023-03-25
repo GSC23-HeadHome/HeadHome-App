@@ -91,22 +91,9 @@ class LocationDisabledPage extends StatelessWidget {
   }
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key, this.isLocationEnabled});
   final bool? isLocationEnabled;
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +129,7 @@ class _MyAppState extends State<MyApp> {
           bodySmall: TextStyle(fontSize: 12.0),
         ),
       ),
-      home: widget.isLocationEnabled != null && widget.isLocationEnabled!
+      home: isLocationEnabled != null && isLocationEnabled!
           ? const MyHomePage()
           : const LocationDisabledPage(),
     );

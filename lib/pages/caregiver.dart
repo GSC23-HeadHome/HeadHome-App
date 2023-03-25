@@ -73,7 +73,7 @@ class _CaregiverState extends State<Caregiver> {
 
   void _deregisterNotification() async {
     for (CareReceiver careReceiver in careReceivers) {
-      messaging.unsubscribeFromTopic(careReceiver.id.split("@")[0]);
+      await messaging.unsubscribeFromTopic(careReceiver.id.split("@")[0]);
     }
   }
 
@@ -162,6 +162,7 @@ class _CaregiverState extends State<Caregiver> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
@@ -175,55 +176,49 @@ class _CaregiverState extends State<Caregiver> {
                 ],
               ),
             ),
-            Column(
-              children: [
-                Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-                    child: Container(
-                      width: 350,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        // mainAxisSize: MainAxisSize.values,
-                        children: [
-                          Container(),
-                          Container(
-                            child: Text("Select Patient",
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                textAlign: TextAlign.center),
-                          ),
-                          Container(
-                            child: Icon(Icons.edit),
-                          )
-                        ],
+            Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+                child: Container(
+                  width: 350,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // mainAxisSize: MainAxisSize.values,
+                    children: [
+                      Container(),
+                      Container(
+                        child: Text("Select Patient",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            textAlign: TextAlign.center),
                       ),
-                    )),
-                SizedBox(
-                  height: 480,
-                  child: ListView.builder(
-                      itemCount: careReceiverDetails.length,
-                      itemBuilder: (BuildContext context, int i) {
-                        return Card(
-                          elevation: 0,
-                          color: Colors.transparent,
-                          surfaceTintColor: Colors.white,
-                          child: CaregiverPatients(
-                            model: careReceiverDetails[i],
-                            name: careReceiverDetails[i].name,
-                            note:
-                                "Known to leave safe zone. Hangs out in ang mo kio park",
-                            status: careReceiverDetails[i].travellog == null
-                                ? "home"
-                                : careReceiverDetails[i].travellog!.status,
-                          ),
-                        );
-                      }),
-                )
-              ],
-            ),
+                      Container(
+                        child: Icon(Icons.edit),
+                      )
+                    ],
+                  ),
+                )),
+            Expanded(
+              child: ListView.builder(
+                  itemCount: careReceiverDetails.length,
+                  itemBuilder: (BuildContext context, int i) {
+                    return Card(
+                      elevation: 0,
+                      color: Colors.transparent,
+                      surfaceTintColor: Colors.white,
+                      child: CaregiverPatients(
+                        model: careReceiverDetails[i],
+                        name: careReceiverDetails[i].name,
+                        note: careReceiverDetails[i].notes,
+                        status: careReceiverDetails[i].travellog == null
+                            ? "home"
+                            : careReceiverDetails[i].travellog!.status,
+                      ),
+                    );
+                  }),
+            )
           ],
         ),
       ),
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
         height: 80,
         width: 80,
         child: FittedBox(

@@ -150,7 +150,7 @@ class _PatientPageState extends State<PatientPage> {
               onPressed: () async {
                 //code to execute on bxutton press
                 await FlutterPhoneDirectCaller.callNumber(
-                    widget.carereceiverModel.contactNum);
+                    widget.carereceiverModel.contactNum.replaceAll(' ', ''));
               },
               child: Icon(Icons.call),
               backgroundColor:
@@ -332,7 +332,7 @@ class _findPatientState extends State<findPatient> {
                             //send alert
                             if (widget.priContactNo != "-") {
                               await FlutterPhoneDirectCaller.callNumber(
-                                  widget.priContactNo);
+                                  widget.priContactNo.replaceAll(' ', ''));
                             }
                           },
                           style: ElevatedButton.styleFrom(

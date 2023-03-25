@@ -78,7 +78,9 @@ class SosLogModel {
     required this.sosId,
     required this.startLocation,
     required this.status,
+    required this.vId,
     required this.volunteer,
+    required this.volunteerContactNum,
   });
 
   String crId;
@@ -86,7 +88,9 @@ class SosLogModel {
   String sosId;
   StartLocation startLocation;
   String status;
+  String vId;
   String volunteer;
+  String volunteerContactNum;
 
   factory SosLogModel.fromJson(Map<String, dynamic> json) => SosLogModel(
         crId: json["CrId"],
@@ -94,7 +98,9 @@ class SosLogModel {
         sosId: json["SOSId"],
         startLocation: StartLocation.fromJson(json["StartLocation"]),
         status: json["Status"],
+        vId: json["VId"],
         volunteer: json["Volunteer"],
+        volunteerContactNum: json["VolunteerContactNum"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -103,7 +109,9 @@ class SosLogModel {
         "SOSId": sosId,
         "StartLocation": startLocation.toJson(),
         "Status": status,
+        "VId": vId,
         "Volunteer": volunteer,
+        "VolunteerContactNum": volunteerContactNum,
       };
 }
 
