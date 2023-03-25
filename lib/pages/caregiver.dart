@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
@@ -63,8 +64,14 @@ class _CaregiverState extends State<Caregiver> {
       await messaging.subscribeToTopic(careReceiver.id.split("@")[0]);
     }
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Message: ${message.notification?.title}');
-      debugPrint('Body: ${message.notification?.body}');
+      if (message.notification != null && message.notification!.body != null) {
+        debugPrint('Message: ${message.notification!.title}');
+        debugPrint('Body: ${message.notification!.body}');
+        String crId = message.notification!.body!.split(" ")[0];
+        CarereceiverModel? careReceiver =
+            careReceiverDetails.firstWhereOrNull((cr) => cr.crId == crId);
+        careReceiver?.getCRTravelLog();
+      }
     });
     if (settings.authorizationStatus != AuthorizationStatus.authorized) {
       debugPrint('User declined or has not accepted permission');
@@ -223,9 +230,8 @@ class _CaregiverState extends State<Caregiver> {
         width: 80,
         child: FittedBox(
             child: AddPatientOverlay(
-            addNewPatient: _addNewPatient,
-          )
-        ),
+          addNewPatient: _addNewPatient,
+        )),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
