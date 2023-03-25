@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
+import 'package:headhome/constants.dart';
 import '../main.dart' show MyApp;
 import './caregiverPatient.dart' show PatientDetails;
 import '../components/profileDialog.dart' show ProfileOverlay;
@@ -11,29 +14,25 @@ import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Caregiver extends StatefulWidget {
-  const Caregiver({super.key, this.caregiverModel});
-  final CaregiverModel? caregiverModel;
+  const Caregiver({super.key, required this.caregiverModel});
+  final CaregiverModel caregiverModel;
 
   @override
   State<Caregiver> createState() => _CaregiverState();
 }
 
 class _CaregiverState extends State<Caregiver> {
-  late CaregiverModel? _CaregiverModel = {} as CaregiverModel?;
-  late CarereceiverModel? _CarereceiverModel = {} as CarereceiverModel?;
   // late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
 
   //caregiver details
-  late String CgId = widget.caregiverModel?.cgId ?? "cg0002";
-
-  late String nameValue = widget.caregiverModel?.name ?? "John";
-
-  late String contactNum = widget.caregiverModel?.contactNum ?? "69823042";
-
+  late String CgId = widget.caregiverModel.cgId;
+  late String nameValue = widget.caregiverModel.name;
+  late String contactNum = widget.caregiverModel.contactNum;
   late String password = "69823042";
 
-  late List<CareReceiver> careReceivers = [];
-  late List<CarereceiverModel?> careReceiverDetails = [];
+  late List<CareReceiver> careReceivers = widget.caregiverModel.careReceiver;
+  late List<CarereceiverModel> careReceiverDetails = [];
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
@@ -41,12 +40,13 @@ class _CaregiverState extends State<Caregiver> {
     _getCaregiverInfo(CgId);
   }
 
-  void _registerNotification(List<CareReceiver> careReceivers) async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    for (CareReceiver careReceiver in careReceivers) {
-      await messaging.subscribeToTopic(careReceiver.id.split("@")[0]);
-    }
+  @override
+  void dispose() {
+    super.dispose();
+    _deregisterNotification();
+  }
 
+  void _registerNotification(List<CareReceiver> careReceivers) async {
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
       announcement: false,
@@ -57,33 +57,38 @@ class _CaregiverState extends State<Caregiver> {
       sound: true,
     );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      debugPrint(
-          'User granted permission with FCMToken: ${await messaging.getToken()}');
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint(message.notification?.title);
-        debugPrint(message.notification?.body);
-      });
-    } else {
+    debugPrint(
+        'User granted permission with FCMToken: ${await messaging.getToken()}');
+    for (CareReceiver careReceiver in careReceivers) {
+      await messaging.subscribeToTopic(careReceiver.id.split("@")[0]);
+    }
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('Message: ${message.notification?.title}');
+      debugPrint('Body: ${message.notification?.body}');
+    });
+    if (settings.authorizationStatus != AuthorizationStatus.authorized) {
       debugPrint('User declined or has not accepted permission');
     }
   }
 
+  void _deregisterNotification() async {
+    for (CareReceiver careReceiver in careReceivers) {
+      messaging.unsubscribeFromTopic(careReceiver.id.split("@")[0]);
+    }
+  }
+
   void _getCaregiverInfo(cgId) async {
-    _CaregiverModel = await ApiService.getCaregiver(cgId);
-    setState(() {
-      nameValue = _CaregiverModel!.name;
-      contactNum = _CaregiverModel!.contactNum;
-      careReceivers = _CaregiverModel!.careReceiver;
-    });
     //get all careReceivers
     for (var i = 0; i < careReceivers.length; i++) {
       // TO DO
-      _CarereceiverModel =
+      CarereceiverModel? _CarereceiverModel =
           await ApiService.getCarereceiver(careReceivers[i].id);
-      setState(() {
-        careReceiverDetails.add(_CarereceiverModel);
-      });
+      await _CarereceiverModel?.getCRTravelLog();
+      if (_CarereceiverModel != null) {
+        setState(() {
+          careReceiverDetails.add(_CarereceiverModel);
+        });
+      }
       // add to careReceiverDetails
     }
     _registerNotification(careReceivers);
@@ -202,13 +207,14 @@ class _CaregiverState extends State<Caregiver> {
                           color: Colors.transparent,
                           surfaceTintColor: Colors.white,
                           child: CaregiverPatients(
-                              model: careReceiverDetails[i]!,
-                              name: careReceiverDetails[i]!.name,
-                              note:
-                                  "Known to leave safe zone. Hangs out in ang mo kio park",
-                              status: "danger",
-                              //change imageurl to careReceiverDetails[i]!.profilePic
-                              imageurl: "https://picsum.photos/id/237/200/300"),
+                            model: careReceiverDetails[i],
+                            name: careReceiverDetails[i].name,
+                            note:
+                                "Known to leave safe zone. Hangs out in ang mo kio park",
+                            status: careReceiverDetails[i].travellog == null
+                                ? "home"
+                                : careReceiverDetails[i].travellog!.status,
+                          ),
                         );
                       }),
                 )
@@ -266,36 +272,65 @@ class _CaregiverState extends State<Caregiver> {
   }
 }
 
-class CaregiverPatients extends StatelessWidget {
-  const CaregiverPatients(
-      {super.key,
-      required this.name,
-      required this.note,
-      required this.status,
-      required this.imageurl,
-      required this.model});
+class CaregiverPatients extends StatefulWidget {
+  const CaregiverPatients({
+    super.key,
+    required this.name,
+    required this.note,
+    required this.status,
+    required this.model,
+  });
 
   final String name;
   final String note;
   final String status;
-  final String imageurl;
   final CarereceiverModel model;
+
+  @override
+  State<CaregiverPatients> createState() => _CaregiverPatientsState();
+}
+
+class _CaregiverPatientsState extends State<CaregiverPatients> {
+  // either "warning" OR "safezone" OR "home" OR "safezone unsafe"
+  Uint8List? profileBytes;
+
+  void _getProfileImg() async {
+    if (widget.model.profilePic != "") {
+      Uint8List? fetchedBytes =
+          await ApiService.getProfileImg(widget.model.profilePic);
+      if (fetchedBytes != null) {
+        setState(() {
+          profileBytes = fetchedBytes;
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getProfileImg();
+  }
 
   @override
   Widget build(BuildContext context) {
     var statusText = "invalid status";
     var containerColour = Colors.white;
-    var statusTextColour = Color(0xFF263238);
+    var statusTextColour = const Color(0xFF263238);
 
-    if (status == "danger") {
+    if (widget.status == "warning") {
       statusText = "Out of Safe Zone";
-      containerColour = Color(0xFFF8E3E4);
+      containerColour = const Color(0xFFF8E3E4);
       statusTextColour = Theme.of(context).colorScheme.error;
-    } else if (status == "safe") {
+    } else if (widget.status == "safezone unsafe") {
+      statusText = "Patient Needs Help";
+      containerColour = const Color(0xFFF8E3E4);
+      statusTextColour = Theme.of(context).colorScheme.error;
+    } else if (widget.status == "safezone") {
       statusText = "Within Safe Zone";
       containerColour = Colors.white;
       statusTextColour = Theme.of(context).colorScheme.primary;
-    } else if (status == "home") {
+    } else if (widget.status == "home") {
       statusText = "At Home";
       containerColour = Colors.white;
       statusTextColour = Theme.of(context).colorScheme.secondary;
@@ -306,13 +341,13 @@ class CaregiverPatients extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
         child: GestureDetector(
           onTap: () {
-            print("clicked");
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => PatientDetails(
-                        CarereceiverModel: model,
-                      )),
+                builder: (context) => PatientDetails(
+                    carereceiverModel: widget.model,
+                    profileBytes: profileBytes),
+              ),
             );
           },
           child: Container(
@@ -339,7 +374,7 @@ class CaregiverPatients extends StatelessWidget {
                       Padding(
                           padding: const EdgeInsets.fromLTRB(20, 20, 0, 5),
                           child: Text(
-                            name,
+                            widget.name,
                             style: TextStyle(
                                 fontSize: 20.0,
                                 color: Color(0xFF263238),
@@ -349,7 +384,7 @@ class CaregiverPatients extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(20, 5, 0, 10),
                           child: Wrap(children: [
                             Text(
-                              note,
+                              widget.note,
                               style: TextStyle(
                                   fontSize: 14.0,
                                   color: Color(0xFF263238),
@@ -369,7 +404,9 @@ class CaregiverPatients extends StatelessWidget {
                   flex: 4, // 40%
                   child: CircleAvatar(
                     radius: 45,
-                    backgroundImage: NetworkImage(imageurl),
+                    backgroundImage: profileBytes == null
+                        ? const NetworkImage(defaultProfilePic) as ImageProvider
+                        : MemoryImage(profileBytes!),
                   ),
                 ),
               ],

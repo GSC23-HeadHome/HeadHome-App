@@ -4,6 +4,10 @@
 
 import 'dart:convert';
 
+import 'package:headhome/api/api_services.dart';
+import 'package:headhome/api/models/soslogdata.dart';
+import 'package:headhome/api/models/travellogdata.dart';
+
 CarereceiverModel carereceiverFromJson(String str) =>
     CarereceiverModel.fromJson(json.decode(str));
 
@@ -31,6 +35,8 @@ class CarereceiverModel {
   List<CareGiver> careGiver;
   String profilePic;
   String authId;
+  TravelLogModel? travellog;
+  SosLogModel? soslog;
 
   factory CarereceiverModel.fromJson(Map<String, dynamic> json) =>
       CarereceiverModel(
@@ -58,6 +64,14 @@ class CarereceiverModel {
         "ProfilePic": profilePic,
         "AuthID": authId,
       };
+
+  Future<void> getCRTravelLog() async {
+    travellog = await ApiService.getTravelLog(crId);
+  }
+
+  Future<void> getCRSOSLog() async {
+    soslog = await ApiService.getSOSLog(crId);
+  }
 }
 
 class CareGiver {

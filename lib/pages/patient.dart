@@ -97,7 +97,6 @@ class _PatientState extends State<Patient> {
                     CircleAvatar(
                       radius: 100,
                       backgroundImage: MemoryImage(profileBytes),
-                      // NetworkImage("https://picsum.photos/id/237/200/300"),
                     ),
                     const SizedBox(
                       height: 5,
@@ -466,17 +465,11 @@ class _PatientState extends State<Patient> {
   }
 
   void _getProfileImg() async {
-    Reference? storageRef = FirebaseStorage.instance.ref();
-    final profileRef = storageRef.child("ProfileImg");
-    final imageRef = profileRef.child(profilePic);
-    try {
-      const oneMegabyte = 1024 * 1024;
-      final Uint8List? data = await imageRef.getData(oneMegabyte);
+    Uint8List? fetchedBytes = await ApiService.getProfileImg(profilePic);
+    if (fetchedBytes != null) {
       setState(() {
-        profileBytes = data!;
+        profileBytes = fetchedBytes;
       });
-    } on FirebaseException catch (e) {
-      debugPrint("Error getting profile");
     }
   }
 
