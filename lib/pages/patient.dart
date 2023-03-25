@@ -486,7 +486,7 @@ class _PatientState extends State<Patient> {
 
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
-    Timer.periodic(const Duration(seconds: 10), (timer) async {
+    Timer.periodic(const Duration(minutes: 5), (timer) async {
       _locStatusCallHelp(false);
     });
   }
@@ -505,7 +505,7 @@ class _PatientState extends State<Patient> {
   }
 
   Future<void> _routingTimer() async {
-    Timer.periodic(const Duration(seconds: 10), (timer) async {
+    Timer.periodic(const Duration(minutes: 5), (timer) async {
       debugPrint("Routing");
       if (!sosCalled) {
         debugPrint("End routing");
