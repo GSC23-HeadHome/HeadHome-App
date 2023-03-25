@@ -60,6 +60,7 @@ class _PatientState extends State<Patient> {
 
   Timer? _lTimer;
   Timer? _rTimer;
+  StreamSubscription? _positionStream;
 
   BluetoothDevice? _device;
   StreamSubscription? _deviceStateSubscription;
@@ -407,6 +408,13 @@ class _PatientState extends State<Patient> {
   @override
   void initState() {
     super.initState();
+
+    _positionStream =
+        Geolocator.getPositionStream().listen((Position position) {
+      currentPosition = LatLng(position.latitude, position.longitude);
+      print(currentPosition);
+    });
+
     _getData();
     _getProfileImg();
     _locationHandler();
@@ -421,6 +429,7 @@ class _PatientState extends State<Patient> {
     _lTimer?.cancel();
     _charSubscription?.cancel();
     _deviceStateSubscription?.cancel();
+    _positionStream?.cancel();
   }
 
   // ------- START OF BLUETOOTH METHODS -----
@@ -534,25 +543,31 @@ class _PatientState extends State<Patient> {
   }
 
   Future<String> _updateLocStatus(bool manualCall) async {
-    Position position = await _getCurrentPosition();
-    double distFromSafe = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        widget.carereceiverModel.safezoneCtr.lat,
-        widget.carereceiverModel.safezoneCtr.lng);
+    if (currentPosition != null) {
+      double distFromSafe = Geolocator.distanceBetween(
+          currentPosition!.latitude,
+          currentPosition!.longitude,
+          widget.carereceiverModel.safezoneCtr.lat,
+          widget.carereceiverModel.safezoneCtr.lng);
 
-    String status = distFromSafe > widget.carereceiverModel.safezoneRadius
-        ? "warning"
-        : distFromSafe > 30
-            ? manualCall
-                ? "safezone unsafe"
-                : "safezone"
-            : "home";
-    var response =
-        await ApiService.updateCarereceiverLoc(crId, position, status);
-    debugPrint(response.body);
+      String status = distFromSafe > widget.carereceiverModel.safezoneRadius
+          ? "warning"
+          : distFromSafe > 30
+              ? manualCall
+                  ? "safezone unsafe"
+                  : "safezone"
+              : "home";
+      var response = await ApiService.updateCarereceiverLoc(
+          crId,
+          currentPosition!.latitude.toString(),
+          currentPosition!.longitude.toString(),
+          status);
+      debugPrint(response.body);
 
-    return status;
+      return status;
+    } else {
+      return "home";
+    }
   }
 
   // CAN ALSO USE THIS FUNCTION TO CALL FOR BLUETOOTH BUTTON PRESS BY

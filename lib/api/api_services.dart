@@ -360,18 +360,18 @@ class ApiService {
   // ----------- TRAVEL LOG METHODS ------------
 
   static Future<http.Response> updateCarereceiverLoc(
-      String id, Position pos, String status) async {
+      String id, String lat, String lng, String status) async {
     int datetime =
         DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     String travelLogId = id + datetime.toString();
     Uri url = Uri.parse(
         '${ApiConstants.baseUrl}/${ApiConstants.travellog}/$travelLogId');
-    debugPrint(pos.latitude.toString());
-    debugPrint(pos.longitude.toString());
+    debugPrint(lat);
+    debugPrint(lng);
     Map data = {
       "CrId": id,
       "Datetime": datetime,
-      "CurrentLocation": {"Lat": pos.latitude, "Lng": pos.longitude},
+      "CurrentLocation": {"Lat": lat, "Lng": lng},
       "Status": status
     };
 
