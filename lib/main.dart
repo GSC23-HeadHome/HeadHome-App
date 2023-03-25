@@ -147,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
   BluetoothDevice? _device;
   StreamSubscription? _deviceStateSubscription;
-  BluetoothCharacteristic? _targetCharacteristic;
+  StreamSubscription? _charSubscription;
   BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
 
   void initBluetooth() async {
@@ -174,20 +174,26 @@ class _MyHomePageState extends State<MyHomePage> {
             service.uuid.toString() == BluetoothConstants.serviceUUID);
         List<BluetoothCharacteristic> characteristics =
             targetService.characteristics;
-        _targetCharacteristic = characteristics.firstWhere((characteristic) =>
-            characteristic.uuid.toString() ==
-            BluetoothConstants.characteristicUUID);
+        BluetoothCharacteristic _txCharacteristic = characteristics.firstWhere(
+            (characteristic) =>
+                characteristic.uuid.toString() ==
+                BluetoothConstants.characteristicUUIDTX);
 
-        if (_targetCharacteristic != null) {
-          List<int> receivedData = await _targetCharacteristic!.read();
-          debugPrint(String.fromCharCodes(receivedData));
-          await _targetCharacteristic!
-              .write(utf8.encode("Hello from flutter!"));
-        }
+        BluetoothCharacteristic _rxCharacteristic = characteristics.firstWhere(
+            (characteristic) =>
+                characteristic.uuid.toString() ==
+                BluetoothConstants.characteristicUUIDRX);
+
+        _rxCharacteristic.setNotifyValue(true);
+        _charSubscription = _rxCharacteristic.value.listen((event) {
+          debugPrint("Raw Data: $event");
+          debugPrint("Decoded Data: ${String.fromCharCodes(event)}");
+        });
+        await _txCharacteristic.write(utf8.encode("Hello from flutter!"));
       }
     });
 
-// Stop scanning
+    // Stop scanning
     flutterBlue.stopScan();
   }
 
@@ -202,6 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
     _device?.disconnect();
     _deviceStateSubscription?.cancel();
+    _charSubscription?.cancel();
   }
 
   @override
