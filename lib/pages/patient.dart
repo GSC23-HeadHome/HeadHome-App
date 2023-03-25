@@ -56,6 +56,9 @@ class _PatientState extends State<Patient> {
   String tempAddress = "";
   String tempRel = "";
 
+  Timer? lTimer;
+  Timer? rTimer;
+
   void showPatientDetails() {
     showDialog(
         context: context,
@@ -401,6 +404,14 @@ class _PatientState extends State<Patient> {
     _getCurrentPosition();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    rTimer?.cancel();
+    lTimer?.cancel();
+  }
+
   // ------- START OF PROFILE METHODS -------
   void _getData() async {
     if (widget.carereceiverModel != null &&
@@ -504,7 +515,7 @@ class _PatientState extends State<Patient> {
 
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
-    Timer.periodic(const Duration(minutes: 5), (timer) async {
+    lTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       _locStatusCallHelp(false);
     });
   }
@@ -523,7 +534,7 @@ class _PatientState extends State<Patient> {
   }
 
   Future<void> _routingTimer() async {
-    Timer.periodic(const Duration(minutes: 5), (timer) async {
+    rTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       debugPrint("Routing");
       if (!sosCalled) {
         debugPrint("End routing");
