@@ -38,13 +38,14 @@ class _CaregiverState extends State<Caregiver> {
   @override
   void initState() {
     super.initState();
-    _getData();
-    _registerNotification();
+    _getCaregiverInfo(CgId);
   }
 
-  void _registerNotification() async {
+  void _registerNotification(List<CareReceiver> careReceivers) async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-    await messaging.subscribeToTopic("adrian.lim");
+    for (CareReceiver careReceiver in careReceivers) {
+      await messaging.subscribeToTopic(careReceiver.id.split("@")[0]);
+    }
 
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
@@ -68,10 +69,6 @@ class _CaregiverState extends State<Caregiver> {
     }
   }
 
-  void _getData() async {
-    _getCaregiverInfo(CgId);
-  }
-
   void _getCaregiverInfo(cgId) async {
     _CaregiverModel = await ApiService.getCaregiver(cgId);
     setState(() {
@@ -89,6 +86,7 @@ class _CaregiverState extends State<Caregiver> {
       });
       // add to careReceiverDetails
     }
+    _registerNotification(careReceivers);
   }
 
   Future<String> _updateCgInfo(
