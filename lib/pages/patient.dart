@@ -24,6 +24,7 @@ class Patient extends StatefulWidget {
 
 class _PatientState extends State<Patient> {
   late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
+  bool sosCalled = false;
   // UI
   bool visible = true;
   bool fade = true;
@@ -292,29 +293,6 @@ class _PatientState extends State<Patient> {
                     const SizedBox(
                       height: 20,
                     ),
-                    // Container(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: TextField(
-                    //     decoration: InputDecoration(
-                    //       labelText: 'Primary Contact Username',
-                    //       labelStyle:
-                    //           const TextStyle(fontWeight: FontWeight.bold),
-                    //       border: OutlineInputBorder(
-                    //           borderRadius: BorderRadius.circular(5.0)),
-                    //       contentPadding: const EdgeInsets.all(10),
-                    //       hintText: priContactUsername,
-                    //       floatingLabelBehavior: FloatingLabelBehavior.always,
-                    //     ),
-                    //     onChanged: (String? newValue) {
-                    //       setState(() {
-                    //         priContactUsername = newValue!;
-                    //       });
-                    //     },
-                    //   ),
-                    // ),
-                    // const SizedBox(
-                    //   height: 20,
-                    // ),
                     Container(
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(
@@ -335,30 +313,6 @@ class _PatientState extends State<Patient> {
                         },
                       ),
                     ),
-                    // const SizedBox(
-                    //   height: 20,
-                    // ),
-                    // Container(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: TextField(
-                    //     decoration: InputDecoration(
-                    //       labelText: 'Password',
-                    //       labelStyle:
-                    //           const TextStyle(fontWeight: FontWeight.bold),
-                    //       border: OutlineInputBorder(
-                    //           borderRadius: BorderRadius.circular(5.0)),
-                    //       contentPadding: const EdgeInsets.all(10),
-                    //       hintText: passwordValue,
-                    //       floatingLabelBehavior: FloatingLabelBehavior.always,
-                    //     ),
-                    //     obscureText: true,
-                    //     onChanged: (String? newValue) {
-                    //       setState(() {
-                    //         passwordValue = newValue!;
-                    //       });
-                    //     },
-                    //   ),
-                    // ),
                     const SizedBox(
                       height: 100,
                     ),
@@ -438,10 +392,10 @@ class _PatientState extends State<Patient> {
     final storage = FirebaseStorage.instance;
     _getData();
     _getProfileImg();
-    _getLocation();
-    _requestHelp();
+    _locationHandler();
   }
 
+  // ------- START OF PROFILE METHODS -------
   void _getData() async {
     if (widget.carereceiverModel != null &&
         widget.carereceiverModel!.careGiver.isNotEmpty) {
@@ -480,7 +434,19 @@ class _PatientState extends State<Patient> {
     }
   }
 
-  void _getLocation() async {
+  _callNumber() async {
+    bool? res = await FlutterPhoneDirectCaller.callNumber(
+        priContactNo.replaceAll(' ', ''));
+    if (res!) {
+      debugPrint("Working");
+    } else {
+      debugPrint("Not working");
+    }
+  }
+  // ------- END OF PROFILE METHODS -------
+
+  // ------- START OF FUNCTIONAL LOCATION METHODS -------
+  Future<String> _updateLocStatus(bool manualCall) async {
     Position position = await Geolocator.getCurrentPosition();
     double distFromSafe = Geolocator.distanceBetween(
         position.latitude,
@@ -490,11 +456,39 @@ class _PatientState extends State<Patient> {
     String status = distFromSafe > widget.carereceiverModel!.safezoneRadius
         ? "warning"
         : distFromSafe > 30
-            ? "safezone"
+            ? manualCall
+                ? "safezone unsafe"
+                : "safezone"
             : "home";
     var response =
         await ApiService.updateCarereceiverLoc(crId, position, status);
     debugPrint(response.body);
+    return status;
+  }
+
+  // CAN ALSO USE THIS FUNCTION TO CALL FOR BLUETOOTH BUTTON PRESS BY
+  // manualCALL = true WHEN CALLING THE FUNCTION
+  void _locStatusCallHelp(bool manualCall) async {
+    String locStatus = await _updateLocStatus(manualCall);
+    debugPrint(locStatus);
+    if ((locStatus == "warning" || manualCall) && sosCalled == false) {
+      debugPrint("CALLING FOR HELP");
+      _requestHelp();
+      setState(() {
+        sosCalled = true;
+      });
+    } else if (locStatus == "home") {
+      setState(() {
+        sosCalled = false;
+      });
+    }
+  }
+
+  Future<void> _locationHandler() async {
+    _locStatusCallHelp(false);
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
+      _locStatusCallHelp(false);
+    });
   }
 
   void _requestHelp() async {
@@ -507,12 +501,18 @@ class _PatientState extends State<Patient> {
         widget.carereceiverModel!.safezoneCtr.lat.toString(),
         widget.carereceiverModel!.safezoneCtr.lng.toString());
     debugPrint(response.body);
-    _timerHandler();
+    _routingTimer();
   }
 
-  Future<void> _timerHandler() async {
-    Timer.periodic(const Duration(minutes: 5), (timer) {
-      _routingHelp();
+  Future<void> _routingTimer() async {
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
+      debugPrint("Routing");
+      if (!sosCalled) {
+        debugPrint("End routing");
+        timer.cancel();
+      } else {
+        _routingHelp();
+      }
     });
   }
 
@@ -524,16 +524,7 @@ class _PatientState extends State<Patient> {
         widget.carereceiverModel!.safezoneCtr.lng.toString());
     debugPrint(response.body);
   }
-
-  _callNumber() async {
-    bool? res = await FlutterPhoneDirectCaller.callNumber(
-        priContactNo.replaceAll(' ', ''));
-    if (res!) {
-      debugPrint("Working");
-    } else {
-      debugPrint("Not working");
-    }
-  }
+  // ------- END OF FUNCTIONAL LOCATION METHODS -------
 
   @override
   Widget build(BuildContext context) {
@@ -694,6 +685,7 @@ class _PatientState extends State<Patient> {
                 onPressed: () {
                   setState(() {
                     fade = !fade;
+                    _locStatusCallHelp(true);
                   });
                 },
                 child: Padding(
