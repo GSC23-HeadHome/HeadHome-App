@@ -222,8 +222,9 @@ class _CaregiverState extends State<Caregiver> {
         width: 80,
         child: FittedBox(
             child: AddPatientOverlay(
-          addNewPatient: _addNewPatient,
-        )),
+            addNewPatient: _addNewPatient,
+          )
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
