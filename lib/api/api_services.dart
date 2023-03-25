@@ -408,11 +408,13 @@ class ApiService {
   static Future<Uint8List?> getProfileImg(String imageName) async {
     Reference? storageRef = FirebaseStorage.instance.ref();
     final profileRef = storageRef.child("ProfileImg");
+
+    if (imageName == "") return null;
     final imageRef = profileRef.child(imageName);
     try {
       const oneMegabyte = 1024 * 1024;
       return (await imageRef.getData(oneMegabyte));
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (_) {
       debugPrint("Error getting profile");
       return null;
     }
