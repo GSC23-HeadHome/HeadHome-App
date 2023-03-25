@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' hide log;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,9 +9,11 @@ import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/api/models/soslogdata.dart';
+import 'package:headhome/api/models/travellogdata.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import 'package:headhome/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ApiService {
   // ---------- CARERECEIVER METHODS ----------
@@ -70,32 +73,6 @@ class ApiService {
     var body = json.encode(data);
 
     var response = await http.put(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: body,
-    );
-    return response;
-  }
-
-  static Future<http.Response> updateCarereceiverLoc(
-      String id, Position pos, String status) async {
-    int datetime =
-        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
-    String travelLogId = id + datetime.toString();
-    Uri url = Uri.parse(
-        '${ApiConstants.baseUrl}/${ApiConstants.travellog}/$travelLogId');
-    debugPrint(pos.latitude.toString());
-    debugPrint(pos.longitude.toString());
-    Map data = {
-      "CrId": id,
-      "Datetime": datetime,
-      "CurrentLocation": {"Lat": pos.latitude, "Lng": pos.longitude},
-      "Status": status
-    };
-
-    var body = json.encode(data);
-
-    var response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: body,
@@ -363,5 +340,83 @@ class ApiService {
     return null;
   }
 
+  static Future<SosLogModel?> getSOSLog(String id) async {
+    try {
+      var url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.sos}/$id');
+      print(url);
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        SosLogModel model = sosLogModelFromJson(response.body);
+        return model;
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
+  }
+
   // --------- END OF SOS LOG METHODS ----------
+
+  // ----------- TRAVEL LOG METHODS ------------
+
+  static Future<http.Response> updateCarereceiverLoc(
+      String id, Position pos, String status) async {
+    int datetime =
+        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+    String travelLogId = id + datetime.toString();
+    Uri url = Uri.parse(
+        '${ApiConstants.baseUrl}/${ApiConstants.travellog}/$travelLogId');
+    debugPrint(pos.latitude.toString());
+    debugPrint(pos.longitude.toString());
+    Map data = {
+      "CrId": id,
+      "Datetime": datetime,
+      "CurrentLocation": {"Lat": pos.latitude, "Lng": pos.longitude},
+      "Status": status
+    };
+
+    var body = json.encode(data);
+
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+    return response;
+  }
+
+  static Future<TravelLogModel?> getTravelLog(String id) async {
+    try {
+      var url =
+          Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.travellog}/$id');
+      print(url);
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        TravelLogModel model = travelLogModelFromJson(response.body);
+        return model;
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
+  }
+
+  // --------- END OF TRAVEL LOG METHODS -------
+
+  // --------- FIREBASE STORAGE METHODS --------
+
+  static Future<Uint8List?> getProfileImg(String imageName) async {
+    Reference? storageRef = FirebaseStorage.instance.ref();
+    final profileRef = storageRef.child("ProfileImg");
+    final imageRef = profileRef.child(imageName);
+    try {
+      const oneMegabyte = 1024 * 1024;
+      return (await imageRef.getData(oneMegabyte));
+    } on FirebaseException catch (e) {
+      debugPrint("Error getting profile");
+      return null;
+    }
+  }
+
+  // ----- END OF FIREBASE STORAGE METHODS -----
 }

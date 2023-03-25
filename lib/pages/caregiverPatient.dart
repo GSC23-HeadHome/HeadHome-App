@@ -1,12 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
+import 'package:headhome/constants.dart';
 import 'package:provider/provider.dart';
 
 import 'package:headhome/api/api_services.dart';
 
 class PatientDetails extends StatefulWidget {
-  const PatientDetails({super.key, this.CarereceiverModel});
-  final CarereceiverModel;
+  const PatientDetails(
+      {super.key, required this.carereceiverModel, required this.profileBytes});
+  final CarereceiverModel carereceiverModel;
+  final Uint8List? profileBytes;
 
   @override
   State<PatientDetails> createState() => _PatientDetailsState();
@@ -14,7 +19,6 @@ class PatientDetails extends StatefulWidget {
 
 class MyState extends ChangeNotifier {
   bool alert_sent = false;
-
   bool get _alert_sent => alert_sent;
 
   void respondButton(CarereceiverModel model) {
@@ -30,11 +34,23 @@ class _PatientDetailsState extends State<PatientDetails> {
   final MyState _myState = MyState();
   String distanceValue = "";
 
+  bool _showAlertButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.carereceiverModel.travellog != null) {
+      _showAlertButton =
+          widget.carereceiverModel.travellog!.status == "safezone unsafe" ||
+              widget.carereceiverModel.travellog!.status == "warning";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // var responded;
     // var alertStatus;
-    // void toggleAlert (responded){}
+    // void toggleAlert (responded) {}
 
     // if (responded == 0) {
     //   alertStatus = sendAlert();
@@ -88,60 +104,76 @@ class _PatientDetailsState extends State<PatientDetails> {
                         padding: EdgeInsets.fromLTRB(0, 40, 0, 30),
                         child: Column(
                           children: [
-                            Text(widget.CarereceiverModel.name,
+                            Text(widget.carereceiverModel.name,
                                 style:
                                     Theme.of(context).textTheme.displayMedium),
                           ],
                         ),
                       ),
-                      const CircleAvatar(
-                        radius: 80,
-                        backgroundImage: NetworkImage(
-                            "https://picsum.photos/id/237/200/300"),
-                      ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                              child: Icon(
-                                Icons.crisis_alert_sharp,
-                                color: Theme.of(context).colorScheme.error,
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundImage: widget.profileBytes == null
+                              ? const NetworkImage(defaultProfilePic)
+                              : MemoryImage(widget.profileBytes!)
+                                  as ImageProvider,
+                        ),
+                      ),
+                      _showAlertButton
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                                    child: Icon(
+                                      Icons.crisis_alert_sharp,
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Out of Safe Zone",
+                                    style: TextStyle(
+                                        fontSize: 16.0,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .error),
+                                  )
+                                ],
                               ),
-                            ),
-                            Text(
-                              "Out of Safe Zone",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Theme.of(context).colorScheme.error),
                             )
-                          ],
-                        ),
-                      ),
-                      sendAlert(model: widget.CarereceiverModel),
-
-                      //notes
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                              child: Text("Notes",
-                                  style:
-                                      Theme.of(context).textTheme.titleSmall),
-                            ),
-                            const Text(
-                                "Known to travel out of safe zone. Likes to hang out at Bishan Park.",
-                                style: TextStyle(
-                                    fontSize: 14.0, color: Color(0xFF263238))),
-                          ],
-                        ),
-                      ),
-
+                          : Container(),
+                      _showAlertButton
+                          ? sendAlert(model: widget.carereceiverModel)
+                          : Container(),
+                      // Notes
+                      _showAlertButton
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                                    child: Text("Notes",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall),
+                                  ),
+                                  const Text(
+                                      "Known to travel out of safe zone. Likes to hang out at Bishan Park.",
+                                      style: TextStyle(
+                                          fontSize: 14.0,
+                                          color: Color(0xFF263238))),
+                                ],
+                              ),
+                            )
+                          : Container(),
                       //google map widget
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),

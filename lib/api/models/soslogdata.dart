@@ -65,3 +65,64 @@ class Message {
         "RouteGeom": routeGeom,
       };
 }
+
+SosLogModel sosLogModelFromJson(String str) =>
+    SosLogModel.fromJson(json.decode(str));
+
+String sosLogModelToJson(SosLogModel data) => json.encode(data.toJson());
+
+class SosLogModel {
+  SosLogModel({
+    required this.crId,
+    required this.datetime,
+    required this.sosId,
+    required this.startLocation,
+    required this.status,
+    required this.volunteer,
+  });
+
+  String crId;
+  int datetime;
+  String sosId;
+  StartLocation startLocation;
+  String status;
+  String volunteer;
+
+  factory SosLogModel.fromJson(Map<String, dynamic> json) => SosLogModel(
+        crId: json["CrId"],
+        datetime: json["Datetime"],
+        sosId: json["SOSId"],
+        startLocation: StartLocation.fromJson(json["StartLocation"]),
+        status: json["Status"],
+        volunteer: json["Volunteer"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "CrId": crId,
+        "Datetime": datetime,
+        "SOSId": sosId,
+        "StartLocation": startLocation.toJson(),
+        "Status": status,
+        "Volunteer": volunteer,
+      };
+}
+
+class StartLocation {
+  StartLocation({
+    required this.lat,
+    required this.lng,
+  });
+
+  double lat;
+  double lng;
+
+  factory StartLocation.fromJson(Map<String, dynamic> json) => StartLocation(
+        lat: json["Lat"]?.toDouble(),
+        lng: json["Lng"]?.toDouble(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "Lat": lat,
+        "Lng": lng,
+      };
+}

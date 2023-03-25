@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
+import 'package:headhome/constants.dart';
 import '../api/models/carereceiverdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
@@ -256,7 +257,7 @@ class PatientDetails extends StatefulWidget {
 
 class _PatientDetailsState extends State<PatientDetails> {
   CarereceiverModel? _carereceiverModel;
-  String imageUrl = "https://picsum.photos/id/237/200/300";
+  String imageUrl = defaultProfilePic;
 
   void fetchPatient() async {
     CarereceiverModel? fetchedModel =
@@ -291,14 +292,14 @@ class _PatientDetailsState extends State<PatientDetails> {
         padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
         child: Container(
           decoration: BoxDecoration(
-            color: Color(0xFFF8E3E4),
-            borderRadius: BorderRadius.all(Radius.circular(6)),
+            color: const Color(0xFFF8E3E4),
+            borderRadius: const BorderRadius.all(Radius.circular(6)),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.3),
                 spreadRadius: 3,
                 blurRadius: 6,
-                offset: Offset(0, 5), // changes position of shadow
+                offset: const Offset(0, 5), // changes position of shadow
               ),
             ],
           ),
