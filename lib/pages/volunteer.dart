@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import 'package:headhome/constants.dart';
+import 'package:headhome/api/api_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 import '../api/models/carereceiverdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
 import '../components/profileDialog.dart' show ProfileOverlay;
 import '../components/settingsDialog.dart' show SettingsOverlay;
-import 'package:headhome/api/api_services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import '../components/gmapsWidget.dart' show GmapsWidget;
 
 final FirebaseFirestore db = FirebaseFirestore.instance;
 final Reference ref = FirebaseStorage.instance.ref();

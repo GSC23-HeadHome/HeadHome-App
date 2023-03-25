@@ -8,11 +8,14 @@ import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:headhome/utils/extensions.dart';
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
+
+import '../components/gmapsWidget.dart' show GmapsWidget;
 
 class Patient extends StatefulWidget {
   const Patient({super.key, this.carereceiverModel});
@@ -45,6 +48,8 @@ class _PatientState extends State<Patient> {
   late String homeAddress = widget.carereceiverModel?.address ?? "-";
   late String profilePic = widget.carereceiverModel?.profilePic ?? "";
   late Uint8List profileBytes;
+  late LatLng currentPosition;
+  Set<String> polylines = {};
 
   String tempName = "";
   String tempPhoneNum = "";
@@ -395,6 +400,7 @@ class _PatientState extends State<Patient> {
     _getData();
     _getProfileImg();
     _locationHandler();
+    _getCurrentPosition();
   }
 
   @override
@@ -450,13 +456,24 @@ class _PatientState extends State<Patient> {
   // ------- END OF PROFILE METHODS -------
 
   // ------- START OF FUNCTIONAL LOCATION METHODS -------
-  Future<String> _updateLocStatus(bool manualCall) async {
+
+  Future<Position> _getCurrentPosition() async{
     Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      currentPosition = LatLng(position.latitude, position.longitude);
+    });
+    return position;
+  }
+
+  Future<String> _updateLocStatus(bool manualCall) async {
+    Position position = await _getCurrentPosition();
     double distFromSafe = Geolocator.distanceBetween(
         position.latitude,
         position.longitude,
         widget.carereceiverModel!.safezoneCtr.lat,
         widget.carereceiverModel!.safezoneCtr.lng);
+
+
     String status = distFromSafe > widget.carereceiverModel!.safezoneRadius
         ? "warning"
         : distFromSafe > 30
@@ -467,6 +484,7 @@ class _PatientState extends State<Patient> {
     var response =
         await ApiService.updateCarereceiverLoc(crId, position, status);
     debugPrint(response.body);
+    
     return status;
   }
 
@@ -496,7 +514,7 @@ class _PatientState extends State<Patient> {
   }
 
   void _requestHelp() async {
-    Position position = await Geolocator.getCurrentPosition();
+    Position position = await _getCurrentPosition();
     debugPrint(position.latitude.toString());
     debugPrint(position.longitude.toString());
     var response = await ApiService.requestHelp(
@@ -521,7 +539,7 @@ class _PatientState extends State<Patient> {
   }
 
   void _routingHelp() async {
-    Position position = await Geolocator.getCurrentPosition();
+    Position position = await _getCurrentPosition();
     var response = await ApiService.routingHelp(
         position,
         widget.carereceiverModel!.safezoneCtr.lat.toString(),
@@ -564,6 +582,13 @@ class _PatientState extends State<Patient> {
         ],
       ),
       body: Stack(children: [
+        Container(
+          child:  GmapsWidget(
+            polylineStrs: polylines,
+            center: currentPosition, 
+            bearing: 120.0,
+          )
+        ),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -605,11 +630,11 @@ class _PatientState extends State<Patient> {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.grey.shade600,
-                      spreadRadius: 1,
-                      blurRadius: 15,
-                      blurStyle: BlurStyle.outer,
-                      offset: const Offset(0, 10)),
+                    color: Colors.grey.shade600,
+                    spreadRadius: 1,
+                    blurRadius: 15,
+                    blurStyle: BlurStyle.outer,
+                  ),
                 ],
                 color: Colors.white,
               ),

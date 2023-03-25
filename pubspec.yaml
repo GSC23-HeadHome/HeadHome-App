@@ -48,6 +48,8 @@ dependencies:
   flutter_phone_direct_caller: ^2.1.1
   firebase_storage: ^11.0.16
   firebase_messaging: ^14.3.0
+  google_maps_flutter: ^2.2.5
+  flutter_polyline_points: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -124,6 +126,8 @@ flutter_native_splash:
   #background_image_dark: "assets/dark-background.png"
   #image_dark: assets/splash-invert.png
   #branding_dark: assets/dart_dark.png
+
+
 
   # Android 12 handles the splash screen differently than previous versions.  Please visit
   # https://developer.android.com/guide/topics/ui/splash-screen
@@ -225,6 +229,7 @@ flutter_native_splash:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets: ["assets/arrow.png"]
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
