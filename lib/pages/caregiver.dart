@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -35,6 +36,8 @@ class _CaregiverState extends State<Caregiver> {
   late List<CarereceiverModel> careReceiverDetails = [];
   final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
+  StreamSubscription? fcmStream;
+
   @override
   void initState() {
     super.initState();
@@ -63,7 +66,8 @@ class _CaregiverState extends State<Caregiver> {
     for (CareReceiver careReceiver in careReceivers) {
       await messaging.subscribeToTopic(careReceiver.id.split("@")[0]);
     }
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+
+    fcmStream = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null && message.notification!.body != null) {
         debugPrint('Message: ${message.notification!.title}');
         debugPrint('Body: ${message.notification!.body}');
@@ -79,6 +83,7 @@ class _CaregiverState extends State<Caregiver> {
   }
 
   void _deregisterNotification() async {
+    fcmStream?.cancel();
     for (CareReceiver careReceiver in careReceivers) {
       await messaging.unsubscribeFromTopic(careReceiver.id.split("@")[0]);
     }
