@@ -205,6 +205,7 @@ class _PatientPageState extends State<PatientPage> {
           width: 80,
           child: FittedBox(
             child: FloatingActionButton(
+              heroTag: 'VolunteerPatientFAB',
               //Floating action button on Scaffold
               onPressed: () async {
                 //code to execute on bxutton press
@@ -341,6 +342,7 @@ class _findPatientState extends State<findPatient> {
                     top: 16,
                     right: 16,
                     child: FloatingActionButton(
+                      heroTag: 'MapsVolunteerPatientFAB',
                       onPressed: () {
                         widget.openMap(lat, lng);
                       },
@@ -485,6 +487,7 @@ class findHome extends StatelessWidget {
                     top: 16,
                     right: 16,
                     child: FloatingActionButton(
+                      heroTag: 'MapsVolunteerHomeFAB',
                       onPressed: () {
                         openMap(lat, lng);
                       },
