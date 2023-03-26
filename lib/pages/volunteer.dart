@@ -8,7 +8,7 @@ import 'package:headhome/api/api_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api/models/carereceiverdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
@@ -33,6 +33,8 @@ class _VolunteerState extends State<Volunteer> {
   late String contactNum = widget.volunteerModel.contactNum;
   late String password = "";
   Position? _currentPosition;
+  LatLng? currentPosition;
+  Set<String> polylines = {};
 
   final Stream<QuerySnapshot> _soslogStream =
       FirebaseFirestore.instance.collection('sos_log').snapshots();
@@ -41,14 +43,19 @@ class _VolunteerState extends State<Volunteer> {
   void initState() {
     super.initState();
     _getData();
+    print(currentPosition);
   }
 
   void _getData() async {
     Position fetchedPosition = await Geolocator.getCurrentPosition();
+    print(fetchedPosition);
     debugPrint("FetchedLocationData: $fetchedPosition");
     setState(() {
       _currentPosition = fetchedPosition;
+      currentPosition =
+          LatLng(fetchedPosition.latitude, fetchedPosition.longitude);
     });
+    print(currentPosition);
   }
 
   Future<String> _updateVolunteerInfo(
@@ -128,12 +135,13 @@ class _VolunteerState extends State<Volunteer> {
               //google map widget
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(6)),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                child: SizedBox(
                   height: 200,
+                  child: currentPosition == null
+                      ? Container()
+                      : GmapsWidget(
+                          center: currentPosition!,
+                        ),
                 ),
               ),
 
@@ -177,11 +185,11 @@ class _VolunteerState extends State<Volunteer> {
                         return ListView(
                           scrollDirection:
                               Axis.vertical, // set the direction of scrolling
-                          children: snapshot.data!.docs.map(
-                            (document) {
-                              Map<String, dynamic> data =
-                                  document.data()! as Map<String, dynamic>;
-                              double distance = Geolocator.distanceBetween(
+                          children: snapshot.data!.docs
+                              .map((document) {
+                                Map<String, dynamic> data =
+                                    document.data()! as Map<String, dynamic>;
+                                double distance = Geolocator.distanceBetween(
                                   data["start_location"]["lat"],
                                   data["start_location"]["lng"],
                                   _currentPosition == null
@@ -189,14 +197,24 @@ class _VolunteerState extends State<Volunteer> {
                                       : _currentPosition!.latitude,
                                   _currentPosition == null
                                       ? data["start_location"]["lng"]
-                                      : _currentPosition!.longitude);
-                              return PatientDetails(
-                                distance: distance,
-                                sosLogModel: data,
-                                volunteerModel: widget.volunteerModel,
-                              );
-                            },
-                          ).toList(),
+                                      : _currentPosition!.longitude,
+                                );
+                                return {
+                                  'distance': distance,
+                                  'status': data["status"],
+                                  'vname': data["volunteer"],
+                                  'data': data,
+                                };
+                              })
+                              .where((item) =>
+                                  item['status'] as String == "lost" || (item['status'] as String == "guided" && item['vname'] as String == widget.volunteerModel.name as String))
+                              .map((item) => PatientDetails(
+                                    distance: item['distance'] as double,
+                                    sosLogModel:
+                                        item['data'] as Map<String, dynamic>,
+                                    volunteerModel: widget.volunteerModel,
+                                  ))
+                              .toList(),
                         );
                       },
                     ),
@@ -267,6 +285,7 @@ class _PatientDetailsState extends State<PatientDetails> {
     CarereceiverModel? fetchedModel =
         await ApiService.getCarereceiver(widget.sosLogModel["cr_id"]);
 
+    print("fetching patient details");
     if (fetchedModel != null) {
       Uint8List? fetchedBytes =
           await ApiService.getProfileImg(fetchedModel.profilePic);
@@ -277,12 +296,16 @@ class _PatientDetailsState extends State<PatientDetails> {
     } else {
       _carereceiverModel = fetchedModel;
     }
+
+    print("seet patient details");
+    print(_carereceiverModel?.name);
   }
 
   @override
   void initState() {
     super.initState();
     fetchPatient();
+    debugPrint("PATIENT DETAILS WIDGET CALLEDr");
   }
 
   @override
@@ -329,7 +352,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                             _carereceiverModel == null
                                 ? ""
                                 : _carereceiverModel!.name,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 16.0,
                                 color: Color(0xFF263238),
                                 fontWeight: FontWeight.w600),
@@ -338,7 +361,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
                       child: Text("${widget.distance.round()}m away",
-                          style: TextStyle(fontSize: 12.0)),
+                          style: const TextStyle(fontSize: 12.0)),
                     ),
                   ],
                 ),
@@ -365,7 +388,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                     style: ElevatedButton.styleFrom(
                         minimumSize: Size(100, 45),
                         backgroundColor: Theme.of(context).colorScheme.error),
-                    child: Text(
+                    child: const Text(
                       'Locate',
                       style: TextStyle(color: Colors.white),
                     ),
