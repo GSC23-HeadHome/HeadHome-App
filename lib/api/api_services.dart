@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
@@ -82,7 +83,7 @@ class ApiService {
   }
 
   static Future<http.Response> requestHelp(
-      String id, Position startPos, String endLat, String endLng) async {
+      String id, LatLng startPos, String endLat, String endLng) async {
     int datetime =
         DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     Uri url = Uri.parse(
@@ -107,7 +108,7 @@ class ApiService {
   }
 
   static Future<http.Response> routingHelp(
-      Position startPos, String endLat, String endLng) async {
+      LatLng startPos, String endLat, String endLng) async {
     Uri url =
         Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/route');
     Map data = {

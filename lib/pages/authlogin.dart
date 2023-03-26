@@ -20,8 +20,15 @@ class _AuthLoginState extends State<AuthLogin> {
   String dropdownValue = "Caregiver";
   String emailValue = "";
   String passwordValue = "";
+  String? emailError;
+  String? passwordError;
+  String? dropdownError;
 
   void loginAccount(BuildContext context) async {
+    setState(() {
+      emailError = null;
+      passwordError = null;
+    });
     try {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailValue,
@@ -42,6 +49,9 @@ class _AuthLoginState extends State<AuthLogin> {
               );
               break;
             } else {
+              setState(() {
+                dropdownError = "User is not a Patient.";
+              });
               throw Exception("User is not a Carereceiver");
             }
 
@@ -58,6 +68,9 @@ class _AuthLoginState extends State<AuthLogin> {
               );
               break;
             } else {
+              setState(() {
+                dropdownError = "User is not a Volunteer.";
+              });
               throw Exception("User is not a Volunteer");
             }
 
@@ -74,6 +87,9 @@ class _AuthLoginState extends State<AuthLogin> {
               );
               break;
             } else {
+              setState(() {
+                dropdownError = "User is not a Caregiver.";
+              });
               throw Exception("User is not a Caregiver");
             }
 
@@ -86,8 +102,19 @@ class _AuthLoginState extends State<AuthLogin> {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         debugPrint('No user found for that email.');
+        setState(() {
+          emailError = "No user found for that email.";
+        });
       } else if (e.code == 'wrong-password') {
         debugPrint('Wrong password provided for that user.');
+        setState(() {
+          passwordError = "Wrong password provided.";
+        });
+      } else if (e.code == 'invalid-email') {
+        debugPrint('The email address is invalid.');
+        setState(() {
+          emailError = "The email address is invalid.";
+        });
       }
     } catch (e) {
       debugPrint("$e");
@@ -133,6 +160,7 @@ class _AuthLoginState extends State<AuthLogin> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5.0)),
                           contentPadding: const EdgeInsets.all(10),
+                          errorText: dropdownError,
                         ),
                         child: ButtonTheme(
                           materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -166,10 +194,12 @@ class _AuthLoginState extends State<AuthLogin> {
                         labelStyle:
                             const TextStyle(fontWeight: FontWeight.bold),
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
                         contentPadding: const EdgeInsets.all(10),
                         hintText: 'Enter Email',
                         floatingLabelBehavior: FloatingLabelBehavior.always,
+                        errorText: emailError,
                       ),
                       onChanged: (String? newValue) {
                         setState(() {
@@ -190,6 +220,7 @@ class _AuthLoginState extends State<AuthLogin> {
                         contentPadding: const EdgeInsets.all(10),
                         hintText: 'Enter Password',
                         floatingLabelBehavior: FloatingLabelBehavior.always,
+                        errorText: passwordError,
                       ),
                       obscureText: true,
                       onChanged: (String? newValue) {

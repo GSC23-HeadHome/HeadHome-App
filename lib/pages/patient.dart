@@ -2,19 +2,22 @@
 // import 'dart:math';
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:headhome/api/models/routelogdata.dart';
 import 'package:headhome/utils/debouncer.dart';
 import '../constants.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
-import 'package:headhome/utils/extensions.dart';
+import 'package:headhome/utils/strings.dart';
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
@@ -30,11 +33,12 @@ class Patient extends StatefulWidget {
 }
 
 class _PatientState extends State<Patient> {
-  late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
   bool sosCalled = false;
+
   // UI
   bool visible = true;
   bool fade = true;
+
   // Patient Details
   late String crId = widget.carereceiverModel.crId;
   late String nameValue = widget.carereceiverModel.name;
@@ -47,17 +51,26 @@ class _PatientState extends State<Patient> {
       ? "friend"
       : widget.carereceiverModel.careGiver[0].relationship;
   late String priContactNo = "-";
+  late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
   late String homeAddress = widget.carereceiverModel.address;
   late String profilePic = widget.carereceiverModel.profilePic;
   Uint8List? profileBytes;
-  LatLng? currentPosition;
-  Set<String> polylines = {};
 
+  // Edit profile
   String tempName = "";
   String tempPhoneNum = "";
   String tempAddress = "";
   String tempRel = "";
 
+  // Location details
+  LatLng? currentPosition;
+  Set<Polyline> polylines = {};
+
+  int routeIndex = 0;
+  List<RouteLog> routeLogsModel = [];
+  double distanceToNextRouteLog = 0;
+
+  double bearing = 0.0;
   Timer? _lTimer;
   Timer? _rTimer;
   StreamSubscription? _positionStream;
@@ -66,7 +79,51 @@ class _PatientState extends State<Patient> {
   StreamSubscription? _deviceStateSubscription;
   StreamSubscription? _charSubscription;
   BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
+  BluetoothCharacteristic? txCharacteristic;
   final Debouncer _debouncer = Debouncer(seconds: 5);
+
+  IconData determineRouteArrow(RouteLog? rl) {
+    if (rl == null) return Icons.straight;
+
+    switch (rl.maneuver) {
+      case "turn-slight-left":
+        return Icons.turn_left;
+      case "turn-sharp-left":
+        return Icons.turn_sharp_left;
+      case "uturn-left":
+        return Icons.u_turn_left;
+      case "turn-left":
+        return Icons.turn_left;
+      case "turn-slight-right":
+        return Icons.turn_right;
+      case "turn-sharp-right":
+        return Icons.turn_sharp_right;
+      case "uturn-right":
+        return Icons.u_turn_right;
+      case "turn-right":
+        return Icons.turn_right;
+      case "ramp-left":
+        return Icons.ramp_left;
+      case "ramp-right":
+        return Icons.turn_right;
+      case "merge":
+        return Icons.merge;
+      case "fork-left":
+        return Icons.fork_left;
+      case "fork-right":
+        return Icons.fork_right;
+      case "ferry":
+        return Icons.directions_boat;
+      case "ferry-train":
+        return Icons.directions_ferry;
+      case "roundabout-left":
+        return Icons.roundabout_left;
+      case "roundabout-right":
+        return Icons.roundabout_right;
+      default:
+        return Icons.straight;
+    }
+  }
 
   void showPatientDetails() {
     showDialog(
@@ -411,14 +468,39 @@ class _PatientState extends State<Patient> {
 
     _positionStream =
         Geolocator.getPositionStream().listen((Position position) {
-      currentPosition = LatLng(position.latitude, position.longitude);
-      print(currentPosition);
+      // listen out for whether we've reached the end of current routelog
+      if (sosCalled) {
+        Location endLocation = routeLogsModel[routeIndex].endLocation;
+        double endDistance = Geolocator.distanceBetween(position.latitude,
+            position.longitude, endLocation.lat, endLocation.lng);
+        double endBearing = Geolocator.bearingBetween(position.latitude,
+            position.longitude, endLocation.lat, endLocation.lng);
+
+        Map<String, dynamic> dataToESP = {
+          "bearing": endBearing,
+          "distance": endDistance.toInt(),
+          "alert": 1,
+        };
+        txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
+
+        setState(() {
+          distanceToNextRouteLog = endDistance;
+          if (endDistance < 10) {
+            routeIndex++;
+          }
+          currentPosition = LatLng(position.latitude, position.longitude);
+        });
+      } else {
+        setState(() =>
+            currentPosition = LatLng(position.latitude, position.longitude));
+      }
+      print("Streaming: $currentPosition");
     });
 
     _getData();
     _getProfileImg();
     _locationHandler();
-    _getCurrentPosition();
+    // _bearingTimer();
     _initBluetooth();
   }
 
@@ -431,6 +513,15 @@ class _PatientState extends State<Patient> {
     _deviceStateSubscription?.cancel();
     _positionStream?.cancel();
   }
+
+  // ------- Testing ---------
+  // Future<void> _bearingTimer() async {
+  //   _lTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+  //     setState(() {
+  //       bearing += 10;
+  //     });
+  //   });
+  // }
 
   // ------- START OF BLUETOOTH METHODS -----
 
@@ -458,10 +549,9 @@ class _PatientState extends State<Patient> {
             service.uuid.toString() == BluetoothConstants.serviceUUID);
         List<BluetoothCharacteristic> characteristics =
             targetService.characteristics;
-        BluetoothCharacteristic txCharacteristic = characteristics.firstWhere(
-            (characteristic) =>
-                characteristic.uuid.toString() ==
-                BluetoothConstants.characteristicUUIDTX);
+        txCharacteristic = characteristics.firstWhere((characteristic) =>
+            characteristic.uuid.toString() ==
+            BluetoothConstants.characteristicUUIDTX);
 
         BluetoothCharacteristic rxCharacteristic = characteristics.firstWhere(
             (characteristic) =>
@@ -474,12 +564,17 @@ class _PatientState extends State<Patient> {
           if (data.startsWith("{")) {
             debugPrint("Decoded Data: $data");
             Map<String, dynamic> jsonData = jsonDecode(data);
-            if (jsonData["SOS"] == 1) {
-              _debouncer.run(() => _locStatusCallHelp(true));
+            if (jsonData["SOS"] == "1") {
+              _debouncer.run(() {
+                setState(() {
+                  fade = !fade;
+                  _locStatusCallHelp(true);
+                });
+              });
             }
           }
         });
-        await txCharacteristic.write(utf8.encode("Hello from flutter!"));
+        await txCharacteristic?.write(utf8.encode("Hello from flutter!"));
       }
     });
 
@@ -533,15 +628,6 @@ class _PatientState extends State<Patient> {
   // ------- END OF PROFILE METHODS -------
 
   // ------- START OF FUNCTIONAL LOCATION METHODS -------
-
-  Future<Position> _getCurrentPosition() async {
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      currentPosition = LatLng(position.latitude, position.longitude);
-    });
-    return position;
-  }
-
   Future<String> _updateLocStatus(bool manualCall) async {
     if (currentPosition != null) {
       double distFromSafe = Geolocator.distanceBetween(
@@ -549,7 +635,7 @@ class _PatientState extends State<Patient> {
           currentPosition!.longitude,
           widget.carereceiverModel.safezoneCtr.lat,
           widget.carereceiverModel.safezoneCtr.lng);
-
+      debugPrint(distFromSafe.toString());
       String status = distFromSafe > widget.carereceiverModel.safezoneRadius
           ? "warning"
           : distFromSafe > 30
@@ -558,10 +644,7 @@ class _PatientState extends State<Patient> {
                   : "safezone"
               : "home";
       var response = await ApiService.updateCarereceiverLoc(
-          crId,
-          currentPosition!.latitude,
-          currentPosition!.longitude,
-          status);
+          crId, currentPosition!.latitude, currentPosition!.longitude, status);
       debugPrint(response.body);
 
       return status;
@@ -596,16 +679,51 @@ class _PatientState extends State<Patient> {
   }
 
   void _requestHelp() async {
-    Position position = await _getCurrentPosition();
-    debugPrint(position.latitude.toString());
-    debugPrint(position.longitude.toString());
+    // Position position = await _getCurrentPosition();
+    debugPrint(currentPosition!.latitude.toString());
+    debugPrint(currentPosition!.longitude.toString());
     var response = await ApiService.requestHelp(
         crId,
-        position,
+        currentPosition!,
         widget.carereceiverModel.safezoneCtr.lat.toString(),
         widget.carereceiverModel.safezoneCtr.lng.toString());
-    debugPrint(response.body);
+    Map<String, dynamic> res = json.decode(response.body);
+
+    _processRouteResponse(res);
+    // Calling route api every 5 mins
     _routingTimer();
+  }
+
+  void _processRouteResponse(Map<String, dynamic> res) {
+    // Converting polyline
+    Set<Polyline> tempPoly = {};
+    for (int i = 0; i < res["Route"].length; i++) {
+      PolylinePoints polylinePoints = PolylinePoints();
+      List<PointLatLng> polylinePointsList =
+          polylinePoints.decodePolyline(res["Route"][i]["Polyline"]);
+      List<LatLng> latLngList = <LatLng>[];
+      for (PointLatLng point in polylinePointsList) {
+        latLngList.add(LatLng(point.latitude, point.longitude));
+      }
+      Polyline polyline = Polyline(
+        visible: true,
+        polylineId: PolylineId(Random().nextInt(10000).toString()),
+        points: latLngList,
+        color: Colors.blue,
+        width: 5,
+      );
+      tempPoly.add(polyline);
+    }
+    List<RouteLog> fetchedRouteLogs = [];
+    for (Map<String, dynamic> routeLog in res["Route"]) {
+      fetchedRouteLogs.add(RouteLog.fromJson(routeLog));
+    }
+
+    setState(() {
+      polylines = tempPoly;
+      routeLogsModel = fetchedRouteLogs;
+      routeIndex = 0;
+    });
   }
 
   Future<void> _routingTimer() async {
@@ -621,12 +739,14 @@ class _PatientState extends State<Patient> {
   }
 
   void _routingHelp() async {
-    Position position = await _getCurrentPosition();
+    // Position position = await _getCurrentPosition();
     var response = await ApiService.routingHelp(
-        position,
+        currentPosition!,
         widget.carereceiverModel.safezoneCtr.lat.toString(),
         widget.carereceiverModel.safezoneCtr.lng.toString());
     debugPrint(response.body);
+    Map<String, dynamic> res = jsonDecode(response.body);
+    _processRouteResponse(res);
   }
   // ------- END OF FUNCTIONAL LOCATION METHODS -------
 
@@ -666,9 +786,9 @@ class _PatientState extends State<Patient> {
       body: Stack(children: [
         currentPosition != null
             ? GmapsWidget(
-                polylineStrs: polylines,
+                polylines: polylines,
                 center: currentPosition!,
-                bearing: 120.0,
+                bearing: bearing,
               )
             : Container(),
         Column(
@@ -711,60 +831,69 @@ class _PatientState extends State<Patient> {
                 ),
               ),
             ),
-            Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade600,
-                    spreadRadius: 1,
-                    blurRadius: 15,
-                    blurStyle: BlurStyle.outer,
-                  ),
-                ],
-                color: Colors.white,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.arrow_upward,
-                    size: 100,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                    child: Text.rich(
-                      TextSpan(
-                        style: TextStyle(fontSize: 25),
+            Visibility(
+              visible: sosCalled,
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade600,
+                      spreadRadius: 1,
+                      blurRadius: 15,
+                      blurStyle: BlurStyle.outer,
+                    ),
+                  ],
+                  color: Colors.white,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Icon(
+                      determineRouteArrow(
+                          routeIndex >= routeLogsModel.length - 1
+                              ? null
+                              : routeLogsModel[routeIndex + 1]),
+                      size: 100,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextSpan(
-                            text: "Straight ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          Text(
+                            parseHTML(routeIndex >= routeLogsModel.length - 1
+                                ? "Continue to destination"
+                                : routeLogsModel[routeIndex + 1]
+                                    .htmlInstructions),
+                            style: const TextStyle(fontSize: 20),
                           ),
-                          TextSpan(text: 'for\n'),
-                          TextSpan(
-                            text: "200m",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                    text:
+                                        routeIndex >= routeLogsModel.length - 1
+                                            ? "For "
+                                            : routeLogsModel[routeIndex + 1]
+                                                        .maneuver ==
+                                                    "straight"
+                                                ? "For "
+                                                : "In "),
+                                TextSpan(
+                                  text:
+                                      '${distanceToNextRouteLog.toInt().toString()}m',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                              style: const TextStyle(fontSize: 20),
+                            ),
                           )
                         ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Container(),
-                  ),
-                  const Text.rich(
-                    TextSpan(
-                      style: TextStyle(fontSize: 25),
-                      children: [
-                        TextSpan(
-                          text: "     25\n",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        TextSpan(text: 'mins left'),
-                      ],
-                    ),
-                  )
-                ],
+                  ],
+                ),
               ),
             )
           ],
