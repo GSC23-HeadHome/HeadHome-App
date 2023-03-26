@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:headhome/api/api_services.dart';
@@ -5,16 +7,17 @@ import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/api/models/soslogdata.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
+import 'package:headhome/constants.dart';
 
 class PatientPage extends StatefulWidget {
   const PatientPage(
       {super.key,
       required this.carereceiverModel,
-      required this.imageUrl,
+      required this.profileBytes,
       required this.sosLogModel,
       required this.volunteerModel});
   final CarereceiverModel carereceiverModel;
-  final String imageUrl;
+  final Uint8List? profileBytes;
   final Map<String, dynamic> sosLogModel;
   final VolunteerModel volunteerModel;
 
@@ -102,7 +105,10 @@ class _PatientPageState extends State<PatientPage> {
                     ),
                     CircleAvatar(
                       radius: 80,
-                      backgroundImage: NetworkImage(widget.imageUrl),
+                      backgroundImage: widget.profileBytes == null
+                          ? const NetworkImage(defaultProfilePic)
+                              as ImageProvider
+                          : MemoryImage(widget.profileBytes!),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
