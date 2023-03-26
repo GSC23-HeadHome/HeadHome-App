@@ -87,7 +87,6 @@ class _GmapsWidgetState extends State<GmapsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // debugPrint("${widget.polylines}");
     return GoogleMap(
       myLocationEnabled: true,
       onMapCreated: _onMapCreated,
@@ -95,7 +94,7 @@ class _GmapsWidgetState extends State<GmapsWidget> {
         target: widget.center,
         zoom: 15.0,
       ),
-      polylines: widget.polylines!,
+      polylines: widget.polylines ?? const <Polyline>{},
       markers: markerIcon == null
           ? {}
           : {

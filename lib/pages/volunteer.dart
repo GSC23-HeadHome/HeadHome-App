@@ -137,9 +137,11 @@ class _VolunteerState extends State<Volunteer> {
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
                 child: SizedBox(
                   height: 200,
-                  child: GmapsWidget(
-                    center: currentPosition!,
-                  ),
+                  child: currentPosition == null
+                      ? Container()
+                      : GmapsWidget(
+                          center: currentPosition!,
+                        ),
                 ),
               ),
 
@@ -340,7 +342,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                             _carereceiverModel == null
                                 ? ""
                                 : _carereceiverModel!.name,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 16.0,
                                 color: Color(0xFF263238),
                                 fontWeight: FontWeight.w600),
@@ -349,7 +351,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
                       child: Text("${widget.distance.round()}m away",
-                          style: TextStyle(fontSize: 12.0)),
+                          style: const TextStyle(fontSize: 12.0)),
                     ),
                   ],
                 ),
@@ -376,7 +378,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                     style: ElevatedButton.styleFrom(
                         minimumSize: Size(100, 45),
                         backgroundColor: Theme.of(context).colorScheme.error),
-                    child: Text(
+                    child: const Text(
                       'Locate',
                       style: TextStyle(color: Colors.white),
                     ),
