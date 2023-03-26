@@ -492,8 +492,13 @@ class _PatientState extends State<Patient> {
           if (data.startsWith("{")) {
             debugPrint("Decoded Data: $data");
             Map<String, dynamic> jsonData = jsonDecode(data);
-            if (jsonData["SOS"] == 1) {
-              _debouncer.run(() => _locStatusCallHelp(true));
+            if (jsonData["SOS"] == "1") {
+              _debouncer.run(() {
+                setState(() {
+                  fade = !fade;
+                  _locStatusCallHelp(true);
+                });
+              });
             }
           }
         });
@@ -611,7 +616,7 @@ class _PatientState extends State<Patient> {
         widget.carereceiverModel.safezoneCtr.lat.toString(),
         widget.carereceiverModel.safezoneCtr.lng.toString());
     Map<String, dynamic> res = json.decode(response.body);
-    
+
     // Converting polyline
     Set<Polyline> tempPoly = {};
     for (int i = 0; i < res["Route"].length; i++) {
