@@ -559,8 +559,8 @@ class _PatientState extends State<Patient> {
               : "home";
       var response = await ApiService.updateCarereceiverLoc(
           crId,
-          currentPosition!.latitude.toString(),
-          currentPosition!.longitude.toString(),
+          currentPosition!.latitude,
+          currentPosition!.longitude,
           status);
       debugPrint(response.body);
 

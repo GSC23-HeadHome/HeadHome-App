@@ -17,7 +17,6 @@ class GmapsWidget extends StatefulWidget {
 
 class _GmapsWidgetState extends State<GmapsWidget> {
   late GoogleMapController mapController;
-  //BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor? markerIcon;
 
   Set<Polyline> polylines = {};
