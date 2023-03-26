@@ -68,7 +68,6 @@ class _GmapsWidgetState extends State<GmapsWidget> {
     print(Directory.current.path);
     var icon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(), 'assets/arrow.png');
-
     setState(() {
       markerIcon = icon;
     });
