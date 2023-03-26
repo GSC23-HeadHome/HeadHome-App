@@ -521,8 +521,13 @@ class _PatientState extends State<Patient> {
           if (data.startsWith("{")) {
             debugPrint("Decoded Data: $data");
             Map<String, dynamic> jsonData = jsonDecode(data);
-            if (jsonData["SOS"] == 1) {
-              _debouncer.run(() => _locStatusCallHelp(true));
+            if (jsonData["SOS"] == "1") {
+              _debouncer.run(() {
+                setState(() {
+                  fade = !fade;
+                  _locStatusCallHelp(true);
+                });
+              });
             }
           }
         });
