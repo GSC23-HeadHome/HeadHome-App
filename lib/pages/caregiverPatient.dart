@@ -4,8 +4,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
+import 'package:headhome/api/models/travellogdata.dart';
 import 'package:headhome/constants.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../components/gmapsWidget.dart' show GmapsWidget;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:headhome/api/api_services.dart';
 
@@ -39,6 +43,8 @@ class MyState extends ChangeNotifier {
 
 class _PatientDetailsState extends State<PatientDetails> {
   final MyState _myState = MyState();
+  LatLng? patientLocation;
+  Timer? _lTimer;
   String distanceValue = "";
 
   bool _showAlertButton = false;
@@ -52,6 +58,38 @@ class _PatientDetailsState extends State<PatientDetails> {
     }
   }
 
+  //redirect to google maps
+  void openMap(double latitude, double longitude) async {
+    String googleUrl =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    if (await canLaunchUrl(Uri.parse(googleUrl))) {
+      await launchUrl(Uri.parse(googleUrl));
+    } else {
+      throw 'Could not open the map.';
+    }
+  }
+
+  //call travel log and update current location
+  void getPatientLocation() async {
+    final TravelLogModel? travelLogModel =
+        await ApiService.getTravelLog(widget.carereceiverModel.crId);
+    if (travelLogModel != null) {
+      setState(() {
+        patientLocation = LatLng(travelLogModel.currentLocation.lat,
+            travelLogModel.currentLocation.lng);
+      });
+      print("currentLocation updated");
+    }
+  }
+
+  //call travel log every 5 min to update current location
+  void updateLocation() {
+    print("timer activated");
+    _lTimer = Timer.periodic(Duration(minutes: 5), (Timer timer) {
+      getPatientLocation();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,10 +99,20 @@ class _PatientDetailsState extends State<PatientDetails> {
           widget.carereceiverModel.travellog!.status == "safezone unsafe" ||
               widget.carereceiverModel.travellog!.status == "warning";
     }
+    getPatientLocation();
+    updateLocation();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _lTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
+    // double lat = patientLocation!.latitude;
+    // double lng = patientLocation!.longitude;
     // var responded;
     // var alertStatus;
     // void toggleAlert (responded) {}
@@ -214,13 +262,28 @@ class _PatientDetailsState extends State<PatientDetails> {
                                   style:
                                       Theme.of(context).textTheme.titleSmall),
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(6)),
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              height: 200,
+                            Stack(
+                              children: [
+                                SizedBox(
+                                  height: 200,
+                                  child:patientLocation == null? Container(): GmapsWidget(
+                                    center: patientLocation!,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 16,
+                                  right: 16,
+                                  child: FloatingActionButton(
+                                    heroTag: 'MapsVolunteerPatientFAB',
+                                    onPressed: () {
+                                      openMap(patientLocation!.latitude, patientLocation!.longitude);
+                                    },
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.secondary,
+                                    child: const Icon(Icons.navigation),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

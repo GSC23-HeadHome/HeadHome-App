@@ -210,7 +210,7 @@ class _PatientPageState extends State<PatientPage> {
                             sosLogModel: widget.sosLogModel,
                             volunteerModel: widget.volunteerModel,
                             updateAuthenticated: updateAuthenticated,
-                            patientLocation: homeLocation,
+                            patientLocation: currentLocation!,
                             openMap: openMap,
                           ),
                   ],
