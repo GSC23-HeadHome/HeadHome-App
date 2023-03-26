@@ -8,14 +8,14 @@ class GmapsWidget extends StatefulWidget {
   final LatLng center;
   final Set<String>? polylineStrs;
   final double? bearing;
-  final bool? locationButton;
+  final bool? enableLocationButton;
 
   const GmapsWidget(
       {Key? key,
       this.polylineStrs,
       this.bearing,
       required this.center,
-      this.locationButton})
+      this.enableLocationButton})
       : super(key: key);
 
   @override
@@ -25,7 +25,7 @@ class GmapsWidget extends StatefulWidget {
 class _GmapsWidgetState extends State<GmapsWidget> {
   late GoogleMapController mapController;
   BitmapDescriptor? markerIcon;
-
+  //BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   Set<Polyline> polylines = {};
   Set<Marker> markers = {};
 
@@ -93,7 +93,9 @@ class _GmapsWidgetState extends State<GmapsWidget> {
                 rotation: widget.bearing ?? 0.0,
               )
             },
-      myLocationButtonEnabled: widget.locationButton == null ?false: widget.locationButton!,
+      myLocationButtonEnabled: widget.enableLocationButton == null
+          ? false
+          : widget.enableLocationButton!,
     );
   }
 }

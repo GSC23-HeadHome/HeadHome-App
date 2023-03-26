@@ -1,10 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/api/models/soslogdata.dart';
+import 'package:headhome/api/models/travellogdata.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../components/gmapsWidget.dart' show GmapsWidget;
 
 class PatientPage extends StatefulWidget {
   const PatientPage(
@@ -24,6 +29,8 @@ class PatientPage extends StatefulWidget {
 
 class _PatientPageState extends State<PatientPage> {
   String _priContactNo = "-";
+  LatLng? currentLocation;
+  Timer? _lTimer;
 
   void fetchCgNumber() async {
     final Cgcontactnum? fetchedContactNo = await ApiService.getCgContact(
@@ -36,15 +43,56 @@ class _PatientPageState extends State<PatientPage> {
     }
   }
 
+  //redirect to google maps
+  void openMap(double latitude, double longitude) async {
+    String googleUrl =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    if (await canLaunchUrl(Uri.parse(googleUrl))) {
+      await launchUrl(Uri.parse(googleUrl));
+    } else {
+      throw 'Could not open the map.';
+    }
+  }
+
+  //call travel log and update current location
+  void getPatientLocation() async {
+    final TravelLogModel? travelLogModel =
+        await ApiService.getTravelLog(widget.carereceiverModel.crId);
+    if (travelLogModel != null) {
+      setState(() {
+        currentLocation = LatLng(travelLogModel.currentLocation.lat,
+            travelLogModel.currentLocation.lng);
+      });
+      print("currentLocation updated");
+    }
+  }
+
+  //call travel log every 5 min to update current location
+  void updateLocation() {
+    print("timer activated");
+    _lTimer = Timer.periodic(Duration(minutes: 5), (Timer timer) {
+      getPatientLocation();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     fetchCgNumber();
+    updateLocation();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _lTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     bool authenticated = false;
+    LatLng homeLocation = LatLng(widget.carereceiverModel.safezoneCtr.lat,
+        widget.carereceiverModel.safezoneCtr.lng);
 
     void updateAuthenticated(bool newAuthenticated) {
       setState(() {
@@ -95,7 +143,7 @@ class _PatientPageState extends State<PatientPage> {
                       padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
                       child: Column(
                         children: [
-                          Text("Amy Zhang",
+                          Text(widget.carereceiverModel.name,
                               style: Theme.of(context).textTheme.displayMedium),
                         ],
                       ),
@@ -126,13 +174,18 @@ class _PatientPageState extends State<PatientPage> {
                       ),
                     ),
                     authenticated
-                        ? findPatient(
+                        ? findHome(
+                            priContactNo: _priContactNo,
+                            homeLocation: homeLocation,
+                            openMap: openMap,
+                          )
+                        : findPatient(
                             priContactNo: _priContactNo,
                             sosLogModel: widget.sosLogModel,
                             volunteerModel: widget.volunteerModel,
-                            updateAuthenticated: updateAuthenticated)
-                        : findHome(
-                            priContactNo: _priContactNo,
+                            updateAuthenticated: updateAuthenticated,
+                            patientLocation: homeLocation,
+                            openMap: openMap,
                           ),
                   ],
                 ),
@@ -177,11 +230,15 @@ class findPatient extends StatefulWidget {
     required this.sosLogModel,
     required this.volunteerModel,
     required this.updateAuthenticated,
+    required this.patientLocation,
+    required this.openMap,
   });
   final String priContactNo;
   final Map<String, dynamic> sosLogModel;
   final VolunteerModel volunteerModel;
   final void Function(bool) updateAuthenticated;
+  final LatLng patientLocation;
+  final void Function(double, double) openMap;
 
   @override
   State<findPatient> createState() => _findPatientState();
@@ -196,8 +253,17 @@ class _findPatientState extends State<findPatient> {
     authIdController.dispose();
   }
 
+  //to check if class rerenders
+  // @override
+  // void didUpdateWidget(findPatient oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   print("find patient widget has been updated");
+  // }
+
   @override
   Widget build(BuildContext context) {
+    double lat = widget.patientLocation.latitude;
+    double lng = widget.patientLocation.longitude;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -223,6 +289,9 @@ class _findPatientState extends State<findPatient> {
                       Icons.send_outlined,
                     ),
                     onPressed: () async {
+                      print(widget.sosLogModel["sos_id"]);
+                      print(authIdController.text);
+                      print(widget.volunteerModel.vId);
                       AcceptSOSResponse? response = await ApiService.acceptSOS(
                           widget.sosLogModel["sos_id"],
                           authIdController.text,
@@ -254,18 +323,32 @@ class _findPatientState extends State<findPatient> {
                 child: Text("Patient's Location",
                     style: Theme.of(context).textTheme.titleSmall),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                height: 200,
+              Stack(
+                children: [
+                  SizedBox(
+                    height: 200,
+                    child: GmapsWidget(
+                      center: widget.patientLocation,
+                    ),
+                  ),
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        widget.openMap(lat, lng);
+                      },
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      child: const Icon(Icons.navigation),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
 
-        //safe zone
+        //caregiver info
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
           child:
@@ -357,11 +440,19 @@ class _findPatientState extends State<findPatient> {
 }
 
 class findHome extends StatelessWidget {
-  const findHome({super.key, required this.priContactNo});
+  const findHome(
+      {super.key,
+      required this.priContactNo,
+      required this.homeLocation,
+      required this.openMap});
   final String priContactNo;
+  final LatLng homeLocation;
+  final void Function(double, double) openMap;
 
   @override
   Widget build(BuildContext context) {
+    double lat = homeLocation.latitude;
+    double lng = homeLocation.longitude;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -376,12 +467,26 @@ class findHome extends StatelessWidget {
                 child: Text("Home Location",
                     style: Theme.of(context).textTheme.titleSmall),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                height: 200,
+              Stack(
+                children: [
+                  SizedBox(
+                    height: 200,
+                    child: GmapsWidget(
+                      center: homeLocation,
+                    ),
+                  ),
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        openMap(lat, lng);
+                      },
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      child: const Icon(Icons.navigation),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

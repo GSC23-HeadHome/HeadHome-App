@@ -133,23 +133,13 @@ class _VolunteerState extends State<Volunteer> {
               //google map widget
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-                child:
-                    // Container(
-                    //   decoration: BoxDecoration(
-                    //     borderRadius: const BorderRadius.all(Radius.circular(6)),
-                    //     color: Theme.of(context).colorScheme.primary,
-                    //   ),
-                    //   height: 200,
-                    // ),
-                    SizedBox(
+                child: SizedBox(
                   height: 200,
                   child: GmapsWidget(
                     center: currentPosition!,
-                    locationButton: false,
                   ),
                 ),
               ),
-             
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
@@ -281,7 +271,9 @@ class _PatientDetailsState extends State<PatientDetails> {
     CarereceiverModel? fetchedModel =
         await ApiService.getCarereceiver(widget.sosLogModel["cr_id"]);
 
+    print("fetching patient details");
     if (fetchedModel != null) {
+      print(fetchedModel?.name);
       final ref = FirebaseStorage.instance
           .ref()
           .child("ProfileImg/${fetchedModel.profilePic}");
@@ -295,12 +287,16 @@ class _PatientDetailsState extends State<PatientDetails> {
         _carereceiverModel = fetchedModel;
       });
     }
+
+    print("seet patient details");
+    print(_carereceiverModel?.name);
   }
 
   @override
   void initState() {
     super.initState();
     fetchPatient();
+    debugPrint("PATIENT DETAILS WIDGET CALLED");
   }
 
   @override
