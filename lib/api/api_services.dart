@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:math' hide log;
 import 'dart:typed_data';
 
@@ -360,14 +361,14 @@ class ApiService {
   // ----------- TRAVEL LOG METHODS ------------
 
   static Future<http.Response> updateCarereceiverLoc(
-      String id, String lat, String lng, String status) async {
+      String id, double lat, double lng, String status) async {
     int datetime =
         DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     String travelLogId = id + datetime.toString();
     Uri url = Uri.parse(
         '${ApiConstants.baseUrl}/${ApiConstants.travellog}/$travelLogId');
-    debugPrint(lat);
-    debugPrint(lng);
+    // debugPrint(lat);
+    // debugPrint(lng);
     Map data = {
       "CrId": id,
       "Datetime": datetime,

@@ -3,7 +3,6 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'dart:io';
 
 class GmapsWidget extends StatefulWidget {
   final LatLng center;
@@ -25,7 +24,6 @@ class GmapsWidget extends StatefulWidget {
 
 class _GmapsWidgetState extends State<GmapsWidget> {
   late GoogleMapController mapController;
-  //BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor? markerIcon;
 
   Set<Polyline> polylines = {};
@@ -36,15 +34,6 @@ class _GmapsWidgetState extends State<GmapsWidget> {
     super.initState();
     addCustomIcon();
     toPolyline();
-
-    // currentLocationMarker = Marker(
-    //     markerId: const MarkerId('current_location'),
-    //     position: widget.center,
-    //     infoWindow: const InfoWindow(title: 'Current Location'),
-    //     icon: markerIcon,
-    //     rotation: 90.0 //widget.bearing ?? 0.0,
-    //     );
-    // markers.add(currentLocationMarker);
   }
 
   Future<void> toPolyline() async {
@@ -72,7 +61,6 @@ class _GmapsWidgetState extends State<GmapsWidget> {
   }
 
   void addCustomIcon() async {
-    print(Directory.current.path);
     var icon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(), 'assets/arrow.png');
 
