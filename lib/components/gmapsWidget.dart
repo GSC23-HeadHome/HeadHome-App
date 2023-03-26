@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -7,9 +9,14 @@ class GmapsWidget extends StatefulWidget {
   final LatLng center;
   final Set<String>? polylineStrs;
   final double? bearing;
+  final bool? locationButton;
 
   const GmapsWidget(
-      {Key? key, this.polylineStrs, this.bearing, required this.center})
+      {Key? key,
+      this.polylineStrs,
+      this.bearing,
+      required this.center,
+      this.locationButton})
       : super(key: key);
 
   @override
@@ -98,6 +105,7 @@ class _GmapsWidgetState extends State<GmapsWidget> {
                 rotation: widget.bearing ?? 0.0,
               )
             },
+      myLocationButtonEnabled: widget.locationButton == null ?false: widget.locationButton!,
     );
   }
 }

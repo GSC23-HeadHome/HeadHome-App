@@ -6,7 +6,7 @@ import 'package:headhome/api/api_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api/models/carereceiverdata.dart';
 import '../main.dart' show MyApp;
 import './volunteerPatient.dart' show PatientPage;
@@ -31,6 +31,8 @@ class _VolunteerState extends State<Volunteer> {
   late String contactNum = widget.volunteerModel.contactNum;
   late String password = "";
   Position? _currentPosition;
+  LatLng? currentPosition;
+  Set<String> polylines = {};
 
   final Stream<QuerySnapshot> _soslogStream =
       FirebaseFirestore.instance.collection('sos_log').snapshots();
@@ -39,14 +41,19 @@ class _VolunteerState extends State<Volunteer> {
   void initState() {
     super.initState();
     _getData();
+    print(currentPosition);
   }
 
   void _getData() async {
     Position fetchedPosition = await Geolocator.getCurrentPosition();
+    print(fetchedPosition);
     debugPrint("FetchedLocationData: $fetchedPosition");
     setState(() {
       _currentPosition = fetchedPosition;
+      currentPosition =
+          LatLng(fetchedPosition.latitude, fetchedPosition.longitude);
     });
+    print(currentPosition);
   }
 
   Future<String> _updateVolunteerInfo(
@@ -126,14 +133,23 @@ class _VolunteerState extends State<Volunteer> {
               //google map widget
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(6)),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                child:
+                    // Container(
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: const BorderRadius.all(Radius.circular(6)),
+                    //     color: Theme.of(context).colorScheme.primary,
+                    //   ),
+                    //   height: 200,
+                    // ),
+                    SizedBox(
                   height: 200,
+                  child: GmapsWidget(
+                    center: currentPosition!,
+                    locationButton: false,
+                  ),
                 ),
               ),
+             
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
