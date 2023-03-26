@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
@@ -259,25 +261,21 @@ class PatientDetails extends StatefulWidget {
 
 class _PatientDetailsState extends State<PatientDetails> {
   CarereceiverModel? _carereceiverModel;
-  String imageUrl = defaultProfilePic;
+  Uint8List? profileBytes;
 
   void fetchPatient() async {
     CarereceiverModel? fetchedModel =
         await ApiService.getCarereceiver(widget.sosLogModel["cr_id"]);
 
     if (fetchedModel != null) {
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child("ProfileImg/${fetchedModel.profilePic}");
-      final String url = await ref.getDownloadURL();
+      Uint8List? fetchedBytes =
+          await ApiService.getProfileImg(fetchedModel.profilePic);
       setState(() {
         _carereceiverModel = fetchedModel;
-        imageUrl = url;
+        profileBytes = fetchedBytes;
       });
     } else {
-      setState(() {
-        _carereceiverModel = fetchedModel;
-      });
+      _carereceiverModel = fetchedModel;
     }
   }
 
@@ -313,7 +311,10 @@ class _PatientDetailsState extends State<PatientDetails> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: CircleAvatar(
                       radius: 20,
-                      backgroundImage: NetworkImage(imageUrl),
+                      backgroundImage: profileBytes == null
+                          ? const NetworkImage(defaultProfilePic)
+                              as ImageProvider
+                          : MemoryImage(profileBytes!),
                     ),
                   )),
               Expanded(
@@ -352,11 +353,12 @@ class _PatientDetailsState extends State<PatientDetails> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => PatientPage(
-                                  carereceiverModel: _carereceiverModel!,
-                                  sosLogModel: widget.sosLogModel,
-                                  volunteerModel: widget.volunteerModel,
-                                  imageUrl: imageUrl)),
+                            builder: (context) => PatientPage(
+                                carereceiverModel: _carereceiverModel!,
+                                sosLogModel: widget.sosLogModel,
+                                volunteerModel: widget.volunteerModel,
+                                profileBytes: profileBytes),
+                          ),
                         );
                       }
                     },
