@@ -292,10 +292,12 @@ class _PatientState extends State<Patient> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 100,
-                      backgroundImage:
-                          NetworkImage("https://picsum.photos/id/237/200/300"),
+                      backgroundImage: profileBytes == null
+                          ? const NetworkImage(defaultProfilePic)
+                              as ImageProvider
+                          : MemoryImage(profileBytes!),
                     ),
                     const SizedBox(
                       height: 10,

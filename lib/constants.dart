@@ -7,7 +7,7 @@ class BluetoothConstants {
       "d6729370-102e-4eb3-a6e2-c1ac1fed26ff";
 }
 
-const String defaultProfilePic = "https://picsum.photos/id/237/200/300";
+const String defaultProfilePic = "https://picsum.photos/200";
 
 class ApiConstants {
   static String baseUrl = 'https://HeadHome.chayhuixiang.repl.co';
