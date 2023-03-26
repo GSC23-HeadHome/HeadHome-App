@@ -35,6 +35,8 @@ class _PatientPageState extends State<PatientPage> {
   LatLng? currentLocation;
   Timer? _lTimer;
 
+  //to check if class rerenders
+
   void fetchCgNumber() async {
     final Cgcontactnum? fetchedContactNo = await ApiService.getCgContact(
         widget.carereceiverModel.careGiver[0].id,
@@ -83,6 +85,7 @@ class _PatientPageState extends State<PatientPage> {
     super.initState();
     fetchCgNumber();
     updateLocation();
+    intialiseAuthenticated();
   }
 
   @override
@@ -92,16 +95,33 @@ class _PatientPageState extends State<PatientPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    bool authenticated = false;
-    LatLng homeLocation = LatLng(widget.carereceiverModel.safezoneCtr.lat,
-        widget.carereceiverModel.safezoneCtr.lng);
+  void didUpdateWidget(PatientPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print("main widget has been updated");
+  }
 
-    void updateAuthenticated(bool newAuthenticated) {
+  bool authenticated = false;
+
+  void intialiseAuthenticated() {
+    if (widget.sosLogModel["status"] == "guided") {
       setState(() {
-        authenticated = newAuthenticated;
+        authenticated = true;
       });
     }
+  }
+
+  void updateAuthenticated(bool newAuthenticated) {
+    setState(() {
+      authenticated = newAuthenticated;
+    });
+    print("updated authenticated:");
+    print(authenticated);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    LatLng homeLocation = LatLng(widget.carereceiverModel.safezoneCtr.lat,
+        widget.carereceiverModel.safezoneCtr.lng);
 
     return Scaffold(
       appBar: AppBar(
@@ -306,6 +326,7 @@ class _findPatientState extends State<findPatient> {
                       debugPrint("$response");
                       if (response != null) {
                         widget.updateAuthenticated(true);
+                        print("updateAuthenticated called");
                       }
                     },
                   ),

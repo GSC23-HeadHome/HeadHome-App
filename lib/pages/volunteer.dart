@@ -185,11 +185,11 @@ class _VolunteerState extends State<Volunteer> {
                         return ListView(
                           scrollDirection:
                               Axis.vertical, // set the direction of scrolling
-                          children: snapshot.data!.docs.map(
-                            (document) {
-                              Map<String, dynamic> data =
-                                  document.data()! as Map<String, dynamic>;
-                              double distance = Geolocator.distanceBetween(
+                          children: snapshot.data!.docs
+                              .map((document) {
+                                Map<String, dynamic> data =
+                                    document.data()! as Map<String, dynamic>;
+                                double distance = Geolocator.distanceBetween(
                                   data["start_location"]["lat"],
                                   data["start_location"]["lng"],
                                   _currentPosition == null
@@ -197,14 +197,24 @@ class _VolunteerState extends State<Volunteer> {
                                       : _currentPosition!.latitude,
                                   _currentPosition == null
                                       ? data["start_location"]["lng"]
-                                      : _currentPosition!.longitude);
-                              return PatientDetails(
-                                distance: distance,
-                                sosLogModel: data,
-                                volunteerModel: widget.volunteerModel,
-                              );
-                            },
-                          ).toList(),
+                                      : _currentPosition!.longitude,
+                                );
+                                return {
+                                  'distance': distance,
+                                  'status': data["status"],
+                                  'vname': data["volunteer"],
+                                  'data': data,
+                                };
+                              })
+                              .where((item) =>
+                                  item['status'] as String == "lost" || (item['status'] as String == "guided" && item['vname'] as String == widget.volunteerModel.name as String))
+                              .map((item) => PatientDetails(
+                                    distance: item['distance'] as double,
+                                    sosLogModel:
+                                        item['data'] as Map<String, dynamic>,
+                                    volunteerModel: widget.volunteerModel,
+                                  ))
+                              .toList(),
                         );
                       },
                     ),

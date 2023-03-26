@@ -415,7 +415,7 @@ class ApiService {
     if (imageName == "") return null;
     final imageRef = profileRef.child(imageName);
     try {
-      const oneMegabyte = 1024 * 1024;
+      const oneMegabyte = 4096 * 4096;
       return (await imageRef.getData(oneMegabyte));
     } on FirebaseException catch (_) {
       debugPrint("Error getting profile");
