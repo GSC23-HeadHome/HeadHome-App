@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'dart:io';
 
 class GmapsWidget extends StatefulWidget {
   final LatLng center;
-  final Set<String>? polylineStrs;
+  final Set<Polyline>? polylines;
+  // final Set<String>? polylineStrs;
   final double? bearing;
 
   const GmapsWidget(
-      {Key? key, this.polylineStrs, this.bearing, required this.center})
+      {Key? key, this.polylines, this.bearing, required this.center})
       : super(key: key);
 
   @override
@@ -18,54 +18,55 @@ class GmapsWidget extends StatefulWidget {
 
 class _GmapsWidgetState extends State<GmapsWidget> {
   late GoogleMapController mapController;
-  //BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor? markerIcon;
 
-  Set<Polyline> polylines = {};
+  // Set<Polyline> polylines = {};
   Set<Marker> markers = {};
 
   @override
   void initState() {
     super.initState();
     addCustomIcon();
-    toPolyline();
-
-    // currentLocationMarker = Marker(
-    //     markerId: const MarkerId('current_location'),
-    //     position: widget.center,
-    //     infoWindow: const InfoWindow(title: 'Current Location'),
-    //     icon: markerIcon,
-    //     rotation: 90.0 //widget.bearing ?? 0.0,
-    //     );
-    // markers.add(currentLocationMarker);
+    // toPolyline();
   }
 
-  Future<void> toPolyline() async {
-    if (widget.polylineStrs!.isNotEmpty) {
-      for (int i = 0; i < widget.polylineStrs!.length; i++) {
-        //Convert polyline string to lat lng
-        PolylinePoints polylinePoints = PolylinePoints();
-        List<PointLatLng> polylinePointsList =
-            polylinePoints.decodePolyline(widget.polylineStrs!.elementAt(i));
-        List<LatLng> latLngList = <LatLng>[];
-        for (PointLatLng point in polylinePointsList) {
-          latLngList.add(LatLng(point.latitude, point.longitude));
-        }
+  // void toPolyline() {
+  //   if (widget.polylineStrs!.isNotEmpty) {
+  //     Set<Polyline> tempPolylines = {};
+  //     for (int i = 0; i < widget.polylineStrs!.length; i++) {
+  //       //Convert polyline string to lat lng
+  //       PolylinePoints polylinePoints = PolylinePoints();
+  //       List<PointLatLng> polylinePointsList =
+  //           polylinePoints.decodePolyline(widget.polylineStrs!.elementAt(i));
+  //       List<LatLng> latLngList = <LatLng>[];
+  //       for (PointLatLng point in polylinePointsList) {
+  //         latLngList.add(LatLng(point.latitude, point.longitude));
+  //       }
 
-        //Create polyline object
-        Polyline polyline = Polyline(
-          polylineId: const PolylineId("polyline"),
-          points: latLngList,
-          color: Colors.blue,
-          width: 5,
-        );
-        polylines.add(polyline);
-      }
-    }
-  }
+  //       //Create polyline object
+  //       Polyline polyline = Polyline(
+  //         polylineId: const PolylineId("polyline"),
+  //         points: latLngList,
+  //         color: Colors.blue,
+  //         width: 5,
+  //       );
+
+  //       tempPolylines.add(polyline);
+  //     }
+  //     debugPrint("Changing Polylines to $tempPolylines");
+  //     setState(() {
+  //       polylines = tempPolylines;
+  //     });
+  //   }
+  // }
+
+  // @override
+  // void didUpdateWidget(covariant GmapsWidget oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   toPolyline();
+  // }
 
   void addCustomIcon() async {
-    print(Directory.current.path);
     var icon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(), 'assets/arrow.png');
     setState(() {
@@ -79,13 +80,15 @@ class _GmapsWidgetState extends State<GmapsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // debugPrint("${widget.polylines}");
     return GoogleMap(
+      myLocationEnabled: true,
       onMapCreated: _onMapCreated,
       initialCameraPosition: CameraPosition(
         target: widget.center,
         zoom: 15.0,
       ),
-      polylines: polylines,
+      polylines: widget.polylines!,
       markers: markerIcon == null
           ? {}
           : {
