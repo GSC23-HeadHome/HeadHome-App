@@ -100,131 +100,137 @@ class _AuthLoginState extends State<AuthLogin> {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 40.0,
-                left: 50.0,
-                right: 50.0,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    "Welcome to",
-                    style: Theme.of(context).textTheme.displayMedium,
-                  ),
-                  Text(
-                    "HeadHome",
-                    style: Theme.of(context).textTheme.displayLarge,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 50.0,
-                      bottom: 30.0,
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 40.0,
+                  left: 50.0,
+                  right: 50.0,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Welcome to",
+                      style: Theme.of(context).textTheme.displayMedium,
                     ),
-                    child: InputDecorator(
+                    Text(
+                      "HeadHome",
+                      style: Theme.of(context).textTheme.displayLarge,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 50.0,
+                        bottom: 30.0,
+                      ),
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'I am a',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                        ),
+                        child: ButtonTheme(
+                          materialTapTargetSize: MaterialTapTargetSize.padded,
+                          child: DropdownButton<String>(
+                            hint: const Text("I am a"),
+                            isExpanded: true,
+                            value: dropdownValue,
+                            elevation: 16,
+                            underline: DropdownButtonHideUnderline(
+                              child: Container(),
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                dropdownValue = newValue!;
+                              });
+                            },
+                            items: <String>['Caregiver', 'Patient', 'Volunteer']
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextField(
                       decoration: InputDecoration(
-                        labelText: 'I am a',
+                        labelText: 'Email',
                         labelStyle:
                             const TextStyle(fontWeight: FontWeight.bold),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5.0)),
                         contentPadding: const EdgeInsets.all(10),
+                        hintText: 'Enter Email',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
-                      child: ButtonTheme(
-                        materialTapTargetSize: MaterialTapTargetSize.padded,
-                        child: DropdownButton<String>(
-                          hint: const Text("I am a"),
-                          isExpanded: true,
-                          value: dropdownValue,
-                          elevation: 16,
-                          underline: DropdownButtonHideUnderline(
-                            child: Container(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          emailValue = newValue!;
+                        });
+                      },
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle:
+                            const TextStyle(fontWeight: FontWeight.bold),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0)),
+                        contentPadding: const EdgeInsets.all(10),
+                        hintText: 'Enter Password',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                      ),
+                      obscureText: true,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          passwordValue = newValue!;
+                        });
+                      },
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize:
+                            const Size(double.infinity, 50), //////// HERE
+                      ),
+                      onPressed: () {
+                        loginAccount(context);
+                      },
+                      child: const Text("Login"),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize:
+                            const Size(double.infinity, 50), //////// HERE
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext bctx) =>
+                                const AuthRegister(),
                           ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              dropdownValue = newValue!;
-                            });
-                          },
-                          items: <String>['Caregiver', 'Patient', 'Volunteer']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
-                      contentPadding: const EdgeInsets.all(10),
-                      hintText: 'Enter Email',
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                    ),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        emailValue = newValue!;
-                      });
-                    },
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
-                      contentPadding: const EdgeInsets.all(10),
-                      hintText: 'Enter Password',
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                    ),
-                    obscureText: true,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        passwordValue = newValue!;
-                      });
-                    },
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize:
-                          const Size(double.infinity, 50), //////// HERE
-                    ),
-                    onPressed: () {
-                      loginAccount(context);
-                    },
-                    child: const Text("Login"),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize:
-                          const Size(double.infinity, 50), //////// HERE
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (BuildContext bctx) => const AuthRegister(),
-                        ),
-                      );
-                    },
-                    child: const Text("Register Now"),
-                  )
-                ],
+                        );
+                      },
+                      child: const Text("Register Now"),
+                    )
+                  ],
+                ),
               ),
             ),
           ),

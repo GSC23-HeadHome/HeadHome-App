@@ -17,15 +17,16 @@ class GmapsWidget extends StatefulWidget {
 
 class _GmapsWidgetState extends State<GmapsWidget> {
   late GoogleMapController mapController;
-  late BitmapDescriptor markerIcon;
+  //BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor? markerIcon;
 
   Set<Polyline> polylines = {};
   Set<Marker> markers = {};
 
   @override
   void initState() {
-    addCustomIcon();
     super.initState();
+    addCustomIcon();
     toPolyline();
   }
 
@@ -53,11 +54,10 @@ class _GmapsWidgetState extends State<GmapsWidget> {
     }
   }
 
- 
-
-  Future<void> addCustomIcon() async {
+  void addCustomIcon() async {
     var icon = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(),  'assets/arrow.png');
+        const ImageConfiguration(), 'assets/arrow.png');
+
     setState(() {
       markerIcon = icon;
     });
@@ -76,15 +76,17 @@ class _GmapsWidgetState extends State<GmapsWidget> {
         zoom: 15.0,
       ),
       polylines: polylines,
-      markers: {
-        Marker(
-          markerId: const MarkerId('current_location'),
-          position: widget.center,
-          infoWindow: const InfoWindow(title: 'Current Location'),
-          icon: markerIcon,
-          rotation: widget.bearing ?? 0.0,
-        )
-      },
+      markers: markerIcon == null
+          ? {}
+          : {
+              Marker(
+                markerId: const MarkerId('current_location'),
+                position: widget.center,
+                infoWindow: const InfoWindow(title: 'Current Location'),
+                icon: markerIcon!,
+                rotation: widget.bearing ?? 0.0,
+              )
+            },
     );
   }
 }

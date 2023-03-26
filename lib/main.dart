@@ -1,14 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:geolocator/geolocator.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:headhome/pages/authlogin.dart';
-import 'package:flutter_blue/flutter_blue.dart';
-import 'constants.dart';
-import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<bool> locationEnabled() async {
@@ -91,22 +86,9 @@ class LocationDisabledPage extends StatelessWidget {
   }
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key, this.isLocationEnabled});
   final bool? isLocationEnabled;
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,83 +124,9 @@ class _MyAppState extends State<MyApp> {
           bodySmall: TextStyle(fontSize: 12.0),
         ),
       ),
-      home: widget.isLocationEnabled != null && widget.isLocationEnabled!
-          ? const MyHomePage()
+      home: isLocationEnabled != null && isLocationEnabled!
+          ? const AuthLogin()
           : const LocationDisabledPage(),
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
-  BluetoothDevice? _device;
-  StreamSubscription? _deviceStateSubscription;
-  BluetoothCharacteristic? _targetCharacteristic;
-  BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
-
-  void initBluetooth() async {
-    FlutterBlue flutterBlue = FlutterBlue.instance;
-    flutterBlue.startScan(timeout: const Duration(seconds: 4));
-    flutterBlue.scanResults.listen((results) async {
-      // do something with scan results
-      // for (ScanResult r in results) {
-      //   debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
-      // }
-      _device = results
-          .firstWhereOrNull(
-              (result) => result.device.name == BluetoothConstants.deviceName)
-          ?.device;
-      if (_device != null &&
-          _deviceState == BluetoothDeviceState.disconnected) {
-        debugPrint("Connecting to device...");
-        _deviceStateSubscription = _device?.state.listen((s) {
-          _deviceState = s;
-        });
-        await _device!.connect();
-        List<BluetoothService> services = await _device!.discoverServices();
-        BluetoothService targetService = services.firstWhere((service) =>
-            service.uuid.toString() == BluetoothConstants.serviceUUID);
-        List<BluetoothCharacteristic> characteristics =
-            targetService.characteristics;
-        _targetCharacteristic = characteristics.firstWhere((characteristic) =>
-            characteristic.uuid.toString() ==
-            BluetoothConstants.characteristicUUID);
-
-        if (_targetCharacteristic != null) {
-          List<int> receivedData = await _targetCharacteristic!.read();
-          debugPrint(String.fromCharCodes(receivedData));
-          await _targetCharacteristic!
-              .write(utf8.encode("Hello from flutter!"));
-        }
-      }
-    });
-
-// Stop scanning
-    flutterBlue.stopScan();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initBluetooth();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _device?.disconnect();
-    _deviceStateSubscription?.cancel();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const AuthLogin();
   }
 }

@@ -2,13 +2,17 @@
 // import 'dart:math';
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:headhome/utils/debouncer.dart';
+import '../constants.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 
 import 'package:headhome/utils/extensions.dart';
 import 'package:headhome/api/api_services.dart';
@@ -18,8 +22,8 @@ import 'package:headhome/api/models/carereceiverdata.dart';
 import '../components/gmapsWidget.dart' show GmapsWidget;
 
 class Patient extends StatefulWidget {
-  const Patient({super.key, this.carereceiverModel});
-  final CarereceiverModel? carereceiverModel;
+  const Patient({super.key, required this.carereceiverModel});
+  final CarereceiverModel carereceiverModel;
 
   @override
   State<Patient> createState() => _PatientState();
@@ -32,23 +36,21 @@ class _PatientState extends State<Patient> {
   bool visible = true;
   bool fade = true;
   // Patient Details
-  late String crId = widget.carereceiverModel?.crId ?? "Cr0001";
-  late String nameValue = widget.carereceiverModel?.name ?? "Amy Zhang";
-  late String phoneNumberValue =
-      widget.carereceiverModel?.contactNum ?? "69823042";
-  late String authenticationID =
-      widget.carereceiverModel?.authId ?? "amyzhang001";
-  late String priContactUsername = widget.carereceiverModel!.careGiver.isEmpty
-      ? "cg0002"
-      : widget.carereceiverModel?.careGiver[0].id ?? "cg0002";
-  late String priContactRel = widget.carereceiverModel!.careGiver.isEmpty
+  late String crId = widget.carereceiverModel.crId;
+  late String nameValue = widget.carereceiverModel.name;
+  late String phoneNumberValue = widget.carereceiverModel.contactNum;
+  late String authenticationID = widget.carereceiverModel.authId;
+  late String priContactUsername = widget.carereceiverModel.careGiver.isEmpty
+      ? "aurora.lim@gmail.com"
+      : widget.carereceiverModel.careGiver[0].id;
+  late String priContactRel = widget.carereceiverModel.careGiver.isEmpty
       ? "friend"
-      : widget.carereceiverModel?.careGiver[0].relationship ?? "friend";
+      : widget.carereceiverModel.careGiver[0].relationship;
   late String priContactNo = "-";
-  late String homeAddress = widget.carereceiverModel?.address ?? "-";
-  late String profilePic = widget.carereceiverModel?.profilePic ?? "";
-  late Uint8List profileBytes;
-  late LatLng currentPosition;
+  late String homeAddress = widget.carereceiverModel.address;
+  late String profilePic = widget.carereceiverModel.profilePic;
+  Uint8List? profileBytes;
+  LatLng? currentPosition;
   Set<String> polylines = {};
 
   String tempName = "";
@@ -56,8 +58,15 @@ class _PatientState extends State<Patient> {
   String tempAddress = "";
   String tempRel = "";
 
-  Timer? lTimer;
-  Timer? rTimer;
+  Timer? _lTimer;
+  Timer? _rTimer;
+  StreamSubscription? _positionStream;
+
+  BluetoothDevice? _device;
+  StreamSubscription? _deviceStateSubscription;
+  StreamSubscription? _charSubscription;
+  BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
+  final Debouncer _debouncer = Debouncer(seconds: 5);
 
   void showPatientDetails() {
     showDialog(
@@ -105,8 +114,10 @@ class _PatientState extends State<Patient> {
                     ),
                     CircleAvatar(
                       radius: 100,
-                      backgroundImage: MemoryImage(profileBytes),
-                      // NetworkImage("https://picsum.photos/id/237/200/300"),
+                      backgroundImage: profileBytes == null
+                          ? const NetworkImage(defaultProfilePic)
+                              as ImageProvider
+                          : MemoryImage(profileBytes!),
                     ),
                     const SizedBox(
                       height: 5,
@@ -397,26 +408,91 @@ class _PatientState extends State<Patient> {
   @override
   void initState() {
     super.initState();
-    final storage = FirebaseStorage.instance;
+
+    _positionStream =
+        Geolocator.getPositionStream().listen((Position position) {
+      currentPosition = LatLng(position.latitude, position.longitude);
+      print(currentPosition);
+    });
+
     _getData();
     _getProfileImg();
     _locationHandler();
     _getCurrentPosition();
+    _initBluetooth();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
-    rTimer?.cancel();
-    lTimer?.cancel();
+    _rTimer?.cancel();
+    _lTimer?.cancel();
+    _charSubscription?.cancel();
+    _deviceStateSubscription?.cancel();
+    _positionStream?.cancel();
   }
+
+  // ------- START OF BLUETOOTH METHODS -----
+
+  void _initBluetooth() async {
+    FlutterBlue flutterBlue = FlutterBlue.instance;
+    flutterBlue.startScan(timeout: const Duration(seconds: 4));
+    flutterBlue.scanResults.listen((results) async {
+      // do something with scan results
+      // for (ScanResult r in results) {
+      //   debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
+      // }
+      _device = results
+          .firstWhereOrNull(
+              (result) => result.device.name == BluetoothConstants.deviceName)
+          ?.device;
+      if (_device != null &&
+          _deviceState == BluetoothDeviceState.disconnected) {
+        debugPrint("Connecting to device...");
+        _deviceStateSubscription = _device?.state.listen((s) {
+          _deviceState = s;
+        });
+        await _device!.connect();
+        List<BluetoothService> services = await _device!.discoverServices();
+        BluetoothService targetService = services.firstWhere((service) =>
+            service.uuid.toString() == BluetoothConstants.serviceUUID);
+        List<BluetoothCharacteristic> characteristics =
+            targetService.characteristics;
+        BluetoothCharacteristic txCharacteristic = characteristics.firstWhere(
+            (characteristic) =>
+                characteristic.uuid.toString() ==
+                BluetoothConstants.characteristicUUIDTX);
+
+        BluetoothCharacteristic rxCharacteristic = characteristics.firstWhere(
+            (characteristic) =>
+                characteristic.uuid.toString() ==
+                BluetoothConstants.characteristicUUIDRX);
+
+        rxCharacteristic.setNotifyValue(true);
+        _charSubscription = rxCharacteristic.value.listen((event) {
+          String data = String.fromCharCodes(event);
+          if (data.startsWith("{")) {
+            debugPrint("Decoded Data: $data");
+            Map<String, dynamic> jsonData = jsonDecode(data);
+            if (jsonData["SOS"] == 1) {
+              _debouncer.run(() => _locStatusCallHelp(true));
+            }
+          }
+        });
+        await txCharacteristic.write(utf8.encode("Hello from flutter!"));
+      }
+    });
+
+    // Stop scanning
+    flutterBlue.stopScan();
+  }
+
+  // ------- END OF BLUETOOTH METHODS -------
 
   // ------- START OF PROFILE METHODS -------
   void _getData() async {
-    if (widget.carereceiverModel != null &&
-        widget.carereceiverModel!.careGiver.isNotEmpty) {
-      _getContact(widget.carereceiverModel!.careGiver[0].id);
+    if (widget.carereceiverModel.careGiver.isNotEmpty) {
+      _getContact(widget.carereceiverModel.careGiver[0].id);
     } else {
       debugPrint("No Contact");
     }
@@ -437,17 +513,11 @@ class _PatientState extends State<Patient> {
   }
 
   void _getProfileImg() async {
-    Reference? storageRef = FirebaseStorage.instance.ref();
-    final profileRef = storageRef.child("ProfileImg");
-    final imageRef = profileRef.child(profilePic);
-    try {
-      const oneMegabyte = 1024 * 1024;
-      final Uint8List? data = await imageRef.getData(oneMegabyte);
+    Uint8List? fetchedBytes = await ApiService.getProfileImg(profilePic);
+    if (fetchedBytes != null) {
       setState(() {
-        profileBytes = data!;
+        profileBytes = fetchedBytes;
       });
-    } on FirebaseException catch (e) {
-      debugPrint("Error getting profile");
     }
   }
 
@@ -464,7 +534,7 @@ class _PatientState extends State<Patient> {
 
   // ------- START OF FUNCTIONAL LOCATION METHODS -------
 
-  Future<Position> _getCurrentPosition() async{
+  Future<Position> _getCurrentPosition() async {
     Position position = await Geolocator.getCurrentPosition();
     setState(() {
       currentPosition = LatLng(position.latitude, position.longitude);
@@ -473,26 +543,31 @@ class _PatientState extends State<Patient> {
   }
 
   Future<String> _updateLocStatus(bool manualCall) async {
-    Position position = await _getCurrentPosition();
-    double distFromSafe = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        widget.carereceiverModel!.safezoneCtr.lat,
-        widget.carereceiverModel!.safezoneCtr.lng);
+    if (currentPosition != null) {
+      double distFromSafe = Geolocator.distanceBetween(
+          currentPosition!.latitude,
+          currentPosition!.longitude,
+          widget.carereceiverModel.safezoneCtr.lat,
+          widget.carereceiverModel.safezoneCtr.lng);
 
+      String status = distFromSafe > widget.carereceiverModel.safezoneRadius
+          ? "warning"
+          : distFromSafe > 30
+              ? manualCall
+                  ? "safezone unsafe"
+                  : "safezone"
+              : "home";
+      var response = await ApiService.updateCarereceiverLoc(
+          crId,
+          currentPosition!.latitude.toString(),
+          currentPosition!.longitude.toString(),
+          status);
+      debugPrint(response.body);
 
-    String status = distFromSafe > widget.carereceiverModel!.safezoneRadius
-        ? "warning"
-        : distFromSafe > 30
-            ? manualCall
-                ? "safezone unsafe"
-                : "safezone"
-            : "home";
-    var response =
-        await ApiService.updateCarereceiverLoc(crId, position, status);
-    debugPrint(response.body);
-    
-    return status;
+      return status;
+    } else {
+      return "home";
+    }
   }
 
   // CAN ALSO USE THIS FUNCTION TO CALL FOR BLUETOOTH BUTTON PRESS BY
@@ -515,7 +590,7 @@ class _PatientState extends State<Patient> {
 
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
-    lTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
+    _lTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       _locStatusCallHelp(false);
     });
   }
@@ -527,14 +602,14 @@ class _PatientState extends State<Patient> {
     var response = await ApiService.requestHelp(
         crId,
         position,
-        widget.carereceiverModel!.safezoneCtr.lat.toString(),
-        widget.carereceiverModel!.safezoneCtr.lng.toString());
+        widget.carereceiverModel.safezoneCtr.lat.toString(),
+        widget.carereceiverModel.safezoneCtr.lng.toString());
     debugPrint(response.body);
     _routingTimer();
   }
 
   Future<void> _routingTimer() async {
-    rTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
+    _rTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       debugPrint("Routing");
       if (!sosCalled) {
         debugPrint("End routing");
@@ -549,8 +624,8 @@ class _PatientState extends State<Patient> {
     Position position = await _getCurrentPosition();
     var response = await ApiService.routingHelp(
         position,
-        widget.carereceiverModel!.safezoneCtr.lat.toString(),
-        widget.carereceiverModel!.safezoneCtr.lng.toString());
+        widget.carereceiverModel.safezoneCtr.lat.toString(),
+        widget.carereceiverModel.safezoneCtr.lng.toString());
     debugPrint(response.body);
   }
   // ------- END OF FUNCTIONAL LOCATION METHODS -------
@@ -589,13 +664,13 @@ class _PatientState extends State<Patient> {
         ],
       ),
       body: Stack(children: [
-        Container(
-          child:  GmapsWidget(
-            polylineStrs: polylines,
-            center: currentPosition, 
-            bearing: 120.0,
-          )
-        ),
+        currentPosition != null
+            ? GmapsWidget(
+                polylineStrs: polylines,
+                center: currentPosition!,
+                bearing: 120.0,
+              )
+            : Container(),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -622,11 +697,14 @@ class _PatientState extends State<Patient> {
                     children: [
                       Icon(MaterialSymbols.home_pin,
                           color: Theme.of(context).colorScheme.primary),
-                      Text(
-                        homeAddress,
-                        textScaleFactor: 1.2,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                      Flexible(
+                        child: Text(
+                          homeAddress,
+                          textScaleFactor: 1.2,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -647,12 +725,12 @@ class _PatientState extends State<Patient> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: const [
-                  Icon(
+                children: [
+                  const Icon(
                     Icons.arrow_upward,
                     size: 100,
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                     child: Text.rich(
                       TextSpan(
@@ -671,19 +749,19 @@ class _PatientState extends State<Patient> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(60, 0, 0, 0),
-                    child: Text.rich(
-                      TextSpan(
-                        style: TextStyle(fontSize: 25),
-                        children: [
-                          TextSpan(
-                            text: "     25\n",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: 'mins left'),
-                        ],
-                      ),
+                  Expanded(
+                    child: Container(),
+                  ),
+                  const Text.rich(
+                    TextSpan(
+                      style: TextStyle(fontSize: 25),
+                      children: [
+                        TextSpan(
+                          text: "     25\n",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(text: 'mins left'),
+                      ],
                     ),
                   )
                 ],

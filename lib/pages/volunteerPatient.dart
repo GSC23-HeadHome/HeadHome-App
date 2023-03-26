@@ -150,7 +150,7 @@ class _PatientPageState extends State<PatientPage> {
               onPressed: () async {
                 //code to execute on bxutton press
                 await FlutterPhoneDirectCaller.callNumber(
-                    widget.carereceiverModel.contactNum);
+                    widget.carereceiverModel.contactNum.replaceAll(' ', ''));
               },
               child: Icon(Icons.call),
               backgroundColor:
@@ -192,7 +192,6 @@ class _findPatientState extends State<findPatient> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     authIdController.dispose();
   }
@@ -235,8 +234,8 @@ class _findPatientState extends State<findPatient> {
                     },
                   ),
                   border: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
+                    borderSide: const BorderSide(
+                        width: 1, color: Colors.grey), //<-- SEE HERE
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
@@ -257,7 +256,7 @@ class _findPatientState extends State<findPatient> {
               ),
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 height: 200,
@@ -287,13 +286,13 @@ class _findPatientState extends State<findPatient> {
                 width: 350,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.3),
                       spreadRadius: 3,
                       blurRadius: 6,
-                      offset: Offset(0, 5), // changes position of shadow
+                      offset: const Offset(0, 5), // changes position of shadow
                     ),
                   ],
                 ),
@@ -332,11 +331,11 @@ class _findPatientState extends State<findPatient> {
                             //send alert
                             if (widget.priContactNo != "-") {
                               await FlutterPhoneDirectCaller.callNumber(
-                                  widget.priContactNo);
+                                  widget.priContactNo.replaceAll(' ', ''));
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                              minimumSize: Size(100, 45),
+                              minimumSize: const Size(100, 45),
                               backgroundColor:
                                   Theme.of(context).colorScheme.primary),
                           child: const Text(
@@ -379,7 +378,7 @@ class findHome extends StatelessWidget {
               ),
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 height: 200,
@@ -399,7 +398,7 @@ class findHome extends StatelessWidget {
                 children: [
                   Text("Caregiver Information",
                       style: Theme.of(context).textTheme.titleSmall),
-                  Spacer(),
+                  const Spacer(),
                 ],
               ),
             ),
@@ -409,13 +408,13 @@ class findHome extends StatelessWidget {
                 width: 350,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.3),
                       spreadRadius: 3,
                       blurRadius: 6,
-                      offset: Offset(0, 5), // changes position of shadow
+                      offset: const Offset(0, 5), // changes position of shadow
                     ),
                   ],
                 ),
@@ -440,7 +439,7 @@ class findHome extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
                             child: Text(priContactNo,
-                                style: TextStyle(fontSize: 12.0)),
+                                style: const TextStyle(fontSize: 12.0)),
                           ),
                         ],
                       ),
@@ -454,7 +453,7 @@ class findHome extends StatelessWidget {
                             //send alert
                           },
                           style: ElevatedButton.styleFrom(
-                              minimumSize: Size(100, 45),
+                              minimumSize: const Size(100, 45),
                               backgroundColor:
                                   Theme.of(context).colorScheme.primary),
                           child: const Text(
