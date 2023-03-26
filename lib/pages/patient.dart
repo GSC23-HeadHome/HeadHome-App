@@ -82,6 +82,49 @@ class _PatientState extends State<Patient> {
   BluetoothCharacteristic? txCharacteristic;
   final Debouncer _debouncer = Debouncer(seconds: 5);
 
+  IconData determineRouteArrow(RouteLog? rl) {
+    if (rl == null) return Icons.straight;
+
+    switch (rl.maneuver) {
+      case "turn-slight-left":
+        return Icons.turn_left;
+      case "turn-sharp-left":
+        return Icons.turn_sharp_left;
+      case "uturn-left":
+        return Icons.u_turn_left;
+      case "turn-left":
+        return Icons.turn_left;
+      case "turn-slight-right":
+        return Icons.turn_right;
+      case "turn-sharp-right":
+        return Icons.turn_sharp_right;
+      case "uturn-right":
+        return Icons.u_turn_right;
+      case "turn-right":
+        return Icons.turn_right;
+      case "ramp-left":
+        return Icons.ramp_left;
+      case "ramp-right":
+        return Icons.turn_right;
+      case "merge":
+        return Icons.merge;
+      case "fork-left":
+        return Icons.fork_left;
+      case "fork-right":
+        return Icons.fork_right;
+      case "ferry":
+        return Icons.directions_boat;
+      case "ferry-train":
+        return Icons.directions_ferry;
+      case "roundabout-left":
+        return Icons.roundabout_left;
+      case "roundabout-right":
+        return Icons.roundabout_right;
+      default:
+        return Icons.straight;
+    }
+  }
+
   void showPatientDetails() {
     showDialog(
         context: context,
@@ -805,29 +848,48 @@ class _PatientState extends State<Patient> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.arrow_upward,
+                    Icon(
+                      determineRouteArrow(
+                          routeIndex >= routeLogsModel.length - 1
+                              ? null
+                              : routeLogsModel[routeIndex + 1]),
                       size: 100,
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                      child: Text.rich(
-                        TextSpan(
-                          style: const TextStyle(fontSize: 10),
-                          children: [
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            parseHTML(routeIndex >= routeLogsModel.length - 1
+                                ? "Continue to destination"
+                                : routeLogsModel[routeIndex + 1]
+                                    .htmlInstructions),
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                          Text.rich(
                             TextSpan(
-                              text: parseHTML(
-                                  routeIndex >= routeLogsModel.length
-                                      ? "Continue to destination"
-                                      : routeLogsModel[routeIndex + 1]
-                                          .htmlInstructions),
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                    text:
+                                        routeIndex >= routeLogsModel.length - 1
+                                            ? "For "
+                                            : routeLogsModel[routeIndex + 1]
+                                                        .maneuver ==
+                                                    "straight"
+                                                ? "For "
+                                                : "In "),
+                                TextSpan(
+                                  text:
+                                      '${distanceToNextRouteLog.toInt().toString()}m',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                              style: const TextStyle(fontSize: 20),
                             ),
-                            TextSpan(
-                                text: distanceToNextRouteLog.toInt().toString())
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     ),
                   ],
