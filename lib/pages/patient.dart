@@ -11,12 +11,13 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:headhome/api/models/routelogdata.dart';
 import 'package:headhome/utils/debouncer.dart';
 import '../constants.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
-import 'package:headhome/utils/extensions.dart';
+import 'package:headhome/utils/strings.dart';
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
@@ -64,6 +65,11 @@ class _PatientState extends State<Patient> {
   // Location details
   LatLng? currentPosition;
   Set<Polyline> polylines = {};
+
+  int routeIndex = 0;
+  List<RouteLog> routeLogsModel = [];
+  double distanceToNextRouteLog = 0;
+
   double bearing = 0.0;
   Timer? _lTimer;
   Timer? _rTimer;
@@ -73,6 +79,7 @@ class _PatientState extends State<Patient> {
   StreamSubscription? _deviceStateSubscription;
   StreamSubscription? _charSubscription;
   BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
+  BluetoothCharacteristic? txCharacteristic;
   final Debouncer _debouncer = Debouncer(seconds: 5);
 
   void showPatientDetails() {
@@ -418,9 +425,32 @@ class _PatientState extends State<Patient> {
 
     _positionStream =
         Geolocator.getPositionStream().listen((Position position) {
-      setState(() {
-        currentPosition = LatLng(position.latitude, position.longitude);
-      });
+      // listen out for whether we've reached the end of current routelog
+      if (sosCalled) {
+        Location endLocation = routeLogsModel[routeIndex].endLocation;
+        double endDistance = Geolocator.distanceBetween(position.latitude,
+            position.longitude, endLocation.lat, endLocation.lng);
+        double endBearing = Geolocator.bearingBetween(position.latitude,
+            position.longitude, endLocation.lat, endLocation.lng);
+
+        Map<String, dynamic> dataToESP = {
+          "bearing": endBearing,
+          "distance": endDistance.toInt(),
+          "alert": 1,
+        };
+        txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
+
+        setState(() {
+          distanceToNextRouteLog = endDistance;
+          if (endDistance < 10) {
+            routeIndex++;
+          }
+          currentPosition = LatLng(position.latitude, position.longitude);
+        });
+      } else {
+        setState(() =>
+            currentPosition = LatLng(position.latitude, position.longitude));
+      }
       print("Streaming: $currentPosition");
     });
 
@@ -476,10 +506,9 @@ class _PatientState extends State<Patient> {
             service.uuid.toString() == BluetoothConstants.serviceUUID);
         List<BluetoothCharacteristic> characteristics =
             targetService.characteristics;
-        BluetoothCharacteristic txCharacteristic = characteristics.firstWhere(
-            (characteristic) =>
-                characteristic.uuid.toString() ==
-                BluetoothConstants.characteristicUUIDTX);
+        txCharacteristic = characteristics.firstWhere((characteristic) =>
+            characteristic.uuid.toString() ==
+            BluetoothConstants.characteristicUUIDTX);
 
         BluetoothCharacteristic rxCharacteristic = characteristics.firstWhere(
             (characteristic) =>
@@ -497,7 +526,7 @@ class _PatientState extends State<Patient> {
             }
           }
         });
-        await txCharacteristic.write(utf8.encode("Hello from flutter!"));
+        await txCharacteristic?.write(utf8.encode("Hello from flutter!"));
       }
     });
 
@@ -611,7 +640,13 @@ class _PatientState extends State<Patient> {
         widget.carereceiverModel.safezoneCtr.lat.toString(),
         widget.carereceiverModel.safezoneCtr.lng.toString());
     Map<String, dynamic> res = json.decode(response.body);
-    
+
+    _processRouteResponse(res);
+    // Calling route api every 5 mins
+    _routingTimer();
+  }
+
+  void _processRouteResponse(Map<String, dynamic> res) {
     // Converting polyline
     Set<Polyline> tempPoly = {};
     for (int i = 0; i < res["Route"].length; i++) {
@@ -631,12 +666,16 @@ class _PatientState extends State<Patient> {
       );
       tempPoly.add(polyline);
     }
+    List<RouteLog> fetchedRouteLogs = [];
+    for (Map<String, dynamic> routeLog in res["Route"]) {
+      fetchedRouteLogs.add(RouteLog.fromJson(routeLog));
+    }
+
     setState(() {
       polylines = tempPoly;
+      routeLogsModel = fetchedRouteLogs;
+      routeIndex = 0;
     });
-
-    // Calling route api every 5 mins
-    _routingTimer();
   }
 
   Future<void> _routingTimer() async {
@@ -658,6 +697,8 @@ class _PatientState extends State<Patient> {
         widget.carereceiverModel.safezoneCtr.lat.toString(),
         widget.carereceiverModel.safezoneCtr.lng.toString());
     debugPrint(response.body);
+    Map<String, dynamic> res = jsonDecode(response.body);
+    _processRouteResponse(res);
   }
   // ------- END OF FUNCTIONAL LOCATION METHODS -------
 
@@ -742,60 +783,50 @@ class _PatientState extends State<Patient> {
                 ),
               ),
             ),
-            Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade600,
-                    spreadRadius: 1,
-                    blurRadius: 15,
-                    blurStyle: BlurStyle.outer,
-                  ),
-                ],
-                color: Colors.white,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.arrow_upward,
-                    size: 100,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                    child: Text.rich(
-                      TextSpan(
-                        style: TextStyle(fontSize: 25),
-                        children: [
-                          TextSpan(
-                            text: "Straight ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: 'for\n'),
-                          TextSpan(
-                            text: "200m",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          )
-                        ],
+            Visibility(
+              visible: sosCalled,
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade600,
+                      spreadRadius: 1,
+                      blurRadius: 15,
+                      blurStyle: BlurStyle.outer,
+                    ),
+                  ],
+                  color: Colors.white,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.arrow_upward,
+                      size: 100,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Text.rich(
+                        TextSpan(
+                          style: const TextStyle(fontSize: 10),
+                          children: [
+                            TextSpan(
+                              text: parseHTML(
+                                  routeIndex >= routeLogsModel.length
+                                      ? "Continue to destination"
+                                      : routeLogsModel[routeIndex + 1]
+                                          .htmlInstructions),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(
+                                text: distanceToNextRouteLog.toInt().toString())
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Container(),
-                  ),
-                  const Text.rich(
-                    TextSpan(
-                      style: TextStyle(fontSize: 25),
-                      children: [
-                        TextSpan(
-                          text: "     25\n",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        TextSpan(text: 'mins left'),
-                      ],
-                    ),
-                  )
-                ],
+                  ],
+                ),
               ),
             )
           ],
