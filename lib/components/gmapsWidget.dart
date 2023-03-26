@@ -56,7 +56,7 @@ class _GmapsWidgetState extends State<GmapsWidget> {
 
   void addCustomIcon() async {
     var icon = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(), 'assets/arrow.png');
+        const ImageConfiguration(), 'assets/arrow_1.png');
 
     setState(() {
       markerIcon = icon;
