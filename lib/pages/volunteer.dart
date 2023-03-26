@@ -296,7 +296,7 @@ class _PatientDetailsState extends State<PatientDetails> {
   void initState() {
     super.initState();
     fetchPatient();
-    debugPrint("PATIENT DETAILS WIDGET CALLED");
+    debugPrint("PATIENT DETAILS WIDGET CALLEDr");
   }
 
   @override
