@@ -71,14 +71,25 @@ class _CaregiverState extends State<Caregiver> {
       if (message.notification != null && message.notification!.body != null) {
         debugPrint('Message: ${message.notification!.title}');
         debugPrint('Body: ${message.notification!.body}');
+        debugPrint('android: ${message.notification!.android}');
+        
+        final snackBar = SnackBar(
+          content: Text(message.notification?.body ?? '', maxLines: 2),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        
         String crId = message.notification!.body!.split(" ")[0];
         CarereceiverModel? careReceiver =
             careReceiverDetails.firstWhereOrNull((cr) => cr.crId == crId);
         careReceiver?.getCRTravelLog();
       }
     });
+
+  
     if (settings.authorizationStatus != AuthorizationStatus.authorized) {
       debugPrint('User declined or has not accepted permission');
+    } else {
+      debugPrint("User has accepted push notifications");
     }
   }
 
