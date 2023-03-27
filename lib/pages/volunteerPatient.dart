@@ -564,7 +564,7 @@ class findHome extends StatelessWidget {
                               padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
                               child: Wrap(children: const [
                                 Text(
-                                  "Sarah",
+                                  "Sarah", // TODO: Replace hardcoded values
                                   style: TextStyle(
                                       fontSize: 16.0,
                                       color: Color(0xFF263238),
@@ -585,7 +585,7 @@ class findHome extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
                         child: ElevatedButton(
                           onPressed: () {
-                            //send alert
+                            // TODO: implement flutter phone caller
                           },
                           style: ElevatedButton.styleFrom(
                               minimumSize: const Size(100, 45),
