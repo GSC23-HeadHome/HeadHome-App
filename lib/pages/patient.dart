@@ -478,25 +478,50 @@ class _PatientState extends State<Patient> {
         double endBearing = Geolocator.bearingBetween(position.latitude,
             position.longitude, endLocation.lat, endLocation.lng);
 
-        Map<String, dynamic> dataToESP = {
-          "bearing": endBearing,
-          "distance": endDistance.toInt(),
-          "alert": 1,
-        };
-        txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
+        double distFromSafe = Geolocator.distanceBetween(
+            position.latitude,
+            position.longitude,
+            widget.carereceiverModel.safezoneCtr.lat,
+            widget.carereceiverModel.safezoneCtr.lng);
 
-        setState(() {
-          distanceToNextRouteLog = endDistance;
-          if (endDistance < 10) {
-            routeIndex++;
-          }
-          currentPosition = LatLng(position.latitude, position.longitude);
-        });
+        Map<String, dynamic> dataToESP;
+
+        // check if user has reached home
+        if (distFromSafe > 30) {
+          dataToESP = {
+            "bearing": endBearing,
+            "distance": endDistance.toInt(),
+            "alert": 1,
+          };
+          txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
+          setState(() {
+            distanceToNextRouteLog = endDistance;
+            if (endDistance < 10) {
+              routeIndex++;
+            }
+            currentPosition = LatLng(position.latitude, position.longitude);
+            sosCalled = false;
+          });
+        } else {
+          dataToESP = {
+            "bearing": endBearing,
+            "distance": endDistance.toInt(),
+            "alert": 0,
+          };
+          txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
+          setState(() {
+            distanceToNextRouteLog = endDistance;
+            if (endDistance < 10) {
+              routeIndex++;
+            }
+            currentPosition = LatLng(position.latitude, position.longitude);
+          });
+        }
       } else {
         setState(() =>
             currentPosition = LatLng(position.latitude, position.longitude));
+        print("Current Position Stream: $currentPosition");
       }
-      print("Streaming: $currentPosition");
     });
 
     _getData();
