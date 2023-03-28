@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
+import 'package:headhome/api/models/caregiverdata.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/api/models/soslogdata.dart';
 import 'package:headhome/api/models/travellogdata.dart';
@@ -31,6 +32,7 @@ class PatientPage extends StatefulWidget {
 }
 
 class _PatientPageState extends State<PatientPage> {
+  String priContactName = "-";
   String _priContactNo = "-";
   LatLng? currentLocation;
   Timer? _lTimer;
@@ -44,6 +46,16 @@ class _PatientPageState extends State<PatientPage> {
     if (fetchedContactNo != null) {
       setState(() {
         _priContactNo = fetchedContactNo.cgContactNum;
+      });
+    }
+  }
+
+  void fetchCgName() async {
+    final CaregiverModel? caregiverModel =
+        await ApiService.getCaregiver(widget.carereceiverModel.careGiver[0].id);
+    if (caregiverModel != null) {
+      setState(() {
+        priContactName = caregiverModel.name;
       });
     }
   }
@@ -83,6 +95,7 @@ class _PatientPageState extends State<PatientPage> {
   @override
   void initState() {
     super.initState();
+    fetchCgName();
     fetchCgNumber();
     updateLocation();
     intialiseAuthenticated();
@@ -201,11 +214,13 @@ class _PatientPageState extends State<PatientPage> {
                     ),
                     authenticated
                         ? findHome(
+                            priContactName: priContactName,
                             priContactNo: _priContactNo,
                             homeLocation: homeLocation,
                             openMap: openMap,
                           )
                         : findPatient(
+                            priContactName: priContactName,
                             priContactNo: _priContactNo,
                             sosLogModel: widget.sosLogModel,
                             volunteerModel: widget.volunteerModel,
@@ -253,6 +268,7 @@ class _PatientPageState extends State<PatientPage> {
 class findPatient extends StatefulWidget {
   findPatient({
     super.key,
+    required this.priContactName,
     required this.priContactNo,
     required this.sosLogModel,
     required this.volunteerModel,
@@ -260,6 +276,7 @@ class findPatient extends StatefulWidget {
     required this.patientLocation,
     required this.openMap,
   });
+  final String priContactName;
   final String priContactNo;
   final Map<String, dynamic> sosLogModel;
   final VolunteerModel volunteerModel;
@@ -417,10 +434,10 @@ class _findPatientState extends State<findPatient> {
                         children: [
                           Padding(
                               padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                              child: Wrap(children: const [
+                              child: Wrap(children: [
                                 Text(
-                                  "Sarah",
-                                  style: TextStyle(
+                                  widget.priContactName,
+                                  style: const TextStyle(
                                       fontSize: 16.0,
                                       color: Color(0xFF263238),
                                       fontWeight: FontWeight.w600),
@@ -471,9 +488,11 @@ class _findPatientState extends State<findPatient> {
 class findHome extends StatelessWidget {
   const findHome(
       {super.key,
+      required this.priContactName,
       required this.priContactNo,
       required this.homeLocation,
       required this.openMap});
+  final String priContactName;
   final String priContactNo;
   final LatLng homeLocation;
   final void Function(double, double) openMap;
@@ -562,10 +581,10 @@ class findHome extends StatelessWidget {
                         children: [
                           Padding(
                               padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                              child: Wrap(children: const [
+                              child: Wrap(children: [
                                 Text(
-                                  "Sarah", // TODO: Replace hardcoded values
-                                  style: TextStyle(
+                                  priContactName,
+                                  style: const TextStyle(
                                       fontSize: 16.0,
                                       color: Color(0xFF263238),
                                       fontWeight: FontWeight.w600),
@@ -584,8 +603,11 @@ class findHome extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
                         child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: implement flutter phone caller
+                          onPressed: () async {
+                            if (priContactNo != "-") {
+                              await FlutterPhoneDirectCaller.callNumber(
+                                  priContactNo.replaceAll(' ', ''));
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                               minimumSize: const Size(100, 45),
