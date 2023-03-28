@@ -207,7 +207,10 @@ class _VolunteerState extends State<Volunteer> {
                                 };
                               })
                               .where((item) =>
-                                  item['status'] as String == "lost" || (item['status'] as String == "guided" && item['vname'] as String == widget.volunteerModel.name as String))
+                                  item['status'] as String == "lost" ||
+                                  (item['status'] as String == "guided" &&
+                                      item['vname'] as String ==
+                                          widget.volunteerModel.name as String))
                               .map((item) => PatientDetails(
                                     distance: item['distance'] as double,
                                     sosLogModel:
@@ -299,6 +302,8 @@ class _PatientDetailsState extends State<PatientDetails> {
 
     print("seet patient details");
     print(_carereceiverModel?.name);
+    print("soslog");
+    print(widget.sosLogModel);
   }
 
   @override
