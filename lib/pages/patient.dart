@@ -691,10 +691,6 @@ class _PatientState extends State<Patient> {
       setState(() {
         sosCalled = true;
       });
-    } else if (locStatus == "home") {
-      setState(() {
-        sosCalled = false;
-      });
     }
   }
 
