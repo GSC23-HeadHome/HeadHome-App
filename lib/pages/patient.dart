@@ -500,7 +500,6 @@ class _PatientState extends State<Patient> {
               routeIndex++;
             }
             currentPosition = LatLng(position.latitude, position.longitude);
-            sosCalled = false;
           });
         } else {
           dataToESP = {
@@ -515,6 +514,7 @@ class _PatientState extends State<Patient> {
               routeIndex++;
             }
             currentPosition = LatLng(position.latitude, position.longitude);
+            sosCalled = false;
           });
         }
       } else {
