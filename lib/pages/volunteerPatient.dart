@@ -32,7 +32,7 @@ class PatientPage extends StatefulWidget {
 
 class _PatientPageState extends State<PatientPage> {
   String _priContactNo = "-";
-  LatLng? currentLocation;
+  late LatLng currentLocation = LatLng(0, 0);
   Timer? _lTimer;
 
   //to check if class rerenders
@@ -84,8 +84,11 @@ class _PatientPageState extends State<PatientPage> {
   void initState() {
     super.initState();
     fetchCgNumber();
+    getPatientLocation();
     updateLocation();
     intialiseAuthenticated();
+    print("currentlocation");
+    print(currentLocation);
   }
 
   @override
@@ -103,6 +106,7 @@ class _PatientPageState extends State<PatientPage> {
   bool authenticated = false;
 
   void intialiseAuthenticated() {
+    print("intialise authenticated");
     if (widget.sosLogModel["status"] == "guided") {
       setState(() {
         authenticated = true;
@@ -122,6 +126,7 @@ class _PatientPageState extends State<PatientPage> {
   Widget build(BuildContext context) {
     LatLng homeLocation = LatLng(widget.carereceiverModel.safezoneCtr.lat,
         widget.carereceiverModel.safezoneCtr.lng);
+    print(homeLocation);
 
     return Scaffold(
       appBar: AppBar(
@@ -210,7 +215,7 @@ class _PatientPageState extends State<PatientPage> {
                             sosLogModel: widget.sosLogModel,
                             volunteerModel: widget.volunteerModel,
                             updateAuthenticated: updateAuthenticated,
-                            patientLocation: currentLocation!,
+                            patientLocation: currentLocation,
                             openMap: openMap,
                           ),
                   ],
