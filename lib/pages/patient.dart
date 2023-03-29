@@ -500,7 +500,6 @@ class _PatientState extends State<Patient> {
               routeIndex++;
             }
             currentPosition = LatLng(position.latitude, position.longitude);
-            sosCalled = false;
           });
         } else {
           dataToESP = {
@@ -515,6 +514,7 @@ class _PatientState extends State<Patient> {
               routeIndex++;
             }
             currentPosition = LatLng(position.latitude, position.longitude);
+            sosCalled = false;
           });
         }
       } else {
@@ -594,7 +594,6 @@ class _PatientState extends State<Patient> {
             if (jsonData["SOS"] == "1") {
               _debouncer.run(() {
                 setState(() {
-                  fade = !fade;
                   _locStatusCallHelp(true);
                 });
               });
@@ -689,6 +688,7 @@ class _PatientState extends State<Patient> {
       debugPrint("CALLING FOR HELP");
       _requestHelp();
       setState(() {
+        fade = !fade;
         sosCalled = true;
       });
     }
@@ -950,7 +950,6 @@ class _PatientState extends State<Patient> {
                 ),
                 onPressed: () {
                   setState(() {
-                    fade = !fade;
                     _locStatusCallHelp(true);
                   });
                 },
