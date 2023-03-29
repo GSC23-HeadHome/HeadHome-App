@@ -501,6 +501,8 @@ class _PatientState extends State<Patient> {
             }
             currentPosition = LatLng(position.latitude, position.longitude);
           });
+
+          // reached home
         } else {
           dataToESP = {
             "bearing": endBearing,
@@ -515,7 +517,17 @@ class _PatientState extends State<Patient> {
             }
             currentPosition = LatLng(position.latitude, position.longitude);
             sosCalled = false;
+            polylines = {};
+            fade = !fade;
           });
+
+          const snackBar = SnackBar(
+            content: Text("Safely Reached Home!"),
+            behavior: SnackBarBehavior.floating,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+          ApiService.updateSOS(widget.carereceiverModel.crId, "home");
         }
       } else {
         setState(() =>

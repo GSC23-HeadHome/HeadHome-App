@@ -364,6 +364,20 @@ class ApiService {
     return null;
   }
 
+  static Future<void> updateSOS(String id, String status) async {
+    try {
+      var url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.sos}/$id');
+      print(url);
+      await http.put(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: {"Status": status},
+      );
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   // --------- END OF SOS LOG METHODS ----------
 
   // ----------- TRAVEL LOG METHODS ------------
