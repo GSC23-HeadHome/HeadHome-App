@@ -30,8 +30,8 @@ class MyState extends ChangeNotifier {
   void respondButton(CarereceiverModel model) {
     alert_sent = !alert_sent;
     ApiService.sendSOS(model.crId);
-    print("state changed");
-    print(alert_sent);
+    debugPrint("state changed");
+    debugPrint(alert_sent.toString());
     notifyListeners();
   }
 
@@ -78,14 +78,14 @@ class _PatientDetailsState extends State<PatientDetails> {
         patientLocation = LatLng(travelLogModel.currentLocation.lat,
             travelLogModel.currentLocation.lng);
       });
-      print("currentLocation updated");
+      debugPrint("currentLocation updated");
     }
   }
 
   //call travel log every 5 min to update current location
   void updateLocation() {
-    print("timer activated");
-    _lTimer = Timer.periodic(Duration(minutes: 5), (Timer timer) {
+    debugPrint("timer activated");
+    _lTimer = Timer.periodic( const Duration(minutes: 5), (Timer timer) {
       getPatientLocation();
     });
   }
@@ -166,7 +166,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                     children: <Widget>[
                       // list of widgets that you want to scroll through
                       Padding(
-                        padding: EdgeInsets.fromLTRB(0, 40, 0, 30),
+                        padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
                         child: Column(
                           children: [
                             Text(widget.carereceiverModel.name,
@@ -307,8 +307,8 @@ class _PatientDetailsState extends State<PatientDetails> {
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleSmall),
-                                    Spacer(),
-                                    Icon(Icons.edit)
+                                    const Spacer(),
+                                    const Icon(Icons.edit)
                                   ],
                                 ),
                               ),
@@ -341,7 +341,7 @@ class _PatientDetailsState extends State<PatientDetails> {
             ),
           ],
         ),
-        floatingActionButton: Container(
+        floatingActionButton: SizedBox(
             height: 80,
             width: 80,
             child: FittedBox(
@@ -350,9 +350,9 @@ class _PatientDetailsState extends State<PatientDetails> {
                 onPressed: () {
                   //code to execute on bxutton press
                 },
-                child: Icon(Icons.add),
                 backgroundColor:
-                    Theme.of(context).colorScheme.primary, //icon inside button
+                    Theme.of(context).colorScheme.primary,
+                child: const Icon(Icons.add), //icon inside button
               ),
             )),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -360,7 +360,7 @@ class _PatientDetailsState extends State<PatientDetails> {
           //bottom navigation bar on scaffold
           height: 80,
           color: Theme.of(context).colorScheme.tertiary,
-          shape: CircularNotchedRectangle(), //shape of notch
+          shape: const CircularNotchedRectangle(), //shape of notch
           notchMargin:
               5, //notche margin between floating button and bottom appbar
         ),
@@ -370,23 +370,23 @@ class _PatientDetailsState extends State<PatientDetails> {
 }
 
 class sendAlert extends StatelessWidget {
-  sendAlert({super.key, required this.model});
+  const sendAlert({super.key, required this.model});
   final CarereceiverModel model;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<MyState>(builder: (context, myState, child) {
       if (model.soslog != null) {
-        print("Model: ${model.soslog!.vId}");
+        debugPrint("Model: ${model.soslog!.vId}");
       } else {
-        print("Model: null");
+        debugPrint("Model: null");
       }
-      print("updated child with: ${myState._alert_sent}");
+      debugPrint("updated child with: ${myState._alert_sent}");
       return myState._alert_sent
           ? Column(
               children: [
                 //button
-                Container(
+                SizedBox(
                   width: 200,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -395,7 +395,7 @@ class sendAlert extends StatelessWidget {
                         // Do nothing as alert cannot be unsent
                       },
                       style: ElevatedButton.styleFrom(
-                          minimumSize: Size(200, 50),
+                          minimumSize: const Size(200, 50),
                           backgroundColor: Colors.grey),
                       child: const Text(
                         'Alert Sent',
@@ -497,7 +497,7 @@ class sendAlert extends StatelessWidget {
           : Column(
               children: [
                 //button
-                Container(
+                SizedBox(
                   width: 200,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -505,11 +505,11 @@ class sendAlert extends StatelessWidget {
                       onPressed: () {
                         //send alert
                         myState.respondButton(model);
-                        print("responded");
+                        debugPrint("responded");
                       },
                       style: ElevatedButton.styleFrom(
-                          minimumSize: Size(200, 50),
-                          backgroundColor: Color(0xFFF8E3E4)),
+                          minimumSize: const Size(200, 50),
+                          backgroundColor: const Color(0xFFF8E3E4)),
                       child: Text(
                         'Send Alert',
                         style: TextStyle(

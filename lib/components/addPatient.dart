@@ -109,7 +109,7 @@ class __AddPatientOverlayState extends State<AddPatientOverlay> {
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
-                                    child: Text(
+                                    child: const Text(
                                       'Cancel',
                                       style: TextStyle(color: Colors.grey),
                                     ),
@@ -119,11 +119,11 @@ class __AddPatientOverlayState extends State<AddPatientOverlay> {
                                       //addNewPatient(authid, relationship) 
                                     },
                                     style: ElevatedButton.styleFrom(
-                                        minimumSize: Size(120, 50),
+                                        minimumSize: const Size(120, 50),
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
                                             .primary),
-                                    child: Text(
+                                    child: const Text(
                                       'Add',
                                       style: TextStyle(color: Colors.white),
                                     ),
@@ -162,9 +162,9 @@ class __AddPatientOverlayState extends State<AddPatientOverlay> {
         //code to execute on bxutton press
         showAddPatient();
       },
-      child: Icon(Icons.add),
       backgroundColor:
-          Theme.of(context).colorScheme.primary, //icon inside button
+          Theme.of(context).colorScheme.primary,
+      child: const Icon(Icons.add), //icon inside button
     );
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class SettingsOverlay extends StatefulWidget {
@@ -50,7 +48,7 @@ class __SettingsOverlayState extends State<SettingsOverlay> {
                         height: 110,
                         decoration: BoxDecoration(
                           color: Colors.grey.withOpacity(0.3),
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                          borderRadius: const BorderRadius.all(Radius.circular(12)),
                         ),
                         child: Row(
                           children: [
