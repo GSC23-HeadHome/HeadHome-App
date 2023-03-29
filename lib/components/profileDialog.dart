@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../pages/volunteer.dart' show Volunteer;
-import '../pages/caregiver.dart' show Caregiver;
 
 class ProfileOverlay extends StatefulWidget {
   const ProfileOverlay(
@@ -167,7 +165,7 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
-                                    child: Text(
+                                    child: const Text(
                                       'Cancel',
                                       style: TextStyle(color: Colors.grey),
                                     ),
@@ -181,7 +179,7 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                           localNum,
                                           localPassword);
 
-                                      print(message);
+                                      debugPrint(message);
 
                                       setState(() {
                                         updateAttempt = true;
@@ -197,11 +195,11 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
-                                        minimumSize: Size(120, 50),
+                                        minimumSize: const Size(120, 50),
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
                                             .primary),
-                                    child: Text(
+                                    child: const Text(
                                       'Save',
                                       style: TextStyle(color: Colors.white),
                                     ),
@@ -227,11 +225,11 @@ class __ProfileOverlayState extends State<ProfileOverlay> {
                             builder: (BuildContext context) {
                               return updateAttempt
                                   ? (updateSuccess
-                                      ? Text(
+                                      ? const Text(
                                           "Update Successful",
                                           style: TextStyle(color: Colors.black),
                                         )
-                                      : Text(
+                                      : const Text(
                                           "Update Failed. Try Again",
                                           style: TextStyle(color: Colors.red),
                                         ))

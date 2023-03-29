@@ -520,14 +520,12 @@ class _PatientState extends State<Patient> {
       } else {
         setState(() =>
             currentPosition = LatLng(position.latitude, position.longitude));
-        print("Current Position Stream: $currentPosition");
       }
     });
 
     _getData();
     _getProfileImg();
     _locationHandler();
-    // _bearingTimer();
     _initBluetooth();
   }
 
@@ -556,10 +554,6 @@ class _PatientState extends State<Patient> {
     FlutterBlue flutterBlue = FlutterBlue.instance;
     flutterBlue.startScan(timeout: const Duration(seconds: 4));
     flutterBlue.scanResults.listen((results) async {
-      // do something with scan results
-      // for (ScanResult r in results) {
-      //   debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
-      // }
       _device = results
           .firstWhereOrNull(
               (result) => result.device.name == BluetoothConstants.deviceName)
