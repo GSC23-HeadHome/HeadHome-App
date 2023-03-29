@@ -270,6 +270,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                                       ? Container()
                                       : GmapsWidget(
                                           center: patientLocation!,
+                                          marker: patientLocation!,
                                         ),
                                 ),
                                 Positioned(

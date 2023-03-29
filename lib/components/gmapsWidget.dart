@@ -112,7 +112,7 @@ class _GmapsWidgetState extends State<GmapsWidget> {
                 markerId: const MarkerId('current_location'),
                 position: widget.marker!,
                 infoWindow: const InfoWindow(title: 'Current Location'),
-                icon: markerIcon!,
+                // icon: markerIcon!,
                 rotation: widget.bearing ?? 0.0,
               )
             },
