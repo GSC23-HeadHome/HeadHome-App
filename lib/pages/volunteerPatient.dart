@@ -34,7 +34,7 @@ class PatientPage extends StatefulWidget {
 class _PatientPageState extends State<PatientPage> {
   String priContactName = "-";
   String _priContactNo = "-";
-  late LatLng currentLocation = LatLng(0, 0);
+  late LatLng currentLocation = LatLng(0,0);
   Timer? _lTimer;
 
   //to check if class rerenders
@@ -230,7 +230,7 @@ class _PatientPageState extends State<PatientPage> {
                             sosLogModel: widget.sosLogModel,
                             volunteerModel: widget.volunteerModel,
                             updateAuthenticated: updateAuthenticated,
-                            patientLocation: currentLocation,
+                            patientLocation: currentLocation!,
                             openMap: openMap,
                           ),
                   ],
@@ -302,12 +302,12 @@ class _findPatientState extends State<findPatient> {
     authIdController.dispose();
   }
 
-  //to check if class rerenders
-  // @override
-  // void didUpdateWidget(findPatient oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   print("find patient widget has been updated");
-  // }
+  // to check if class rerenders
+  @override
+  void didUpdateWidget(findPatient oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print("find patient widget has been updated");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -377,9 +377,11 @@ class _findPatientState extends State<findPatient> {
                 children: [
                   SizedBox(
                     height: 200,
-                    child: GmapsWidget(
-                      center: widget.patientLocation,
-                    ),
+                    child: widget.patientLocation != LatLng(0,0)
+                        ? GmapsWidget(
+                            center: widget.patientLocation,
+                          )
+                        : Container(),
                   ),
                   Positioned(
                     top: 16,
