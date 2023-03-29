@@ -39,6 +39,12 @@ class _GmapsWidgetState extends State<GmapsWidget> {
     // toPolyline();
   }
 
+  @override
+  void didUpdateWidget(GmapsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print("gmaps widget rerendered");
+  }
+
   // void toPolyline() {
   //   if (widget.polylineStrs!.isNotEmpty) {
   //     Set<Polyline> tempPolylines = {};
@@ -90,6 +96,8 @@ class _GmapsWidgetState extends State<GmapsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("gmaps location:");
+    print(widget.center);
     return GoogleMap(
       myLocationEnabled: true,
       onMapCreated: _onMapCreated,
