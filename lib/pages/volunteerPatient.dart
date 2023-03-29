@@ -380,6 +380,7 @@ class _findPatientState extends State<findPatient> {
                     child: widget.patientLocation != LatLng(0,0)
                         ? GmapsWidget(
                             center: widget.patientLocation,
+                            marker: widget.patientLocation,
                           )
                         : Container(),
                   ),
@@ -528,6 +529,7 @@ class findHome extends StatelessWidget {
                     height: 200,
                     child: GmapsWidget(
                       center: homeLocation,
+                      marker: homeLocation,
                     ),
                   ),
                   Positioned(
