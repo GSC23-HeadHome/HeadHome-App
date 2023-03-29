@@ -220,7 +220,7 @@ class ApiService {
         "Lat": travelLogModel?.currentLocation.lat,
         "Lng": travelLogModel?.currentLocation.lng,
       },
-      "Status": "home",
+      "Status": "lost",
       "Volunteer": ""
     });
     request.headers.addAll(headers);
