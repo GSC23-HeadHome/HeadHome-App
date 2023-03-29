@@ -126,7 +126,6 @@ class ApiService {
     return response;
   }
 
-
   // ------- END OF CARERECEIVER METHODS -------
 
   // ------------ CAREGIVER METHODS ------------
@@ -207,13 +206,20 @@ class ApiService {
   }
 
   static Future<SosMessage> sendSOS(String crId) async {
+    final TravelLogModel? travelLogModel = await getTravelLog(crId);
+
+    int datetime =
+        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos'));
     request.body = json.encode({
       "CrId": crId,
-      "Datetime": 1677280000,
-      "StartLocation": {"Lat": 1.34176, "Lng": 103.846836},
+      "Datetime": datetime,
+      "StartLocation": {
+        "Lat": travelLogModel?.currentLocation.lat,
+        "Lng": travelLogModel?.currentLocation.lng,
+      },
       "Status": "home",
       "Volunteer": ""
     });
