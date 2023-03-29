@@ -203,38 +203,6 @@ class ApiService {
     }
   }
 
-  static Future<SosMessage> sendSOS(String crId) async {
-    final TravelLogModel? travelLogModel = await getTravelLog(crId);
-
-    int datetime =
-        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
-    var headers = {'Content-Type': 'application/json'};
-    var request = http.Request(
-        'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos'));
-    request.body = json.encode({
-      "CrId": crId,
-      "Datetime": datetime,
-      "StartLocation": {
-        "Lat": travelLogModel?.currentLocation.lat,
-        "Lng": travelLogModel?.currentLocation.lng,
-      },
-      "Status": "lost",
-      "Volunteer": ""
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
-    if (response.statusCode == 202) {
-      var res = await response.stream.bytesToString();
-      SosMessage model = sosMessageFromJson(res);
-      debugPrint("alert sent");
-      return model;
-    } else {
-      throw Exception('Failed to send SOS: ${response.reasonPhrase}');
-    }
-  }
-
   static Future<AddPatientMessage> addPatient(
       String cgId, String crId, String relationship) async {
     var headers = {'Content-Type': 'application/json'};
@@ -369,10 +337,42 @@ class ApiService {
       await http.put(
         url,
         headers: {"Content-Type": "application/json"},
-        body: {"Status": status},
+        body: json.encode({"Status": status}),
       );
     } catch (e) {
       log(e.toString());
+    }
+  }
+
+  static Future<SosMessage> sendSOS(String crId) async {
+    final TravelLogModel? travelLogModel = await getTravelLog(crId);
+
+    int datetime =
+        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos/'));
+    request.body = json.encode({
+      "CrId": crId,
+      "Datetime": datetime,
+      "StartLocation": {
+        "Lat": travelLogModel?.currentLocation.lat,
+        "Lng": travelLogModel?.currentLocation.lng,
+      },
+      "Status": "lost",
+      "Volunteer": ""
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 202) {
+      var res = await response.stream.bytesToString();
+      SosMessage model = sosMessageFromJson(res);
+      debugPrint("alert sent");
+      return model;
+    } else {
+      throw Exception('Failed to send SOS: ${response.reasonPhrase}');
     }
   }
 

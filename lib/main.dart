@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:headhome/pages/authlogin.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 
 Future<bool> locationEnabled() async {
   bool serviceEnabled;
@@ -65,12 +66,12 @@ void main() async {
     provisional: false,
     sound: true,
   );
-
-  runApp(
-    MyApp(
-      isLocationEnabled: isLocationEnabled,
-    ),
-  );
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((value) => runApp(MyApp(
+        isLocationEnabled: isLocationEnabled,
+      )));
 }
 
 class LocationDisabledPage extends StatelessWidget {
