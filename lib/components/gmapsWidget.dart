@@ -10,12 +10,14 @@ class GmapsWidget extends StatefulWidget {
   // final Set<String>? polylineStrs;
   final double? bearing;
   final bool? enableLocationButton;
+  final LatLng? marker;
 
   const GmapsWidget(
       {Key? key,
       this.polylines,
       this.bearing,
       required this.center,
+      this.marker,
       this.enableLocationButton})
       : super(key: key);
 
@@ -95,12 +97,12 @@ class _GmapsWidgetState extends State<GmapsWidget> {
         zoom: 15.0,
       ),
       polylines: widget.polylines ?? const <Polyline>{},
-      markers: markerIcon == null
+      markers: markerIcon == null || widget.marker == null
           ? {}
           : {
               Marker(
                 markerId: const MarkerId('current_location'),
-                position: widget.center,
+                position: widget.marker!,
                 infoWindow: const InfoWindow(title: 'Current Location'),
                 icon: markerIcon!,
                 rotation: widget.bearing ?? 0.0,

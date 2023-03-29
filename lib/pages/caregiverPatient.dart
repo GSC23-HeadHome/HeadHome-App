@@ -266,9 +266,11 @@ class _PatientDetailsState extends State<PatientDetails> {
                               children: [
                                 SizedBox(
                                   height: 200,
-                                  child:patientLocation == null? Container(): GmapsWidget(
-                                    center: patientLocation!,
-                                  ),
+                                  child: patientLocation == null
+                                      ? Container()
+                                      : GmapsWidget(
+                                          center: patientLocation!,
+                                        ),
                                 ),
                                 Positioned(
                                   top: 16,
@@ -276,7 +278,8 @@ class _PatientDetailsState extends State<PatientDetails> {
                                   child: FloatingActionButton(
                                     heroTag: 'MapsVolunteerPatientFAB',
                                     onPressed: () {
-                                      openMap(patientLocation!.latitude, patientLocation!.longitude);
+                                      openMap(patientLocation!.latitude,
+                                          patientLocation!.longitude);
                                     },
                                     backgroundColor:
                                         Theme.of(context).colorScheme.secondary,
