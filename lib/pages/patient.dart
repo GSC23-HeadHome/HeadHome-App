@@ -80,7 +80,7 @@ class _PatientState extends State<Patient> {
   StreamSubscription? _charSubscription;
   BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
   BluetoothCharacteristic? txCharacteristic;
-  final Debouncer _debouncer = Debouncer(seconds: 5);
+  final Debouncer _debouncer = Debouncer(seconds: 2);
 
   IconData determineRouteArrow(RouteLog? rl) {
     if (rl == null) return Icons.straight;
@@ -501,6 +501,8 @@ class _PatientState extends State<Patient> {
             }
             currentPosition = LatLng(position.latitude, position.longitude);
           });
+
+          // reached home
         } else {
           dataToESP = {
             "bearing": endBearing,
@@ -515,19 +517,27 @@ class _PatientState extends State<Patient> {
             }
             currentPosition = LatLng(position.latitude, position.longitude);
             sosCalled = false;
+            polylines = {};
+            fade = !fade;
           });
+
+          const snackBar = SnackBar(
+            content: Text("Safely Reached Home!"),
+            behavior: SnackBarBehavior.floating,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+          ApiService.updateSOS(widget.carereceiverModel.crId, "home");
         }
       } else {
         setState(() =>
             currentPosition = LatLng(position.latitude, position.longitude));
-        print("Current Position Stream: $currentPosition");
       }
     });
 
     _getData();
     _getProfileImg();
     _locationHandler();
-    // _bearingTimer();
     _initBluetooth();
   }
 
@@ -556,10 +566,6 @@ class _PatientState extends State<Patient> {
     FlutterBlue flutterBlue = FlutterBlue.instance;
     flutterBlue.startScan(timeout: const Duration(seconds: 4));
     flutterBlue.scanResults.listen((results) async {
-      // do something with scan results
-      // for (ScanResult r in results) {
-      //   debugPrint('${r.device.name} ${r.device.id} found! rssi: ${r.rssi}');
-      // }
       _device = results
           .firstWhereOrNull(
               (result) => result.device.name == BluetoothConstants.deviceName)
@@ -696,7 +702,7 @@ class _PatientState extends State<Patient> {
 
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
-    _lTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
+    _lTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
       _locStatusCallHelp(false);
     });
   }
@@ -869,54 +875,60 @@ class _PatientState extends State<Patient> {
                   ],
                   color: Colors.white,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Icon(
-                      determineRouteArrow(
-                          routeIndex >= routeLogsModel.length - 1
-                              ? null
-                              : routeLogsModel[routeIndex + 1]),
-                      size: 100,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            parseHTML(routeIndex >= routeLogsModel.length - 1
-                                ? "Continue to destination"
-                                : routeLogsModel[routeIndex + 1]
-                                    .htmlInstructions),
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                    text:
-                                        routeIndex >= routeLogsModel.length - 1
-                                            ? "For "
-                                            : routeLogsModel[routeIndex + 1]
-                                                        .maneuver ==
-                                                    "straight"
-                                                ? "For "
-                                                : "In "),
-                                TextSpan(
-                                  text:
-                                      '${distanceToNextRouteLog.toInt().toString()}m',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Icon(
+                        determineRouteArrow(
+                            routeIndex >= routeLogsModel.length - 1
+                                ? null
+                                : routeLogsModel[routeIndex + 1]),
+                        size: 100,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              parseHTML(routeIndex >= routeLogsModel.length - 1
+                                  ? "Continue to destination"
+                                  : routeLogsModel[routeIndex + 1]
+                                      .htmlInstructions),
                               style: const TextStyle(fontSize: 20),
                             ),
-                          )
-                        ],
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                      text: routeIndex >=
+                                              routeLogsModel.length - 1
+                                          ? "For "
+                                          : routeLogsModel[routeIndex + 1]
+                                                      .maneuver ==
+                                                  "straight"
+                                              ? "For "
+                                              : "In "),
+                                  TextSpan(
+                                    text:
+                                        '${distanceToNextRouteLog.toInt().toString()}m',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(
+                        width: 10,
+                      )
+                    ],
+                  ),
                 ),
               ),
             )

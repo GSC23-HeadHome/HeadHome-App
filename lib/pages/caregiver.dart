@@ -127,7 +127,7 @@ class _CaregiverState extends State<Caregiver> {
 
     //send put request to update caregiver num
     var response = await ApiService.updateCg(contactNum, _cgid);
-    print(response.message);
+    debugPrint(response.message);
     return response.message;
     //get all careReceiver
   }
@@ -135,7 +135,7 @@ class _CaregiverState extends State<Caregiver> {
   Future<String> _addNewPatient(
       String cgId, String crId, String relationship) async {
     var response = await ApiService.addPatient(cgId, crId, relationship);
-    print(response.message);
+    debugPrint(response.message);
     return response.message;
   }
 
@@ -200,21 +200,17 @@ class _CaregiverState extends State<Caregiver> {
             ),
             Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-                child: Container(
+                child: SizedBox(
                   width: 350,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     // mainAxisSize: MainAxisSize.values,
                     children: [
                       Container(),
-                      Container(
-                        child: Text("Select Patient",
-                            style: Theme.of(context).textTheme.bodyLarge,
-                            textAlign: TextAlign.center),
-                      ),
-                      Container(
-                        child: Icon(Icons.edit),
-                      )
+                      Text("Select Patient",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center),
+                      const Icon(Icons.edit)
                     ],
                   ),
                 )),
@@ -253,7 +249,7 @@ class _CaregiverState extends State<Caregiver> {
         //bottom navigation bar on scaffold
         height: 80,
         color: Theme.of(context).colorScheme.tertiary,
-        shape: CircularNotchedRectangle(), //shape of notch
+        shape: const CircularNotchedRectangle(), //shape of notch
         notchMargin:
             5, //notche margin between floating button and bottom appbar
         child: Row(
@@ -278,7 +274,7 @@ class _CaregiverState extends State<Caregiver> {
                   updateInfo: _updateCgInfo,
                   id: CgId,
                 )),
-            Expanded(
+            const Expanded(
               flex: 5, // 50%
               child: SettingsOverlay(),
             ),
@@ -371,13 +367,13 @@ class _CaregiverPatientsState extends State<CaregiverPatients> {
             width: 350,
             decoration: BoxDecoration(
               color: containerColour,
-              borderRadius: BorderRadius.all(Radius.circular(6)),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.3),
                   spreadRadius: 3,
                   blurRadius: 6,
-                  offset: Offset(0, 5), // changes position of shadow
+                  offset: const Offset(0, 5), // changes position of shadow
                 ),
               ],
             ),
@@ -392,7 +388,7 @@ class _CaregiverPatientsState extends State<CaregiverPatients> {
                           padding: const EdgeInsets.fromLTRB(20, 20, 0, 5),
                           child: Text(
                             widget.name,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 20.0,
                                 color: Color(0xFF263238),
                                 fontWeight: FontWeight.w500),
@@ -402,7 +398,7 @@ class _CaregiverPatientsState extends State<CaregiverPatients> {
                           child: Wrap(children: [
                             Text(
                               widget.note,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 14.0,
                                   color: Color(0xFF263238),
                                   fontWeight: FontWeight.w400),

@@ -8,6 +8,9 @@ extension StringCasingExtension on String {
 }
 
 String parseHTML(String htmlText) {
+  print(htmlText);
+  RegExp div = RegExp(r"<div\b[^>]*>", multiLine: true, caseSensitive: true);
+  htmlText = htmlText.replaceAll(div, '. ');
   RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
   return htmlText.replaceAll(exp, '');
 }

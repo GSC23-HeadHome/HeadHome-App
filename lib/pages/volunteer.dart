@@ -43,19 +43,19 @@ class _VolunteerState extends State<Volunteer> {
   void initState() {
     super.initState();
     _getData();
-    print(currentPosition);
+    debugPrint(currentPosition.toString());
   }
 
   void _getData() async {
     Position fetchedPosition = await Geolocator.getCurrentPosition();
-    print(fetchedPosition);
+    debugPrint(fetchedPosition.toString());
     debugPrint("FetchedLocationData: $fetchedPosition");
     setState(() {
       _currentPosition = fetchedPosition;
       currentPosition =
           LatLng(fetchedPosition.latitude, fetchedPosition.longitude);
     });
-    print(currentPosition);
+    debugPrint(currentPosition.toString());
   }
 
   Future<String> _updateVolunteerInfo(
@@ -67,7 +67,7 @@ class _VolunteerState extends State<Volunteer> {
     });
     //send put request to update caregiver num
     var response = await ApiService.updateVolunteer(contactNum, vId);
-    print(response.message);
+    debugPrint(response.message);
     return response.message;
     //get all careReceiver
   }
@@ -210,7 +210,7 @@ class _VolunteerState extends State<Volunteer> {
                                   item['status'] as String == "lost" ||
                                   (item['status'] as String == "guided" &&
                                       item['vname'] as String ==
-                                          widget.volunteerModel.name as String))
+                                          widget.volunteerModel.name))
                               .map((item) => PatientDetails(
                                     distance: item['distance'] as double,
                                     sosLogModel:
@@ -232,7 +232,7 @@ class _VolunteerState extends State<Volunteer> {
         //bottom navigation bar on scaffold
         height: 80,
         color: Theme.of(context).colorScheme.tertiary,
-        shape: CircularNotchedRectangle(), //shape of notch
+        shape: const CircularNotchedRectangle(), //shape of notch
         notchMargin:
             5, //notche margin between floating button and bottom appbar
         child: Padding(
@@ -252,7 +252,7 @@ class _VolunteerState extends State<Volunteer> {
                     updateInfo: _updateVolunteerInfo,
                     id: vId,
                   )),
-              Expanded(
+              const Expanded(
                 flex: 5, // 50%
                 child: SettingsOverlay(),
               ),
@@ -288,7 +288,7 @@ class _PatientDetailsState extends State<PatientDetails> {
     CarereceiverModel? fetchedModel =
         await ApiService.getCarereceiver(widget.sosLogModel["cr_id"]);
 
-    print("fetching patient details");
+    debugPrint("fetching patient details");
     if (fetchedModel != null) {
       Uint8List? fetchedBytes =
           await ApiService.getProfileImg(fetchedModel.profilePic);
@@ -300,10 +300,10 @@ class _PatientDetailsState extends State<PatientDetails> {
       _carereceiverModel = fetchedModel;
     }
 
-    print("seet patient details");
-    print(_carereceiverModel?.name);
-    print("soslog");
-    print(widget.sosLogModel);
+    debugPrint("seet patient details");
+    debugPrint(_carereceiverModel?.name);
+    debugPrint("soslog");
+    debugPrint(widget.sosLogModel.toString());
   }
 
   @override
@@ -315,93 +315,91 @@ class _PatientDetailsState extends State<PatientDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8E3E4),
-            borderRadius: const BorderRadius.all(Radius.circular(6)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 3,
-                blurRadius: 6,
-                offset: const Offset(0, 5), // changes position of shadow
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                  flex: 2, // 60%
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: profileBytes == null
-                          ? const NetworkImage(defaultProfilePic)
-                              as ImageProvider
-                          : MemoryImage(profileBytes!),
-                    ),
-                  )),
-              Expanded(
-                flex: 4, // 60%
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                        child: Wrap(children: [
-                          Text(
-                            _carereceiverModel == null
-                                ? ""
-                                : _carereceiverModel!.name,
-                            style: const TextStyle(
-                                fontSize: 16.0,
-                                color: Color(0xFF263238),
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ])),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                      child: Text("${widget.distance.round()}m away",
-                          style: const TextStyle(fontSize: 12.0)),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 4, // 40%
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8E3E4),
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 3,
+              blurRadius: 6,
+              offset: const Offset(0, 5), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+                flex: 2, // 60%
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_carereceiverModel != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PatientPage(
-                                carereceiverModel: _carereceiverModel!,
-                                sosLogModel: widget.sosLogModel,
-                                volunteerModel: widget.volunteerModel,
-                                profileBytes: profileBytes),
-                          ),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                        minimumSize: Size(100, 45),
-                        backgroundColor: Theme.of(context).colorScheme.error),
-                    child: const Text(
-                      'Locate',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: profileBytes == null
+                        ? const NetworkImage(defaultProfilePic)
+                            as ImageProvider
+                        : MemoryImage(profileBytes!),
+                  ),
+                )),
+            Expanded(
+              flex: 4, // 60%
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                      child: Wrap(children: [
+                        Text(
+                          _carereceiverModel == null
+                              ? ""
+                              : _carereceiverModel!.name,
+                          style: const TextStyle(
+                              fontSize: 16.0,
+                              color: Color(0xFF263238),
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ])),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                    child: Text("${widget.distance.round()}m away",
+                        style: const TextStyle(fontSize: 12.0)),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 4, // 40%
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_carereceiverModel != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientPage(
+                              carereceiverModel: _carereceiverModel!,
+                              sosLogModel: widget.sosLogModel,
+                              volunteerModel: widget.volunteerModel,
+                              profileBytes: profileBytes),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 45),
+                      backgroundColor: Theme.of(context).colorScheme.error),
+                  child: const Text(
+                    'Locate',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

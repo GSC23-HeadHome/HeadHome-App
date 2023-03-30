@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
 import 'dart:math' hide log;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
@@ -47,7 +45,7 @@ class ApiService {
       var url =
           Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
       var response = await http.get(url);
-      print(response.body);
+      debugPrint(response.body);
       if (response.statusCode == 200) {
         CarereceiverModel model = carereceiverFromJson(response.body);
         return model;
@@ -62,7 +60,7 @@ class ApiService {
       String address, String contactNum, String cgId, String relation) async {
     Uri url =
         Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
-    print(url);
+    debugPrint(url.toString());
     Map data = {
       'Name': name,
       'Address': address,
@@ -153,7 +151,7 @@ class ApiService {
     try {
       var url =
           Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.caregiver}/$id');
-      print(url);
+      debugPrint(url.toString());
       var response = await http.get(url);
       if (response.statusCode == 200) {
         CaregiverModel model = caregiverFromJson(response.body);
@@ -171,7 +169,7 @@ class ApiService {
         'GET',
         Uri.parse(
             'https://HeadHome.chayhuixiang.repl.co/carereceiver/contactcg'));
-    print("$cgId $crId");
+    debugPrint("$cgId $crId");
     request.body = json.encode({"CrId": crId, "CgId": cgId});
     request.headers.addAll(headers);
 
@@ -182,7 +180,7 @@ class ApiService {
       Cgcontactnum model = cgcontactnumFromJson(res);
       return model;
     } else {
-      print(response.reasonPhrase);
+      debugPrint(response.reasonPhrase);
       return null;
     }
   }
@@ -190,7 +188,7 @@ class ApiService {
   static Future<UpdateCgResponse> updateCg(String contact, String cgId) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request('PUT',
-        Uri.parse('https://HeadHome.chayhuixiang.repl.co/caregiver/${cgId}'));
+        Uri.parse('https://HeadHome.chayhuixiang.repl.co/caregiver/$cgId'));
     request.body = json.encode({"ContactNum": contact});
     request.headers.addAll(headers);
 
@@ -205,45 +203,13 @@ class ApiService {
     }
   }
 
-  static Future<SosMessage> sendSOS(String crId) async {
-    final TravelLogModel? travelLogModel = await getTravelLog(crId);
-
-    int datetime =
-        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
-    var headers = {'Content-Type': 'application/json'};
-    var request = http.Request(
-        'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos'));
-    request.body = json.encode({
-      "CrId": crId,
-      "Datetime": datetime,
-      "StartLocation": {
-        "Lat": travelLogModel?.currentLocation.lat,
-        "Lng": travelLogModel?.currentLocation.lng,
-      },
-      "Status": "lost",
-      "Volunteer": ""
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
-    if (response.statusCode == 202) {
-      var res = await response.stream.bytesToString();
-      SosMessage model = sosMessageFromJson(res);
-      print("alert sent");
-      return model;
-    } else {
-      throw Exception('Failed to send SOS: ${response.reasonPhrase}');
-    }
-  }
-
   static Future<AddPatientMessage> addPatient(
       String cgId, String crId, String relationship) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'PUT',
         Uri.parse(
-            'https://HeadHome.chayhuixiang.repl.co/caregiver/${cgId}/newcr'));
+            'https://HeadHome.chayhuixiang.repl.co/caregiver/$cgId/newcr'));
     request.body = json.encode({"Id": crId, "Relationship": relationship});
     request.headers.addAll(headers);
 
@@ -252,7 +218,7 @@ class ApiService {
     if (response.statusCode == 202) {
       var res = await response.stream.bytesToString();
       AddPatientMessage model = addPatientMessageFromJson(res);
-      print("alert sent");
+      debugPrint("alert sent");
       return model;
     } else {
       throw Exception('Failed to add patient: ${response.reasonPhrase}');
@@ -290,7 +256,7 @@ class ApiService {
     try {
       var url =
           Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.volunteers}/$id');
-      print(url);
+      debugPrint(url.toString());
       var response = await http.get(url);
       if (response.statusCode == 200) {
         VolunteerModel model = volunteerFromJson(response.body);
@@ -306,7 +272,7 @@ class ApiService {
       String contact, String vId) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request('PUT',
-        Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/${vId}'));
+        Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/$vId'));
     request.body = json.encode({"ContactNum": contact});
     request.headers.addAll(headers);
 
@@ -352,7 +318,7 @@ class ApiService {
   static Future<SosLogModel?> getSOSLog(String id) async {
     try {
       var url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.sos}/$id');
-      print(url);
+      debugPrint(url.toString());
       var response = await http.get(url);
       if (response.statusCode == 200) {
         SosLogModel model = sosLogModelFromJson(response.body);
@@ -362,6 +328,52 @@ class ApiService {
       log(e.toString());
     }
     return null;
+  }
+
+  static Future<void> updateSOS(String id, String status) async {
+    try {
+      var url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.sos}/$id');
+      print(url);
+      await http.put(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({"Status": status}),
+      );
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  static Future<SosMessage> sendSOS(String crId) async {
+    final TravelLogModel? travelLogModel = await getTravelLog(crId);
+
+    int datetime =
+        DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos/'));
+    request.body = json.encode({
+      "CrId": crId,
+      "Datetime": datetime,
+      "StartLocation": {
+        "Lat": travelLogModel?.currentLocation.lat,
+        "Lng": travelLogModel?.currentLocation.lng,
+      },
+      "Status": "lost",
+      "Volunteer": ""
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 202) {
+      var res = await response.stream.bytesToString();
+      SosMessage model = sosMessageFromJson(res);
+      debugPrint("alert sent");
+      return model;
+    } else {
+      throw Exception('Failed to send SOS: ${response.reasonPhrase}');
+    }
   }
 
   // --------- END OF SOS LOG METHODS ----------
@@ -398,7 +410,7 @@ class ApiService {
     try {
       var url =
           Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.travellog}/$id');
-      print(url);
+      debugPrint(url.toString());
       var response = await http.get(url);
       if (response.statusCode == 200) {
         TravelLogModel model = travelLogModelFromJson(response.body);

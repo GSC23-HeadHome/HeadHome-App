@@ -34,7 +34,7 @@ class PatientPage extends StatefulWidget {
 class _PatientPageState extends State<PatientPage> {
   String priContactName = "-";
   String _priContactNo = "-";
-  late LatLng currentLocation = LatLng(0,0);
+  late LatLng currentLocation = const LatLng(0, 0);
   Timer? _lTimer;
 
   //to check if class rerenders
@@ -80,14 +80,14 @@ class _PatientPageState extends State<PatientPage> {
         currentLocation = LatLng(travelLogModel.currentLocation.lat,
             travelLogModel.currentLocation.lng);
       });
-      print("currentLocation updated");
+      debugPrint("currentLocation updated");
     }
   }
 
   //call travel log every 5 min to update current location
   void updateLocation() {
-    print("timer activated");
-    _lTimer = Timer.periodic(Duration(minutes: 5), (Timer timer) {
+    debugPrint("timer activated");
+    _lTimer = Timer.periodic(const Duration(minutes: 5), (Timer timer) {
       getPatientLocation();
     });
   }
@@ -100,8 +100,8 @@ class _PatientPageState extends State<PatientPage> {
     getPatientLocation();
     updateLocation();
     intialiseAuthenticated();
-    print("currentlocation");
-    print(currentLocation);
+    debugPrint("currentlocation");
+    debugPrint(currentLocation.toString());
   }
 
   @override
@@ -113,13 +113,13 @@ class _PatientPageState extends State<PatientPage> {
   @override
   void didUpdateWidget(PatientPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print("main widget has been updated");
+    debugPrint("main widget has been updated");
   }
 
   bool authenticated = false;
 
   void intialiseAuthenticated() {
-    print("intialise authenticated");
+    debugPrint("intialise authenticated");
     if (widget.sosLogModel["status"] == "guided") {
       setState(() {
         authenticated = true;
@@ -131,15 +131,15 @@ class _PatientPageState extends State<PatientPage> {
     setState(() {
       authenticated = newAuthenticated;
     });
-    print("updated authenticated:");
-    print(authenticated);
+    debugPrint("updated authenticated:");
+    debugPrint(authenticated.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     LatLng homeLocation = LatLng(widget.carereceiverModel.safezoneCtr.lat,
         widget.carereceiverModel.safezoneCtr.lng);
-    print(homeLocation);
+    debugPrint(homeLocation.toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -230,7 +230,7 @@ class _PatientPageState extends State<PatientPage> {
                             sosLogModel: widget.sosLogModel,
                             volunteerModel: widget.volunteerModel,
                             updateAuthenticated: updateAuthenticated,
-                            patientLocation: currentLocation!,
+                            patientLocation: currentLocation,
                             openMap: openMap,
                           ),
                   ],
@@ -240,7 +240,7 @@ class _PatientPageState extends State<PatientPage> {
           ),
         ],
       ),
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
           height: 80,
           width: 80,
           child: FittedBox(
@@ -252,9 +252,9 @@ class _PatientPageState extends State<PatientPage> {
                 await FlutterPhoneDirectCaller.callNumber(
                     widget.carereceiverModel.contactNum.replaceAll(' ', ''));
               },
-              child: Icon(Icons.call),
               backgroundColor:
-                  Theme.of(context).colorScheme.primary, //icon inside button
+                  Theme.of(context).colorScheme.primary,
+              child: const Icon(Icons.call), //icon inside button
             ),
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -262,7 +262,7 @@ class _PatientPageState extends State<PatientPage> {
         //bottom navigation bar on scaffold
         height: 80,
         color: Theme.of(context).colorScheme.tertiary,
-        shape: CircularNotchedRectangle(), //shape of notch
+        shape: const CircularNotchedRectangle(), //shape of notch
         notchMargin:
             5, //notche margin between floating button and bottom appbar
       ),
@@ -271,7 +271,7 @@ class _PatientPageState extends State<PatientPage> {
 }
 
 class findPatient extends StatefulWidget {
-  findPatient({
+  const findPatient({
     super.key,
     required this.priContactName,
     required this.priContactNo,
@@ -329,34 +329,32 @@ class _findPatientState extends State<findPatient> {
                 ],
               ),
             ),
-            Container(
-              child: TextField(
-                controller: authIdController,
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    icon: const Icon(
-                      Icons.send_outlined,
-                    ),
-                    onPressed: () async {
-                      print(widget.sosLogModel["sos_id"]);
-                      print(authIdController.text);
-                      print(widget.volunteerModel.vId);
-                      AcceptSOSResponse? response = await ApiService.acceptSOS(
-                          widget.sosLogModel["sos_id"],
-                          authIdController.text,
-                          widget.volunteerModel.vId);
-                      debugPrint("$response");
-                      if (response != null) {
-                        widget.updateAuthenticated(true);
-                        print("updateAuthenticated called");
-                      }
-                    },
+            TextField(
+              controller: authIdController,
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  icon: const Icon(
+                    Icons.send_outlined,
                   ),
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                        width: 1, color: Colors.grey), //<-- SEE HERE
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+                  onPressed: () async {
+                    debugPrint(widget.sosLogModel["sos_id"]);
+                    debugPrint(authIdController.text);
+                    debugPrint(widget.volunteerModel.vId);
+                    AcceptSOSResponse? response = await ApiService.acceptSOS(
+                        widget.sosLogModel["sos_id"],
+                        authIdController.text,
+                        widget.volunteerModel.vId);
+                    debugPrint("$response");
+                    if (response != null) {
+                      widget.updateAuthenticated(true);
+                      debugPrint("updateAuthenticated called");
+                    }
+                  },
+                ),
+                border: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      width: 1, color: Colors.grey), //<-- SEE HERE
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             )
@@ -377,9 +375,10 @@ class _findPatientState extends State<findPatient> {
                 children: [
                   SizedBox(
                     height: 200,
-                    child: widget.patientLocation != LatLng(0,0)
+                    child: widget.patientLocation != LatLng(0, 0)
                         ? GmapsWidget(
                             center: widget.patientLocation,
+                            marker: widget.patientLocation,
                           )
                         : Container(),
                   ),
@@ -412,7 +411,7 @@ class _findPatientState extends State<findPatient> {
                 children: [
                   Text("Caregiver Information",
                       style: Theme.of(context).textTheme.titleSmall),
-                  Spacer(),
+                  const Spacer(),
                 ],
               ),
             ),
@@ -528,6 +527,7 @@ class findHome extends StatelessWidget {
                     height: 200,
                     child: GmapsWidget(
                       center: homeLocation,
+                      marker: homeLocation,
                     ),
                   ),
                   Positioned(
