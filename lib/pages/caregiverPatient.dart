@@ -27,11 +27,12 @@ class MyState extends ChangeNotifier {
   bool alert_sent = false;
   bool get _alert_sent => alert_sent;
 
-  void respondButton(CarereceiverModel model) {
-    alert_sent = !alert_sent;
-    ApiService.sendSOS(model.crId);
+  void respondButton(CarereceiverModel model) async {
     debugPrint("state changed");
     debugPrint(alert_sent.toString());
+    await ApiService.sendSOS(model.crId);
+    await model.getCRSOSLog();
+    alert_sent = !alert_sent;
     notifyListeners();
   }
 
