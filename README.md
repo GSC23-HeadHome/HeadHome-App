@@ -42,6 +42,7 @@ Currently, we have a couple of testing accounts that can be used to test out the
 ## Application Flow
 
 1. Care Receiver
+
 Our `care receivers` can request for help from their `care giver` and begin the navigation back home by tapping on the red `Navigate Home` button on their home page. The application will also begin navigation when the `care receiver` leaves the configurable safezone radius around their home, or when they press the red button the companion wrist wearable device.
 
 This will display a route home on the Google Maps widget. This route will be updated as the patient goes along, rerouting when necessary.
@@ -49,11 +50,13 @@ This will display a route home on the Google Maps widget. This route will be upd
 The care receiver would each have an Authentication ID which is used to ensure that the `Volunteer` will only have access to the `care receiver's` home address when they have actually met them. 
 
 2. Care Giver
+
 The `care giver` will receive a notification when their respective `care receivers` have started to navigate home. This will inform them about the `care receiver's` current location, and also allow them to choose to send an SOS alert signal to `volunteers`. 
 
 The `care giver` will then be able to contact the `volunteers` who have started to guide the `care receivers` back home through the `contact` button of the application. 
 
 3. Volunteers
+
 Volunteers would be able to view all the care receiver's SOS alerts, and select the care receiver they wish to help. The app would provide them with the current location of the care receiver, and also allow them to redirect to Google Maps to find their way to these care givers. 
 
 Thereafter, when the volunteers reach the care receiver, they would be able to start leading them home after verifying the `care receiver's` Authentication ID
