@@ -80,7 +80,7 @@ class _PatientState extends State<Patient> {
   StreamSubscription? _charSubscription;
   BluetoothDeviceState _deviceState = BluetoothDeviceState.disconnected;
   BluetoothCharacteristic? txCharacteristic;
-  final Debouncer _debouncer = Debouncer(seconds: 5);
+  final Debouncer _debouncer = Debouncer(seconds: 2);
 
   IconData determineRouteArrow(RouteLog? rl) {
     if (rl == null) return Icons.straight;
@@ -702,7 +702,7 @@ class _PatientState extends State<Patient> {
 
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
-    _lTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
+    _lTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
       _locStatusCallHelp(false);
     });
   }

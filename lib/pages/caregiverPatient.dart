@@ -85,7 +85,7 @@ class _PatientDetailsState extends State<PatientDetails> {
   //call travel log every 5 min to update current location
   void updateLocation() {
     debugPrint("timer activated");
-    _lTimer = Timer.periodic( const Duration(minutes: 5), (Timer timer) {
+    _lTimer = Timer.periodic(const Duration(minutes: 5), (Timer timer) {
       getPatientLocation();
     });
   }
@@ -350,8 +350,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                 onPressed: () {
                   //code to execute on bxutton press
                 },
-                backgroundColor:
-                    Theme.of(context).colorScheme.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 child: const Icon(Icons.add), //icon inside button
               ),
             )),
