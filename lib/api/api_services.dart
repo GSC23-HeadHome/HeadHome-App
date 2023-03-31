@@ -438,6 +438,8 @@ class ApiService {
     } on FirebaseException catch (_) {
       debugPrint("Error getting profile");
       return null;
+    } catch (_) {
+      return null;
     }
   }
 
