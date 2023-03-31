@@ -1,16 +1,75 @@
-# headhome
+<div align="center">
+    <div >
+        <img width="200px" src="https://firebasestorage.googleapis.com/v0/b/gsc23-12e94.appspot.com/o/members%2Fheadhome_square.png?alt=media&token=96a55b42-7c9f-4e68-b41f-d986efe79c01" alt=""/>
+    </div>
+    <div >
+            <p style="font-size:50px;"><b>HeadHome</b></p>
+            <p style="font-size:18px"><i>Your companion, every step of the way</i></p>
+    </div>      
+</div>
+<br>
 
-A new Flutter project.
+<h1 align="center">HeadHome Application</h1>
+<div align="center">
 
-## Getting Started
+| Patient | Caregiver | Volunteer |
+|:---------:|:-----------:|:-----------:|
+|<img height="400" src="./assets/elderly page - navigation idle.png">|<img height="400" src="./assets/caregiver - patient info.png">|<img height="400" src="./assets/volunteer.png">|
 
-This project is a starting point for a Flutter application.
+</div>
+The <b>HeadHome application</b> present users with a simplified and streamlined interface that highlights only the most relevant information for each user. The application's user interface and functionality will also be tailored to each user type (Dementia Paitent, Caregivers and Volunteers). 
+<br>
+<h2>👨🏻‍💻 Technology Stack</h2>
+<br />
+<div align="center">
+    <kbd>
+        <img height="50" src="./assets/icon/Flutter.png"/>
+    </kbd>
+    <kbd>
+        <img height="50" src="./assets/icon/Dart.png"/>
+    </kbd>
+    <kbd>
+        <img height="50" src="./assets/icon/Maps.png"/>
+    </kbd>
+    <kbd>
+        <img height="50" src="./assets/icon/Firebase.png"/>
+    </kbd>
+    <kbd>
+        <img height="50" src="./assets/icon/GCP.png"/>
+    </kbd>	
+    <h4>Flutter | Dart | Google Maps Platform | Firebase | Google Cloud Platform</h4>
+</div>
 
-A few resources to get you started if this is your first Flutter project:
+<br>
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# Getting Started
+This repo contains the <b>Frontend application</b> for HeadHome. Click [here](https://github.com/GSC23-HeadHome/HeadHome) to view the full solution.
+<br><br>
+[Flutter `(Version 2.19.2+)`](https://docs.flutter.dev/get-started/install) must be installed to run this application.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ⚙️ &nbsp;Steps to Setup
+1. Clone Repo
+```
+$ git clone https://github.com/GSC23-HeadHome/HeadHome-App.git
+```
+2. Run the following code in bash to install the required dependencies
+```
+$ cd HeadHome-App
+$ flutter pub get
+```
+3. Launch Application
+```
+$ flutter run [--release]
+```
+
+### Test Accounts 
+Currently, we have a couple of testing accounts that can be used to test out the app. These accounts can be found in the [testing_accounts.md](testing_accounts.md).
+
+
+<br>
+
+# 👥 &nbsp;Contributors
+
+|<a href="https://www.linkedin.com/in/hui-xiang/"><img width="180px" src="https://firebasestorage.googleapis.com/v0/b/gsc23-12e94.appspot.com/o/members%2Fhuixiang.jpeg?alt=media&token=96a55b42-7c9f-4e68-b41f-d986efe79c01" alt=""/></a>|<a href="https://www.linkedin.com/in/dao-zheng-chang/"><img width="180px" src="https://firebasestorage.googleapis.com/v0/b/gsc23-12e94.appspot.com/o/members%2Fdaozheng.jpeg?alt=media&token=96a55b42-7c9f-4e68-b41f-d986efe79c01" alt=""/></a>|<a href="https://www.linkedin.com/in/marc-chern/"><img width="180px" src="https://firebasestorage.googleapis.com/v0/b/gsc23-12e94.appspot.com/o/members%2Fmarc.jpeg?alt=media&token=96a55b42-7c9f-4e68-b41f-d986efe79c01" alt=""/></a>|<a href="https://www.linkedin.com/in/jing-xuan-ong-8b59b3201/"><img width="180px" src="https://firebasestorage.googleapis.com/v0/b/gsc23-12e94.appspot.com/o/members%2Fjingxuan.jpeg?alt=media&token=96a55b42-7c9f-4e68-b41f-d986efe79c01" alt=""/>
+|--------------------------|--------------------------|--------------------------|--------------------------|
+|<div align="center"> <h3><b><a href="https://github.com/chayhuixiang">Chay Hui Xiang</b></h3></a><p><i>Nanyang Technological University</i></p></div>|<div align="center"><h3><b><a href="https://github.com/changdaozheng/">Chang Dao Zheng</b></h3></a><p><i>Nanyang Technological University</i></p></div>|<div align="center"><h3><b><a href="https://github.com/Trigon25">Marc Chern Di Yong</b></h3></a><p><i>Nanyang Technological University</i></p></div>|<div align="center"><h3><b><a href="https://github.com/ongjx16">Ong Jing Xuan</b></h3></a><p><i>Nanyang Technological University</i></p></div>|
