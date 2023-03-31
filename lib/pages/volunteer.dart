@@ -207,10 +207,11 @@ class _VolunteerState extends State<Volunteer> {
                                 };
                               })
                               .where((item) =>
-                                  item['status'] as String == "lost" ||
-                                  (item['status'] as String == "guided" &&
-                                      item['vname'] as String ==
-                                          widget.volunteerModel.name))
+                                  item['distance'] < 500 &&
+                                  (item['status'] as String == "lost" ||
+                                      (item['status'] as String == "guided" &&
+                                          item['vname'] as String ==
+                                              widget.volunteerModel.name)))
                               .map((item) => PatientDetails(
                                     distance: item['distance'] as double,
                                     sosLogModel:
@@ -339,8 +340,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                   child: CircleAvatar(
                     radius: 20,
                     backgroundImage: profileBytes == null
-                        ? const NetworkImage(defaultProfilePic)
-                            as ImageProvider
+                        ? const NetworkImage(defaultProfilePic) as ImageProvider
                         : MemoryImage(profileBytes!),
                   ),
                 )),
