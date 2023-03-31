@@ -10,6 +10,13 @@
 <br>
 
 <h1 align="center">HeadHome Application</h1>
+<div align="center">
+
+| Patient | Caregiver | Volunteer |
+|:---------:|:-----------:|:-----------:|
+|<img height="400" src="./assets/elderly page - navigation idle.png">|<img height="400" src="./assets/caregiver - patient info.png">|<img height="400" src="./assets/volunteer.png">|
+
+</div>
 The <b>HeadHome application</b> present users with a simplified and streamlined interface that highlights only the most relevant information for each user. The application's user interface and functionality will also be tailored to each user type (Dementia Paitent, Caregivers and Volunteers). 
 <br>
 <h2>👨🏻‍💻 Technology Stack</h2>
@@ -58,7 +65,6 @@ $ flutter run [--release]
 ### Test Accounts 
 Currently, we have a couple of testing accounts that can be used to test out the app. These accounts can be found in the [testing_accounts.md](testing_accounts.md).
 
-## 📱 &nbsp; Screenshots
 
 <br>
 
