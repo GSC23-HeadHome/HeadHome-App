@@ -23,19 +23,19 @@ The <b>HeadHome application</b> present users with a simplified and streamlined 
 <br />
 <div align="center">
     <kbd>
-        <img height="50" src="./assets/icon/Flutter.png"/>
+        <img height="60" src="./assets/icon/Flutter.png"/>
     </kbd>
     <kbd>
-        <img height="50" src="./assets/icon/Dart.png"/>
+        <img height="60" src="./assets/icon/Dart.png"/>
     </kbd>
     <kbd>
-        <img height="50" src="./assets/icon/Maps.png"/>
+        <img height="60" src="./assets/icon/Maps.png"/>
     </kbd>
     <kbd>
-        <img height="50" src="./assets/icon/Firebase.png"/>
+        <img height="60" src="./assets/icon/Firebase.png"/>
     </kbd>
     <kbd>
-        <img height="50" src="./assets/icon/GCP.png"/>
+        <img height="60" src="./assets/icon/GCP.png"/>
     </kbd>	
     <h4>Flutter | Dart | Google Maps Platform | Firebase | Google Cloud Platform</h4>
 </div>
@@ -65,6 +65,52 @@ $ flutter run [--release]
 ### Test Accounts 
 Currently, we have a couple of testing accounts that can be used to test out the app. These accounts can be found in the [testing_accounts.md](testing_accounts.md).
 
+
+<br>
+
+## 🔑 &nbsp; Files and Directories
+
+```tree
+├── android
+├── assets
+├── ios
+├── lib.go
+│   ├── api
+│   |   ├── models
+│   |   └── api_services.dart
+│   ├── components
+│   |   ├── addPatient.dart
+│   |   ├── gmapsWidget.dart
+│   |   ├── profileDialog.dart
+│   |   └── settingsDialog.dart
+│   ├── pages
+│   |   ├── authlogin.dart
+│   |   ├── authregister.dart
+│   |   ├── caregiver.dart
+│   |   ├── caregiverPatient.dart
+│   |   ├── patient.dart
+│   |   ├── volunteer.dart
+│   |   └── volunteerPatient.dart
+│   ├── utils
+│   |   ├── debouncer.dart
+│   |   └── strings.dart
+│   ├── constants.dart
+│   ├── firebase_option.dart
+│   └── main.dart
+├── linux
+├── macos
+├── test
+├── web
+├── windows
+├── .gitignore
+├── .metadata
+├── README.md
+├── analysis_options.yaml
+├── flutter_jank_metrics_01.json
+├── pubspec.lock
+├── pubspec.yaml
+└── testing_accounts.md
+```
 
 <br>
 
