@@ -41,7 +41,7 @@ class _CaregiverState extends State<Caregiver> {
   @override
   void initState() {
     super.initState();
-    _getCaregiverInfo(CgId);
+    _getCaregiverInfo();
   }
 
   @override
@@ -63,20 +63,24 @@ class _CaregiverState extends State<Caregiver> {
 
     debugPrint(
         'User granted permission with FCMToken: ${await messaging.getToken()}');
-    for (CareReceiver careReceiver in careReceivers) {
-      await messaging.subscribeToTopic(careReceiver.id.split("@")[0]);
+    try {
+      for (CareReceiver careReceiver in careReceivers) {
+        await messaging.subscribeToTopic(careReceiver.id.split("@")[0]);
+      }
+    } catch (e) {
+      debugPrint("Firebase messaging error: $e");
     }
 
     fcmStream = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null && message.notification!.body != null) {
         debugPrint('Message: ${message.notification!.title}');
         debugPrint('Body: ${message.notification!.body}');
-        
+
         final snackBar = SnackBar(
           content: Text(message.notification?.body ?? '', maxLines: 2),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        
+
         String crId = message.notification!.body!.split(" ")[0];
         CarereceiverModel? careReceiver =
             careReceiverDetails.firstWhereOrNull((cr) => cr.crId == crId);
@@ -84,7 +88,6 @@ class _CaregiverState extends State<Caregiver> {
       }
     });
 
-  
     if (settings.authorizationStatus != AuthorizationStatus.authorized) {
       debugPrint('User declined or has not accepted permission');
     } else {
@@ -94,25 +97,30 @@ class _CaregiverState extends State<Caregiver> {
 
   void _deregisterNotification() async {
     fcmStream?.cancel();
-    for (CareReceiver careReceiver in careReceivers) {
-      await messaging.unsubscribeFromTopic(careReceiver.id.split("@")[0]);
+    try {
+      for (CareReceiver careReceiver in careReceivers) {
+        await messaging.unsubscribeFromTopic(careReceiver.id.split("@")[0]);
+      }
+    } catch (e) {
+      debugPrint("Firebase messaging error: $e");
     }
   }
 
-  void _getCaregiverInfo(cgId) async {
+  Future<CarereceiverModel?> _fetchCarereceiverInfo(crId) async {
+    CarereceiverModel? _CarereceiverModel =
+        await ApiService.getCarereceiver(crId);
+    await _CarereceiverModel?.getCRTravelLog();
+    return _CarereceiverModel;
+  }
+
+  void _getCaregiverInfo() async {
     //get all careReceivers
-    for (var i = 0; i < careReceivers.length; i++) {
-      // TO DO
-      CarereceiverModel? _CarereceiverModel =
-          await ApiService.getCarereceiver(careReceivers[i].id);
-      await _CarereceiverModel?.getCRTravelLog();
-      if (_CarereceiverModel != null) {
-        setState(() {
-          careReceiverDetails.add(_CarereceiverModel);
-        });
-      }
-      // add to careReceiverDetails
-    }
+    List<CarereceiverModel?> fetchedCarereceivers = await Future.wait(
+        careReceivers.map((e) => _fetchCarereceiverInfo(e.id)));
+    setState(() {
+      careReceiverDetails =
+          fetchedCarereceivers.whereType<CarereceiverModel>().toList();
+    });
     _registerNotification(careReceivers);
   }
 
