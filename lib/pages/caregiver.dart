@@ -125,19 +125,18 @@ class _CaregiverState extends State<Caregiver> {
   }
 
   Future<String> _updateCgInfo(
-      String _cgid, String _name, String _contact, String _password) async {
+      String cgid, String name, String contact, String password) async {
     //set states of parent widget
     setState(() {
-      nameValue = _name;
-      contactNum = _contact;
-      password = _password;
+      nameValue = name;
+      contactNum = contact;
+      password = password;
     });
 
     //send put request to update caregiver num
-    var response = await ApiService.updateCg(contactNum, _cgid);
+    var response = await ApiService.updateCg(contactNum, cgid);
     debugPrint(response.message);
     return response.message;
-    //get all careReceiver
   }
 
   Future<String> _addNewPatient(
@@ -153,12 +152,6 @@ class _CaregiverState extends State<Caregiver> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        // leading: BackButton(
-        //   onPressed: () {
-        //     Navigator.pop(context);
-        //   },
-        //   color: Theme.of(context).colorScheme.primary,
-        // ),
         title: GestureDetector(
           onTap: () {
             Navigator.push(
