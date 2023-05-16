@@ -69,9 +69,13 @@ void main() async {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
-  ]).then((value) => runApp(MyApp(
+  ]).then(
+    (value) => runApp(
+      MyApp(
         isLocationEnabled: isLocationEnabled,
-      )));
+      ),
+    ),
+  );
 }
 
 class LocationDisabledPage extends StatelessWidget {

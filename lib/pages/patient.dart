@@ -486,6 +486,8 @@ class _PatientState extends State<Patient> {
 
         Map<String, dynamic> dataToESP;
 
+        debugPrint('endDistance: $endDistance');
+
         // check if user has reached home
         if (distFromSafe > 30) {
           dataToESP = {
@@ -493,7 +495,6 @@ class _PatientState extends State<Patient> {
             "distance": endDistance.toInt(),
             "alert": 1,
           };
-          txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
           setState(() {
             distanceToNextRouteLog = endDistance;
             if (endDistance < 10) {
@@ -501,6 +502,7 @@ class _PatientState extends State<Patient> {
             }
             currentPosition = LatLng(position.latitude, position.longitude);
           });
+          txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
 
           // reached home
         } else {
@@ -509,7 +511,6 @@ class _PatientState extends State<Patient> {
             "distance": endDistance.toInt(),
             "alert": 0,
           };
-          txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
           setState(() {
             distanceToNextRouteLog = endDistance;
             if (endDistance < 10) {
@@ -526,8 +527,8 @@ class _PatientState extends State<Patient> {
             behavior: SnackBarBehavior.floating,
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
           ApiService.updateSOS(widget.carereceiverModel.crId, "home");
+          txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
         }
       } else {
         setState(() =>
@@ -752,6 +753,13 @@ class _PatientState extends State<Patient> {
       polylines = tempPoly;
       routeLogsModel = fetchedRouteLogs;
       routeIndex = 0;
+      if (currentPosition != null && fetchedRouteLogs.isNotEmpty) {
+        distanceToNextRouteLog = Geolocator.distanceBetween(
+            currentPosition!.latitude,
+            currentPosition!.longitude,
+            fetchedRouteLogs[0].endLocation.lat,
+            fetchedRouteLogs[0].endLocation.lng);
+      }
     });
   }
 
