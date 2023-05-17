@@ -872,6 +872,7 @@ class _PatientState extends State<Patient> {
             Visibility(
               visible: sosCalled,
               child: Container(
+                width: double.infinity,
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
