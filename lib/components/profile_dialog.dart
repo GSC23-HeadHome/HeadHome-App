@@ -19,10 +19,10 @@ class ProfileOverlay extends StatefulWidget {
   final Function(String, String, String, String) updateInfo;
 
   @override
-  __ProfileOverlayState createState() => __ProfileOverlayState();
+  State<ProfileOverlay> createState() => _ProfileOverlayState();
 }
 
-class __ProfileOverlayState extends State<ProfileOverlay> {
+class _ProfileOverlayState extends State<ProfileOverlay> {
   String localName = '';
   String localNum = '';
   String localPassword = '';
