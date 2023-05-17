@@ -25,10 +25,10 @@ class _AuthLoginState extends State<AuthLogin> {
   String? dropdownError;
 
   void loginAccount(BuildContext context) async {
-    setState(() {
-      emailError = null;
-      passwordError = null;
-    });
+    String? emailErrorText = null;
+    String? passwordErrorText = null;
+    String? dropdownErrorText = null;
+
     try {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailValue,
@@ -49,9 +49,7 @@ class _AuthLoginState extends State<AuthLogin> {
               );
               break;
             } else {
-              setState(() {
-                dropdownError = "User is not a Patient.";
-              });
+              dropdownErrorText = "User is not a Patient.";
               throw Exception("User is not a Carereceiver");
             }
 
@@ -68,9 +66,7 @@ class _AuthLoginState extends State<AuthLogin> {
               );
               break;
             } else {
-              setState(() {
-                dropdownError = "User is not a Volunteer.";
-              });
+              dropdownErrorText = "User is not a Volunteer.";
               throw Exception("User is not a Volunteer");
             }
 
@@ -87,9 +83,7 @@ class _AuthLoginState extends State<AuthLogin> {
               );
               break;
             } else {
-              setState(() {
-                dropdownError = "User is not a Caregiver.";
-              });
+              dropdownErrorText = "User is not a Caregiver.";
               throw Exception("User is not a Caregiver");
             }
 
@@ -102,23 +96,23 @@ class _AuthLoginState extends State<AuthLogin> {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         debugPrint('No user found for that email.');
-        setState(() {
-          emailError = "No user found for that email.";
-        });
+        emailErrorText = "No user found for that email.";
       } else if (e.code == 'wrong-password') {
         debugPrint('Wrong password provided for that user.');
-        setState(() {
-          passwordError = "Wrong password provided.";
-        });
+        passwordErrorText = "Wrong password provided.";
       } else if (e.code == 'invalid-email') {
         debugPrint('The email address is invalid.');
-        setState(() {
-          emailError = "The email address is invalid.";
-        });
+        emailErrorText = "The email address is invalid.";
       }
     } catch (e) {
       debugPrint("$e");
     }
+
+    setState(() {
+      emailError = emailErrorText;
+      passwordError = passwordErrorText;
+      dropdownError = dropdownErrorText;
+    });
   }
 
   @override
