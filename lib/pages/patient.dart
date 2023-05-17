@@ -16,6 +16,7 @@ import 'package:headhome/utils/debouncer.dart';
 import '../constants.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import '../main.dart' show MyApp;
 
 import 'package:headhome/utils/strings.dart';
 import 'package:headhome/api/api_services.dart';
@@ -794,19 +795,30 @@ class _PatientState extends State<Patient> {
         backgroundColor: Colors.white,
         centerTitle: false,
         leadingWidth: 0,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(MaterialSymbols.home_pin,
-                color: Theme.of(context).colorScheme.primary),
-            Text(
-              "HeadHome",
-              style: TextStyle(
-                fontSize: 18.0,
-                color: Theme.of(context).colorScheme.primary,
+        title: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) => const MyApp(
+                        isLocationEnabled: true,
+                      )),
+            );
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(MaterialSymbols.home_pin,
+                  color: Theme.of(context).colorScheme.primary),
+              Text(
+                "HeadHome",
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: <Widget>[
           IconButton(
