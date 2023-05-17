@@ -7,10 +7,10 @@ import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
 import 'package:headhome/constants.dart';
 import '../main.dart' show MyApp;
-import './caregiverPatient.dart' show PatientDetails;
-import '../components/profileDialog.dart' show ProfileOverlay;
-import '../components/settingsDialog.dart' show SettingsOverlay;
-import '../components/addPatient.dart' show AddPatientOverlay;
+import 'package:headhome/pages/caregiver_patient.dart' show PatientDetails;
+import '../components/profile_dialog.dart' show ProfileOverlay;
+import '../components/settings_dialog.dart' show SettingsOverlay;
+import '../components/add_patient.dart' show AddPatientOverlay;
 import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -27,7 +27,7 @@ class _CaregiverState extends State<Caregiver> {
   // late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
 
   //caregiver details
-  late String CgId = widget.caregiverModel.cgId;
+  late String cgId = widget.caregiverModel.cgId;
   late String nameValue = widget.caregiverModel.name;
   late String contactNum = widget.caregiverModel.contactNum;
   late String password = "69823042";
@@ -107,10 +107,10 @@ class _CaregiverState extends State<Caregiver> {
   }
 
   Future<CarereceiverModel?> _fetchCarereceiverInfo(crId) async {
-    CarereceiverModel? _CarereceiverModel =
+    CarereceiverModel? carereceiverModel =
         await ApiService.getCarereceiver(crId);
-    await _CarereceiverModel?.getCRTravelLog();
-    return _CarereceiverModel;
+    await carereceiverModel?.getCRTravelLog();
+    return carereceiverModel;
   }
 
   void _getCaregiverInfo() async {
@@ -273,7 +273,7 @@ class _CaregiverState extends State<Caregiver> {
                   password: password,
                   role: "Caregiver",
                   updateInfo: _updateCgInfo,
-                  id: CgId,
+                  id: cgId,
                 )),
             const Expanded(
               flex: 5, // 50%

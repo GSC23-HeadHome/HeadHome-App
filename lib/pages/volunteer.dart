@@ -11,10 +11,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api/models/carereceiverdata.dart';
 import '../main.dart' show MyApp;
-import './volunteerPatient.dart' show PatientPage;
-import '../components/profileDialog.dart' show ProfileOverlay;
-import '../components/settingsDialog.dart' show SettingsOverlay;
-import '../components/gmapsWidget.dart' show GmapsWidget;
+import 'volunteer_patient.dart' show PatientPage;
+import '../components/profile_dialog.dart' show ProfileOverlay;
+import '../components/settings_dialog.dart' show SettingsOverlay;
+import '../components/gmaps_widget.dart' show GmapsWidget;
 
 final FirebaseFirestore db = FirebaseFirestore.instance;
 final Reference ref = FirebaseStorage.instance.ref();
@@ -59,11 +59,11 @@ class _VolunteerState extends State<Volunteer> {
   }
 
   Future<String> _updateVolunteerInfo(
-      String vId, String _name, String _contact, String _password) async {
+      String vId, String name, String contact, String password) async {
     setState(() {
-      nameValue = _name;
-      contactNum = _contact;
-      password = _password;
+      nameValue = name;
+      contactNum = contact;
+      password = password;
     });
     //send put request to update caregiver num
     var response = await ApiService.updateVolunteer(contactNum, vId);

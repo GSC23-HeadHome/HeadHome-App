@@ -333,7 +333,7 @@ class ApiService {
   static Future<void> updateSOS(String id, String status) async {
     try {
       var url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.sos}/$id');
-      print(url);
+      debugPrint('$url');
       await http.put(
         url,
         headers: {"Content-Type": "application/json"},

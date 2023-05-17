@@ -12,7 +12,7 @@ import 'package:headhome/api/models/travellogdata.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../components/gmapsWidget.dart' show GmapsWidget;
+import '../components/gmaps_widget.dart' show GmapsWidget;
 import 'package:headhome/constants.dart';
 
 class PatientPage extends StatefulWidget {
@@ -218,13 +218,13 @@ class _PatientPageState extends State<PatientPage> {
                       ),
                     ),
                     authenticated
-                        ? findHome(
+                        ? FindHome(
                             priContactName: priContactName,
                             priContactNo: _priContactNo,
                             homeLocation: homeLocation,
                             openMap: openMap,
                           )
-                        : findPatient(
+                        : FindPatient(
                             priContactName: priContactName,
                             priContactNo: _priContactNo,
                             sosLogModel: widget.sosLogModel,
@@ -252,8 +252,7 @@ class _PatientPageState extends State<PatientPage> {
                 await FlutterPhoneDirectCaller.callNumber(
                     widget.carereceiverModel.contactNum.replaceAll(' ', ''));
               },
-              backgroundColor:
-                  Theme.of(context).colorScheme.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               child: const Icon(Icons.call), //icon inside button
             ),
           )),
@@ -270,8 +269,8 @@ class _PatientPageState extends State<PatientPage> {
   }
 }
 
-class findPatient extends StatefulWidget {
-  const findPatient({
+class FindPatient extends StatefulWidget {
+  const FindPatient({
     super.key,
     required this.priContactName,
     required this.priContactNo,
@@ -290,10 +289,10 @@ class findPatient extends StatefulWidget {
   final void Function(double, double) openMap;
 
   @override
-  State<findPatient> createState() => _findPatientState();
+  State<FindPatient> createState() => FindPatientState();
 }
 
-class _findPatientState extends State<findPatient> {
+class FindPatientState extends State<FindPatient> {
   final authIdController = TextEditingController();
 
   @override
@@ -304,9 +303,9 @@ class _findPatientState extends State<findPatient> {
 
   // to check if class rerenders
   @override
-  void didUpdateWidget(findPatient oldWidget) {
+  void didUpdateWidget(FindPatient oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print("find patient widget has been updated");
+    debugPrint("find patient widget has been updated");
   }
 
   @override
@@ -375,7 +374,7 @@ class _findPatientState extends State<findPatient> {
                 children: [
                   SizedBox(
                     height: 200,
-                    child: widget.patientLocation != LatLng(0, 0)
+                    child: widget.patientLocation != const LatLng(0, 0)
                         ? GmapsWidget(
                             center: widget.patientLocation,
                             marker: widget.patientLocation,
@@ -491,8 +490,8 @@ class _findPatientState extends State<findPatient> {
   }
 }
 
-class findHome extends StatelessWidget {
-  const findHome(
+class FindHome extends StatelessWidget {
+  const FindHome(
       {super.key,
       required this.priContactName,
       required this.priContactNo,

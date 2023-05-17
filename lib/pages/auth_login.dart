@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
-import 'package:headhome/pages/authregister.dart';
+import 'package:headhome/pages/auth_register.dart';
 import 'package:headhome/pages/patient.dart';
 import 'package:headhome/pages/caregiver.dart';
 import 'package:headhome/pages/volunteer.dart';
@@ -25,9 +25,9 @@ class _AuthLoginState extends State<AuthLogin> {
   String? dropdownError;
 
   void loginAccount(BuildContext context) async {
-    String? emailErrorText = null;
-    String? passwordErrorText = null;
-    String? dropdownErrorText = null;
+    String? emailErrorText;
+    String? passwordErrorText;
+    String? dropdownErrorText;
 
     try {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(

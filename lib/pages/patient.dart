@@ -22,7 +22,7 @@ import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 
-import '../components/gmapsWidget.dart' show GmapsWidget;
+import '../components/gmaps_widget.dart' show GmapsWidget;
 
 class Patient extends StatefulWidget {
   const Patient({super.key, required this.carereceiverModel});

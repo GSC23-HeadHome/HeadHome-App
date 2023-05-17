@@ -4,10 +4,10 @@ class SettingsOverlay extends StatefulWidget {
   const SettingsOverlay({Key? key}) : super(key: key);
 
   @override
-  __SettingsOverlayState createState() => __SettingsOverlayState();
+  State<SettingsOverlay> createState() => _SettingsOverlayState();
 }
 
-class __SettingsOverlayState extends State<SettingsOverlay> {
+class _SettingsOverlayState extends State<SettingsOverlay> {
   OverlayEntry? overlayEntry;
   bool notifications = true;
   bool show = false;
@@ -48,7 +48,8 @@ class __SettingsOverlayState extends State<SettingsOverlay> {
                         height: 110,
                         decoration: BoxDecoration(
                           color: Colors.grey.withOpacity(0.3),
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                         ),
                         child: Row(
                           children: [

@@ -8,7 +8,7 @@ import 'package:headhome/api/models/travellogdata.dart';
 import 'package:headhome/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../components/gmapsWidget.dart' show GmapsWidget;
+import '../components/gmaps_widget.dart' show GmapsWidget;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:headhome/api/api_services.dart';
@@ -24,20 +24,19 @@ class PatientDetails extends StatefulWidget {
 }
 
 class MyState extends ChangeNotifier {
-  bool alert_sent = false;
-  bool get _alert_sent => alert_sent;
+  bool alertSent = false;
 
   void respondButton(CarereceiverModel model) async {
     debugPrint("state changed");
-    debugPrint(alert_sent.toString());
+    debugPrint(alertSent.toString());
     await ApiService.sendSOS(model.crId);
     await model.getCRSOSLog();
-    alert_sent = !alert_sent;
+    alertSent = !alertSent;
     notifyListeners();
   }
 
   void initAlertSent(bool sent) {
-    alert_sent = sent;
+    alertSent = sent;
     notifyListeners();
   }
 }
@@ -119,7 +118,7 @@ class _PatientDetailsState extends State<PatientDetails> {
     // void toggleAlert (responded) {}
 
     // if (responded == 0) {
-    //   alertStatus = sendAlert();
+    //   alertStatus = SendAlert();
     // } else {
     //   alertStatus = alertSent(response: responded);
     // }
@@ -226,7 +225,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                             )
                           : Container(),
                       _showAlertButton
-                          ? sendAlert(model: widget.carereceiverModel)
+                          ? SendAlert(model: widget.carereceiverModel)
                           : Container(),
                       // Notes
                       _showAlertButton
@@ -369,8 +368,8 @@ class _PatientDetailsState extends State<PatientDetails> {
   }
 }
 
-class sendAlert extends StatelessWidget {
-  const sendAlert({super.key, required this.model});
+class SendAlert extends StatelessWidget {
+  const SendAlert({super.key, required this.model});
   final CarereceiverModel model;
 
   @override
@@ -381,8 +380,8 @@ class sendAlert extends StatelessWidget {
       } else {
         debugPrint("Model: null");
       }
-      debugPrint("updated child with: ${myState._alert_sent}");
-      return myState._alert_sent
+      debugPrint("updated child with: ${myState.alertSent}");
+      return myState.alertSent
           ? Column(
               children: [
                 //button

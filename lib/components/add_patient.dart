@@ -7,10 +7,10 @@ class AddPatientOverlay extends StatefulWidget {
   final Function(String, String, String) addNewPatient;
 
   @override
-  __AddPatientOverlayState createState() => __AddPatientOverlayState();
+  State<AddPatientOverlay> createState() => _AddPatientOverlayState();
 }
 
-class __AddPatientOverlayState extends State<AddPatientOverlay> {
+class _AddPatientOverlayState extends State<AddPatientOverlay> {
   void showAddPatient() {
     showDialog(
         context: context,
@@ -44,7 +44,8 @@ class __AddPatientOverlayState extends State<AddPatientOverlay> {
                       padding: const EdgeInsets.fromLTRB(25, 0, 25, 30),
                       child: Column(
                         children: [
-                          Text("AuthId of patient can be found on patient's account.",
+                          Text(
+                              "AuthId of patient can be found on patient's account.",
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodySmall),
                           Padding(
@@ -116,7 +117,7 @@ class __AddPatientOverlayState extends State<AddPatientOverlay> {
                                   ),
                                   ElevatedButton(
                                     onPressed: () async {
-                                      //addNewPatient(authid, relationship) 
+                                      //addNewPatient(authid, relationship)
                                     },
                                     style: ElevatedButton.styleFrom(
                                         minimumSize: const Size(120, 50),
@@ -162,8 +163,7 @@ class __AddPatientOverlayState extends State<AddPatientOverlay> {
         //code to execute on bxutton press
         showAddPatient();
       },
-      backgroundColor:
-          Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       child: const Icon(Icons.add), //icon inside button
     );
   }
