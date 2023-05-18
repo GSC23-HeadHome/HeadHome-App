@@ -53,12 +53,12 @@ class _SettingsOverlayState extends State<SettingsOverlay> {
                         ),
                         child: Row(
                           children: [
-                            Expanded(
+                            const Expanded(
                               flex: 6, // 60%
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Padding(
+                                  Padding(
                                       padding:
                                           EdgeInsets.fromLTRB(20, 20, 0, 5),
                                       child: Text(
@@ -69,9 +69,9 @@ class _SettingsOverlayState extends State<SettingsOverlay> {
                                             fontWeight: FontWeight.w500),
                                       )),
                                   Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          20, 5, 0, 10),
-                                      child: Wrap(children: const [
+                                      padding:
+                                          EdgeInsets.fromLTRB(20, 5, 0, 10),
+                                      child: Wrap(children: [
                                         Text(
                                           "Alerts when patient is out of safe zone",
                                           style: TextStyle(
