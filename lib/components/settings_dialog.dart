@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Settings dialog component.
 class SettingsOverlay extends StatefulWidget {
   const SettingsOverlay({Key? key}) : super(key: key);
 
@@ -12,44 +13,44 @@ class _SettingsOverlayState extends State<SettingsOverlay> {
   bool notifications = true;
   bool show = false;
 
+  /// Display settings dialog.
   void showSettings() {
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(
-                  20.0,
-                ),
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(
+                20.0,
               ),
             ),
-            title: Center(
-              child: Text(
-                "Settings",
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
+          ),
+          title: Center(
+            child: Text(
+              "Settings",
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-            contentPadding: const EdgeInsets.only(
-              top: 10.0,
-            ),
-            content: SizedBox(
-              height: 450,
-              width: 500,
-              child: ListView(
-                scrollDirection:
-                    Axis.vertical, // set the direction of scrolling
-                children: <Widget>[
-                  // list of widgets that you want to scroll through
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                    child: Column(children: [
-                      Container(
-                        height: 110,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.3),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(12)),
+          ),
+          contentPadding: const EdgeInsets.only(
+            top: 10.0,
+          ),
+          content: SizedBox(
+            height: 450,
+            width: 500,
+            child: ListView(
+              scrollDirection: Axis.vertical, // set the direction of scrolling
+              children: <Widget>[
+                // list of widgets that you want to scroll through
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: Column(children: [
+                    Container(
+                      height: 110,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(12),
                         ),
                         child: Row(
                           children: [
@@ -77,42 +78,47 @@ class _SettingsOverlayState extends State<SettingsOverlay> {
                                           style: TextStyle(
                                               fontSize: 14.0,
                                               color: Color(0xFF263238),
-                                              fontWeight: FontWeight.w400),
+                                              fontWeight: FontWeight.w400,
+                                          ),
                                         ),
-                                      ])),
-                                ],
-                              ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            Expanded(
-                              flex: 4,
-                              child: Switch(
-                                // thumb color (round icon)
-                                activeColor:
-                                    Theme.of(context).colorScheme.primary,
-                                activeTrackColor: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.4),
-                                inactiveThumbColor: Colors.blueGrey.shade600,
-                                inactiveTrackColor: Colors.grey.shade400,
-                                splashRadius: 50.0,
-                                // boolean variable value
-                                value: notifications,
-                                // changes the state of the switch
-                                onChanged: (value) => setState(
-                                    () => notifications = !notifications),
-                              ),
+                          ),
+                          Expanded(
+                            flex: 4,
+                            child: Switch(
+                              // thumb color (round icon)
+                              activeColor:
+                                  Theme.of(context).colorScheme.primary,
+                              activeTrackColor: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.4),
+                              inactiveThumbColor: Colors.blueGrey.shade600,
+                              inactiveTrackColor: Colors.grey.shade400,
+                              splashRadius: 50.0,
+                              // boolean variable value
+                              value: notifications,
+                              // changes the state of the switch
+                              onChanged: (value) => setState(
+                                  () => notifications = !notifications),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ]),
-                  ),
-                ],
-              ),
+                    ),
+                  ]),
+                ),
+              ],
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   @override
