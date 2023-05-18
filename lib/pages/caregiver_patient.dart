@@ -13,9 +13,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:headhome/api/api_services.dart';
 
+/// Caregivers will be redirected here upon clicking on patient on the CaregiverPage.
 class PatientDetails extends StatefulWidget {
-  const PatientDetails(
-      {super.key, required this.carereceiverModel, required this.profileBytes});
+  const PatientDetails({
+    super.key,
+    required this.carereceiverModel,
+    required this.profileBytes,
+  });
   final CarereceiverModel carereceiverModel;
   final Uint8List? profileBytes;
 
@@ -23,12 +27,11 @@ class PatientDetails extends StatefulWidget {
   State<PatientDetails> createState() => _PatientDetailsState();
 }
 
-class MyState extends ChangeNotifier {
+/// State management for sending alerts to volunteers near patient.
+class AlertState extends ChangeNotifier {
   bool alertSent = false;
 
   void respondButton(CarereceiverModel model) async {
-    debugPrint("state changed");
-    debugPrint(alertSent.toString());
     await ApiService.sendSOS(model.crId);
     await model.getCRSOSLog();
     alertSent = !alertSent;
@@ -42,17 +45,22 @@ class MyState extends ChangeNotifier {
 }
 
 class _PatientDetailsState extends State<PatientDetails> {
-  final MyState _myState = MyState();
-  LatLng? patientLocation;
-  Timer? _lTimer;
-  String distanceValue = "";
+  /// Handles state for whether alert is sent to patient.
+  final AlertState _alertState = AlertState();
 
+  /// Stores location of patient.
+  LatLng? patientLocation;
+
+  /// Timer for scheduling locational updates of patient.
+  Timer? _lTimer;
+
+  String distanceValue = "";
   bool _showAlertButton = false;
 
   Future<void> _getCRSOSLog() async {
     await widget.carereceiverModel.getCRSOSLog();
     if (widget.carereceiverModel.soslog != null) {
-      _myState.initAlertSent(
+      _alertState.initAlertSent(
           widget.carereceiverModel.soslog!.status == "lost" ||
               widget.carereceiverModel.soslog!.status == "guided");
     }
@@ -111,20 +119,8 @@ class _PatientDetailsState extends State<PatientDetails> {
 
   @override
   Widget build(BuildContext context) {
-    // double lat = patientLocation!.latitude;
-    // double lng = patientLocation!.longitude;
-    // var responded;
-    // var alertStatus;
-    // void toggleAlert (responded) {}
-
-    // if (responded == 0) {
-    //   alertStatus = SendAlert();
-    // } else {
-    //   alertStatus = alertSent(response: responded);
-    // }
-
     return ChangeNotifierProvider(
-      create: (_) => _myState,
+      create: (_) => _alertState,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -374,14 +370,14 @@ class SendAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MyState>(builder: (context, myState, child) {
+    return Consumer<AlertState>(builder: (context, alertState, child) {
       if (model.soslog != null) {
         debugPrint("Model: ${model.soslog!.vId}");
       } else {
         debugPrint("Model: null");
       }
-      debugPrint("updated child with: ${myState.alertSent}");
-      return myState.alertSent
+      debugPrint("updated child with: ${alertState.alertSent}");
+      return alertState.alertSent
           ? Column(
               children: [
                 //button
@@ -503,7 +499,7 @@ class SendAlert extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         //send alert
-                        myState.respondButton(model);
+                        alertState.respondButton(model);
                         debugPrint("responded");
                       },
                       style: ElevatedButton.styleFrom(

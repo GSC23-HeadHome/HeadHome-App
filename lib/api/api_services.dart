@@ -15,10 +15,17 @@ import 'package:headhome/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart';
 
+/// Service class to interact with application backend.
 class ApiService {
   // ---------- CARERECEIVER METHODS ----------
+
+  /// Registers a new patient account.
   static Future<http.Response> createCarereceiver(
-      String id, String name, String address, String contactNum) async {
+    String id,
+    String name,
+    String address,
+    String contactNum,
+  ) async {
     Uri url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}');
 
     Map data = {
@@ -29,7 +36,7 @@ class ApiService {
       'CareGiver': [],
     };
 
-    //encode Map to JSON
+    // encode Map to JSON
     var body = json.encode(data);
 
     var response = await http.post(
@@ -40,6 +47,7 @@ class ApiService {
     return response;
   }
 
+  /// Retrieves patient information.
   static Future<CarereceiverModel?> getCarereceiver(String id) async {
     try {
       var url =
@@ -56,6 +64,7 @@ class ApiService {
     return null;
   }
 
+  /// Updates patient information.
   static Future<http.Response> updateCarereceiver(String id, String name,
       String address, String contactNum, String cgId, String relation) async {
     Uri url =
@@ -80,8 +89,13 @@ class ApiService {
     return response;
   }
 
+  /// For patient to send an SOS alert to caregivers.
   static Future<http.Response> requestHelp(
-      String id, LatLng startPos, String endLat, String endLng) async {
+    String id,
+    LatLng startPos,
+    String endLat,
+    String endLng,
+  ) async {
     int datetime =
         DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     Uri url = Uri.parse(
@@ -105,6 +119,7 @@ class ApiService {
     return response;
   }
 
+  /// For patients to receive route back home.
   static Future<http.Response> routingHelp(
       LatLng startPos, String endLat, String endLng) async {
     Uri url =
@@ -127,6 +142,8 @@ class ApiService {
   // ------- END OF CARERECEIVER METHODS -------
 
   // ------------ CAREGIVER METHODS ------------
+
+  /// Registers a new caregiver account.
   static Future<http.Response> createCaregiver(
       String id, String name, String address, String contactNum) async {
     Uri url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.caregiver}');
@@ -147,6 +164,7 @@ class ApiService {
     return response;
   }
 
+  /// Retrieves caregiver information.
   static Future<CaregiverModel?> getCaregiver(String id) async {
     try {
       var url =
@@ -163,12 +181,13 @@ class ApiService {
     return null;
   }
 
+  /// Retrieves caregiver contact.
   static Future<Cgcontactnum?> getCgContact(String cgId, crId) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
-        'GET',
-        Uri.parse(
-            'https://HeadHome.chayhuixiang.repl.co/carereceiver/contactcg'));
+      'GET',
+      Uri.parse('https://HeadHome.chayhuixiang.repl.co/carereceiver/contactcg'),
+    );
     debugPrint("$cgId $crId");
     request.body = json.encode({"CrId": crId, "CgId": cgId});
     request.headers.addAll(headers);
@@ -185,6 +204,7 @@ class ApiService {
     }
   }
 
+  /// Updates patient information.
   static Future<UpdateCgResponse> updateCg(String contact, String cgId) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request('PUT',
@@ -203,13 +223,14 @@ class ApiService {
     }
   }
 
+  /// Adds a new patient under the caregiver.
   static Future<AddPatientMessage> addPatient(
       String cgId, String crId, String relationship) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
-        'PUT',
-        Uri.parse(
-            'https://HeadHome.chayhuixiang.repl.co/caregiver/$cgId/newcr'));
+      'PUT',
+      Uri.parse('https://HeadHome.chayhuixiang.repl.co/caregiver/$cgId/newcr'),
+    );
     request.body = json.encode({"Id": crId, "Relationship": relationship});
     request.headers.addAll(headers);
 
@@ -228,6 +249,8 @@ class ApiService {
   // -------- END OF CAREGIVER METHODS ---------
 
   // ------------ VOLUNTEER METHODS ------------
+
+  /// Registers a new volunteer account.
   static Future<http.Response> createVolunteer(
       String id, String name, String contactNum) async {
     Uri url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.volunteers}');
@@ -247,11 +270,15 @@ class ApiService {
     //encode Map to JSON
     var body = json.encode(data);
 
-    var response = await http.post(url,
-        headers: {"Content-Type": "application/json"}, body: body);
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
     return response;
   }
 
+  /// Retrieves volunteer information.
   static Future<VolunteerModel?> getVolunteer(String id) async {
     try {
       var url =
@@ -268,11 +295,14 @@ class ApiService {
     return null;
   }
 
+  /// Updates volunteer information.
   static Future<UpdateVolResponse> updateVolunteer(
       String contact, String vId) async {
     var headers = {'Content-Type': 'application/json'};
-    var request = http.Request('PUT',
-        Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/$vId'));
+    var request = http.Request(
+      'PUT',
+      Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/$vId'),
+    );
     request.body = json.encode({"ContactNum": contact});
     request.headers.addAll(headers);
 
@@ -292,8 +322,12 @@ class ApiService {
 
   // ------------- SOS LOG METHODS -------------
 
+  /// Authenticates a volunteer to guide a patient home.
   static Future<AcceptSOSResponse?> acceptSOS(
-      String sosId, String authID, String vId) async {
+    String sosId,
+    String authID,
+    String vId,
+  ) async {
     var headers = {'Content-Type': 'application/json'};
     String url = '${ApiConstants.baseUrl}/${ApiConstants.sos}/accept';
     log(url);
@@ -315,6 +349,7 @@ class ApiService {
     return null;
   }
 
+  /// Retrieves information about particular sos call.
   static Future<SosLogModel?> getSOSLog(String id) async {
     try {
       var url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.sos}/$id');
@@ -330,6 +365,7 @@ class ApiService {
     return null;
   }
 
+  /// Updates information about a particular sos call.
   static Future<void> updateSOS(String id, String status) async {
     try {
       var url = Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.sos}/$id');
@@ -344,6 +380,7 @@ class ApiService {
     }
   }
 
+  /// Sends SOS to volunteers near patient.
   static Future<SosMessage> sendSOS(String crId) async {
     final TravelLogModel? travelLogModel = await getTravelLog(crId);
 
@@ -380,6 +417,7 @@ class ApiService {
 
   // ----------- TRAVEL LOG METHODS ------------
 
+  /// Uploads patient location onto cloud firestore.
   static Future<http.Response> updateCarereceiverLoc(
       String id, double lat, double lng, String status) async {
     int datetime =
@@ -387,13 +425,11 @@ class ApiService {
     String travelLogId = id + datetime.toString();
     Uri url = Uri.parse(
         '${ApiConstants.baseUrl}/${ApiConstants.travellog}/$travelLogId');
-    // debugPrint(lat);
-    // debugPrint(lng);
     Map data = {
       "CrId": id,
       "Datetime": datetime,
       "CurrentLocation": {"Lat": lat, "Lng": lng},
-      "Status": status
+      "Status": status,
     };
 
     var body = json.encode(data);
@@ -406,6 +442,7 @@ class ApiService {
     return response;
   }
 
+  /// Retrieves patient location information.
   static Future<TravelLogModel?> getTravelLog(String id) async {
     try {
       var url =
@@ -426,6 +463,7 @@ class ApiService {
 
   // --------- FIREBASE STORAGE METHODS --------
 
+  /// Retrieves image in bytes from a firebase storage path.
   static Future<Uint8List?> getProfileImg(String imageName) async {
     Reference? storageRef = FirebaseStorage.instance.ref();
     final profileRef = storageRef.child("ProfileImg");
