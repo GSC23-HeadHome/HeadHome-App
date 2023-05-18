@@ -7,11 +7,11 @@ import 'package:headhome/pages/auth_login.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 
+/// Test if location services are enabled, request for permission if not.
 Future<bool> locationEnabled() async {
   bool serviceEnabled;
   LocationPermission permission;
 
-  // Test if location services are enabled.
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     // Location services are not enabled don't continue
@@ -71,7 +71,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]).then(
     (value) => runApp(
-      MyApp(
+      HeadHomeApp(
         isLocationEnabled: isLocationEnabled,
       ),
     ),
@@ -91,8 +91,9 @@ class LocationDisabledPage extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.isLocationEnabled});
+// Entry point for the application.
+class HeadHomeApp extends StatelessWidget {
+  const HeadHomeApp({super.key, this.isLocationEnabled});
   final bool? isLocationEnabled;
 
   @override
