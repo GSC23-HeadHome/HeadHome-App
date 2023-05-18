@@ -9,6 +9,7 @@ import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:headhome/api/models/volunteerdata.dart';
 
+/// User login page.
 class AuthLogin extends StatefulWidget {
   const AuthLogin({super.key});
 
@@ -17,6 +18,7 @@ class AuthLogin extends StatefulWidget {
 }
 
 class _AuthLoginState extends State<AuthLogin> {
+  /// User input fields.
   String dropdownValue = "Caregiver";
   String emailValue = "";
   String passwordValue = "";
@@ -24,6 +26,7 @@ class _AuthLoginState extends State<AuthLogin> {
   String? passwordError;
   String? dropdownError;
 
+  /// Login to an account.
   void loginAccount(BuildContext context) async {
     String? emailErrorText;
     String? passwordErrorText;
@@ -152,7 +155,8 @@ class _AuthLoginState extends State<AuthLogin> {
                           labelStyle:
                               const TextStyle(fontWeight: FontWeight.bold),
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
                           contentPadding: const EdgeInsets.all(10),
                           errorText: dropdownError,
                         ),
@@ -207,10 +211,12 @@ class _AuthLoginState extends State<AuthLogin> {
                     TextField(
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
                         contentPadding: const EdgeInsets.all(10),
                         hintText: 'Enter Password',
                         floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -228,8 +234,10 @@ class _AuthLoginState extends State<AuthLogin> {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        minimumSize:
-                            const Size(double.infinity, 50), //////// HERE
+                        minimumSize: const Size(
+                          double.infinity,
+                          50,
+                        ),
                       ),
                       onPressed: () {
                         loginAccount(context);
@@ -241,8 +249,10 @@ class _AuthLoginState extends State<AuthLogin> {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        minimumSize:
-                            const Size(double.infinity, 50), //////// HERE
+                        minimumSize: const Size(
+                          double.infinity,
+                          50,
+                        ),
                       ),
                       onPressed: () {
                         Navigator.of(context).push(
