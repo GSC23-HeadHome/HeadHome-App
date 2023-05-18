@@ -25,12 +25,8 @@ import 'package:headhome/api/models/carereceiverdata.dart';
 
 import '../components/gmaps_widget.dart' show GmapsWidget;
 
-/// Patient page (displays when patient logs in).
 class Patient extends StatefulWidget {
-  const Patient({
-    super.key,
-    required this.carereceiverModel,
-  });
+  const Patient({super.key, required this.carereceiverModel});
   final CarereceiverModel carereceiverModel;
 
   @override
@@ -38,14 +34,13 @@ class Patient extends StatefulWidget {
 }
 
 class _PatientState extends State<Patient> {
-  /// Stores whether sos is currently called.
   bool sosCalled = false;
 
-  /// Stores UI states.
+  // UI
   bool visible = true;
   bool fade = true;
 
-  /// Stores patient information.
+  // Patient Details
   late String crId = widget.carereceiverModel.crId;
   late String nameValue = widget.carereceiverModel.name;
   late String phoneNumberValue = widget.carereceiverModel.contactNum;
@@ -62,30 +57,25 @@ class _PatientState extends State<Patient> {
   late String profilePic = widget.carereceiverModel.profilePic;
   Uint8List? profileBytes;
 
-  /// States for editing the patient's profile
+  // Edit profile
   String tempName = "";
   String tempPhoneNum = "";
   String tempAddress = "";
   String tempRel = "";
 
-  /// Patient location details
+  // Location details
   LatLng? currentPosition;
   Set<Polyline> polylines = {};
+
   int routeIndex = 0;
   List<RouteLog> routeLogsModel = [];
   double distanceToNextRouteLog = 0;
+
   double bearing = 0.0;
-
-  /// Timer for scheduling locational updates of patient.
   Timer? _lTimer;
-
-  /// Timer for scheduling routing updates for patient on the way home.
   Timer? _rTimer;
-
-  /// Stream that subscribes to the current location of patient.
   StreamSubscription? _positionStream;
 
-  /// HeadHome hardware device information.
   BluetoothDevice? _device;
   StreamSubscription? _deviceStateSubscription;
   StreamSubscription? _charSubscription;
@@ -93,7 +83,6 @@ class _PatientState extends State<Patient> {
   BluetoothCharacteristic? txCharacteristic;
   final Debouncer _debouncer = Debouncer(seconds: 2);
 
-  /// Determine UI route arrow to be displayed in distance banner.
   IconData determineRouteArrow(RouteLog? rl) {
     if (rl == null) return Icons.straight;
 
@@ -137,380 +126,370 @@ class _PatientState extends State<Patient> {
     }
   }
 
-  /// Displays dialog with patient's profile information.
   void showPatientDetails() {
     showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(
-                20.0,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(
+                  20.0,
+                ),
               ),
             ),
-          ),
-          contentPadding: const EdgeInsets.only(
-            top: 10.0,
-          ),
-          content: SizedBox(
-            height: 700,
-            width: 500,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 8.0),
-                    child: Column(
+            contentPadding: const EdgeInsets.only(
+              top: 10.0,
+            ),
+            content: SizedBox(
+              height: 700,
+              width: 500,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 20.0, 8.0, 8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            nameValue,
+                            style: Theme.of(context).textTheme.displayMedium,
+                          ),
+                          Text(
+                            "patient",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    CircleAvatar(
+                      radius: 100,
+                      backgroundImage: profileBytes == null
+                          ? const NetworkImage(defaultProfilePic)
+                              as ImageProvider
+                          : MemoryImage(profileBytes!),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
                       children: [
                         Text(
-                          nameValue,
-                          style: Theme.of(context).textTheme.displayMedium,
+                          "Authentication ID:",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        const SizedBox(
+                          height: 5,
                         ),
                         Text(
-                          "patient",
-                          style: Theme.of(context).textTheme.bodySmall,
+                          authenticationID,
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  CircleAvatar(
-                    radius: 100,
-                    backgroundImage: profileBytes == null
-                        ? const NetworkImage(defaultProfilePic) as ImageProvider
-                        : MemoryImage(profileBytes!),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text(
-                        "Authentication ID:",
-                        style: Theme.of(context).textTheme.bodyLarge,
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Name',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        child: Text(nameValue),
                       ),
-                      const SizedBox(
-                        height: 5,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Phone Number',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          hintText: phoneNumberValue,
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        child: Text(phoneNumberValue),
                       ),
-                      Text(
-                        authenticationID,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
-                        border: OutlineInputBorder(
+                    ),
+                    const SizedBox(
+                      height: 130,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(300, 50),
+                        shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5.0)),
-                        contentPadding: const EdgeInsets.all(10),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
-                      child: Text(nameValue),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        labelText: 'Phone Number',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
-                        contentPadding: const EdgeInsets.all(10),
-                        hintText: phoneNumberValue,
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                      ),
-                      child: Text(phoneNumberValue),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 130,
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(300, 50),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      showEditProfile();
-                    },
-                    child: const Text(
-                      "Edit Profile",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      onPressed: () {
+                        Navigator.pop(context);
+                        showEditProfile();
+                      },
+                      child: const Text(
+                        "Edit Profile",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 
-  /// Displays dialog to edit patient's profile information.
   void showEditProfile() {
     showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(
-                20.0,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(
+                  20.0,
+                ),
               ),
             ),
-          ),
-          title: Center(
-            child: Text(
-              "Edit Profile",
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-          ),
-          contentPadding: const EdgeInsets.only(
-            top: 10.0,
-          ),
-          content: SizedBox(
-            height: 700,
-            width: 500,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 100,
-                    backgroundImage: profileBytes == null
-                        ? const NetworkImage(defaultProfilePic) as ImageProvider
-                        : MemoryImage(profileBytes!),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
-                        contentPadding: const EdgeInsets.all(10),
-                        hintText: nameValue,
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          tempName = newValue!;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Address',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
-                        contentPadding: const EdgeInsets.all(10),
-                        hintText: homeAddress,
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          tempAddress = newValue!;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Phone Number',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
-                        contentPadding: const EdgeInsets.all(10),
-                        hintText: phoneNumberValue,
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          tempPhoneNum = newValue!;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Primary Contact Relationship',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
-                        contentPadding: const EdgeInsets.all(10),
-                        hintText: priContactRel,
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          tempRel = newValue!;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 100,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          minimumSize: const Size(120, 50),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            tempName = "";
-                            tempPhoneNum = "";
-                            tempAddress = "";
-                            tempRel = "";
-                          });
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(120, 50),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            nameValue = tempName == "" ? nameValue : tempName;
-                            phoneNumberValue = tempPhoneNum == ""
-                                ? phoneNumberValue
-                                : tempPhoneNum;
-                            homeAddress =
-                                tempAddress == "" ? homeAddress : tempAddress;
-                            priContactRel =
-                                tempRel == "" ? priContactRel : tempRel;
-                            tempName = "";
-                            tempPhoneNum = "";
-                            tempAddress = "";
-                            tempRel = "";
-                          });
-                          _updateData();
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "Save",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+            title: Center(
+              child: Text(
+                "Edit Profile",
+                style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
-          ),
-        );
-      },
-    );
+            contentPadding: const EdgeInsets.only(
+              top: 10.0,
+            ),
+            content: SizedBox(
+              height: 700,
+              width: 500,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 100,
+                      backgroundImage: profileBytes == null
+                          ? const NetworkImage(defaultProfilePic)
+                              as ImageProvider
+                          : MemoryImage(profileBytes!),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Name',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          hintText: nameValue,
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            tempName = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          hintText: homeAddress,
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            tempAddress = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Phone Number',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          hintText: phoneNumberValue,
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            tempPhoneNum = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Primary Contact Relationship',
+                          labelStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0)),
+                          contentPadding: const EdgeInsets.all(10),
+                          hintText: priContactRel,
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            tempRel = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 100,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            minimumSize: const Size(120, 50),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0)),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              tempName = "";
+                              tempPhoneNum = "";
+                              tempAddress = "";
+                              tempRel = "";
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(120, 50),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0)),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              nameValue = tempName == "" ? nameValue : tempName;
+                              phoneNumberValue = tempPhoneNum == ""
+                                  ? phoneNumberValue
+                                  : tempPhoneNum;
+                              homeAddress =
+                                  tempAddress == "" ? homeAddress : tempAddress;
+                              priContactRel =
+                                  tempRel == "" ? priContactRel : tempRel;
+                              tempName = "";
+                              tempPhoneNum = "";
+                              tempAddress = "";
+                              tempRel = "";
+                            });
+                            _updateData();
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            "Save",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
   }
 
   @override
   void initState() {
     super.initState();
 
-    /// Listens out for any patient locational updates.
     _positionStream =
         Geolocator.getPositionStream().listen((Position position) {
       // listen out for whether we've reached the end of current routelog
       if (sosCalled) {
         Location endLocation = routeLogsModel[routeIndex].endLocation;
-        double endDistance = Geolocator.distanceBetween(
-          position.latitude,
-          position.longitude,
-          endLocation.lat,
-          endLocation.lng,
-        );
-        double endBearing = Geolocator.bearingBetween(
-          position.latitude,
-          position.longitude,
-          endLocation.lat,
-          endLocation.lng,
-        );
+        double endDistance = Geolocator.distanceBetween(position.latitude,
+            position.longitude, endLocation.lat, endLocation.lng);
+        double endBearing = Geolocator.bearingBetween(position.latitude,
+            position.longitude, endLocation.lat, endLocation.lng);
 
         double distFromSafe = Geolocator.distanceBetween(
-          position.latitude,
-          position.longitude,
-          widget.carereceiverModel.safezoneCtr.lat,
-          widget.carereceiverModel.safezoneCtr.lng,
-        );
+            position.latitude,
+            position.longitude,
+            widget.carereceiverModel.safezoneCtr.lat,
+            widget.carereceiverModel.safezoneCtr.lng);
 
         Map<String, dynamic> dataToESP;
 
-        // Check if user has reached home
+        debugPrint('endDistance: $endDistance');
+
+        // check if user has reached home
         if (distFromSafe > 30) {
           dataToESP = {
             "bearing": endBearing,
@@ -526,7 +505,7 @@ class _PatientState extends State<Patient> {
           });
           txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
 
-          // Reached home
+          // reached home
         } else {
           dataToESP = {
             "bearing": endBearing,
@@ -558,7 +537,7 @@ class _PatientState extends State<Patient> {
       }
     });
 
-    _getContact();
+    _getData();
     _getProfileImg();
     _locationHandler();
     _initBluetooth();
@@ -585,7 +564,6 @@ class _PatientState extends State<Patient> {
 
   // ------- START OF BLUETOOTH METHODS -----
 
-  /// Connects to the HeadHome hardware device.
   void _initBluetooth() async {
     FlutterBlue flutterBlue = FlutterBlue.instance;
     flutterBlue.startScan(timeout: const Duration(seconds: 4));
@@ -641,37 +619,28 @@ class _PatientState extends State<Patient> {
   // ------- END OF BLUETOOTH METHODS -------
 
   // ------- START OF PROFILE METHODS -------
-
-  /// Retrieves contact number of primary contact.
-  void _getContact() async {
+  void _getData() async {
     if (widget.carereceiverModel.careGiver.isNotEmpty) {
-      debugPrint("Getting Contact");
-      _cgcontactnumModel = await ApiService.getCgContact(
-        widget.carereceiverModel.careGiver[0].id,
-        crId,
-      );
-      setState(() {
-        priContactNo = _cgcontactnumModel!.cgContactNum;
-      });
+      _getContact(widget.carereceiverModel.careGiver[0].id);
     } else {
       debugPrint("No Contact");
     }
   }
 
-  /// Updates patient profile information.
+  void _getContact(cgId) async {
+    debugPrint("Getting Contact");
+    _cgcontactnumModel = await ApiService.getCgContact(cgId, crId);
+    setState(() {
+      priContactNo = _cgcontactnumModel!.cgContactNum;
+    });
+  }
+
   void _updateData() async {
-    var response = await ApiService.updateCarereceiver(
-      crId,
-      nameValue,
-      homeAddress,
-      phoneNumberValue,
-      priContactUsername,
-      priContactRel,
-    );
+    var response = await ApiService.updateCarereceiver(crId, nameValue,
+        homeAddress, phoneNumberValue, priContactUsername, priContactRel);
     debugPrint(response.body);
   }
 
-  /// Retrieves profile picture of patient in bytes, stored in [profileBytes].
   void _getProfileImg() async {
     Uint8List? fetchedBytes = await ApiService.getProfileImg(profilePic);
     if (fetchedBytes != null) {
@@ -681,25 +650,25 @@ class _PatientState extends State<Patient> {
     }
   }
 
-  /// Calls primary contact.
-  void _callNumber() async {
-    await FlutterPhoneDirectCaller.callNumber(
-      priContactNo.replaceAll(' ', ''),
-    );
+  _callNumber() async {
+    bool? res = await FlutterPhoneDirectCaller.callNumber(
+        priContactNo.replaceAll(' ', ''));
+    if (res!) {
+      debugPrint("Working");
+    } else {
+      debugPrint("Not working");
+    }
   }
   // ------- END OF PROFILE METHODS -------
 
   // ------- START OF FUNCTIONAL LOCATION METHODS -------
-
-  /// Uploads patient location to cloud firestore.
   Future<String> _updateLocStatus(bool manualCall) async {
     if (currentPosition != null) {
       double distFromSafe = Geolocator.distanceBetween(
-        currentPosition!.latitude,
-        currentPosition!.longitude,
-        widget.carereceiverModel.safezoneCtr.lat,
-        widget.carereceiverModel.safezoneCtr.lng,
-      );
+          currentPosition!.latitude,
+          currentPosition!.longitude,
+          widget.carereceiverModel.safezoneCtr.lat,
+          widget.carereceiverModel.safezoneCtr.lng);
       debugPrint(distFromSafe.toString());
       String status = distFromSafe > widget.carereceiverModel.safezoneRadius
           ? "warning"
@@ -709,11 +678,7 @@ class _PatientState extends State<Patient> {
                   : "safezone"
               : "home";
       var response = await ApiService.updateCarereceiverLoc(
-        crId,
-        currentPosition!.latitude,
-        currentPosition!.longitude,
-        status,
-      );
+          crId, currentPosition!.latitude, currentPosition!.longitude, status);
       debugPrint(response.body);
 
       return status;
@@ -722,7 +687,8 @@ class _PatientState extends State<Patient> {
     }
   }
 
-  /// Uploads patient location on cloud firestore, and if [manualCall] is true, call SOS.
+  // CAN ALSO USE THIS FUNCTION TO CALL FOR BLUETOOTH BUTTON PRESS BY
+  // manualCALL = true WHEN CALLING THE FUNCTION
   void _locStatusCallHelp(bool manualCall) async {
     String locStatus = await _updateLocStatus(manualCall);
     debugPrint(locStatus);
@@ -736,7 +702,6 @@ class _PatientState extends State<Patient> {
     }
   }
 
-  /// Schedules locational uploads onto cloud firestore every 1 min.
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
     _lTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
@@ -744,23 +709,22 @@ class _PatientState extends State<Patient> {
     });
   }
 
-  /// Calls the SOS endpoint on the backend to request for help.
   void _requestHelp() async {
+    // Position position = await _getCurrentPosition();
     debugPrint(currentPosition!.latitude.toString());
     debugPrint(currentPosition!.longitude.toString());
     var response = await ApiService.requestHelp(
-      crId,
-      currentPosition!,
-      widget.carereceiverModel.safezoneCtr.lat.toString(),
-      widget.carereceiverModel.safezoneCtr.lng.toString(),
-    );
+        crId,
+        currentPosition!,
+        widget.carereceiverModel.safezoneCtr.lat.toString(),
+        widget.carereceiverModel.safezoneCtr.lng.toString());
     Map<String, dynamic> res = json.decode(response.body);
+
     _processRouteResponse(res);
     // Calling route api every 5 mins
     _routingTimer();
   }
 
-  /// Processes the home route response.
   void _processRouteResponse(Map<String, dynamic> res) {
     // Converting polyline
     Set<Polyline> tempPoly = {};
@@ -792,16 +756,14 @@ class _PatientState extends State<Patient> {
       routeIndex = 0;
       if (currentPosition != null && fetchedRouteLogs.isNotEmpty) {
         distanceToNextRouteLog = Geolocator.distanceBetween(
-          currentPosition!.latitude,
-          currentPosition!.longitude,
-          fetchedRouteLogs[0].endLocation.lat,
-          fetchedRouteLogs[0].endLocation.lng,
-        );
+            currentPosition!.latitude,
+            currentPosition!.longitude,
+            fetchedRouteLogs[0].endLocation.lat,
+            fetchedRouteLogs[0].endLocation.lng);
       }
     });
   }
 
-  /// Schedules route help calls every 5 mins.
   Future<void> _routingTimer() async {
     _rTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       debugPrint("Routing");
@@ -814,13 +776,12 @@ class _PatientState extends State<Patient> {
     });
   }
 
-  /// Retrieves route to go home.
   void _routingHelp() async {
+    // Position position = await _getCurrentPosition();
     var response = await ApiService.routingHelp(
-      currentPosition!,
-      widget.carereceiverModel.safezoneCtr.lat.toString(),
-      widget.carereceiverModel.safezoneCtr.lng.toString(),
-    );
+        currentPosition!,
+        widget.carereceiverModel.safezoneCtr.lat.toString(),
+        widget.carereceiverModel.safezoneCtr.lng.toString());
     debugPrint(response.body);
     Map<String, dynamic> res = jsonDecode(response.body);
     _processRouteResponse(res);
@@ -839,20 +800,17 @@ class _PatientState extends State<Patient> {
             Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation1, animation2) =>
-                    const HeadHomeApp(
-                  isLocationEnabled: true,
-                ),
-              ),
+                  pageBuilder: (context, animation1, animation2) =>
+                      const HeadHomeApp(
+                        isLocationEnabled: true,
+                      )),
             );
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                MaterialSymbols.home_pin,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              Icon(MaterialSymbols.home_pin,
+                  color: Theme.of(context).colorScheme.primary),
               Text(
                 "HeadHome",
                 style: TextStyle(
@@ -875,192 +833,186 @@ class _PatientState extends State<Patient> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          currentPosition != null
-              ? GmapsWidget(
-                  polylines: polylines,
-                  center: currentPosition!,
-                  bearing: bearing,
-                  marker: LatLng(
-                    widget.carereceiverModel.safezoneCtr.lat,
-                    widget.carereceiverModel.safezoneCtr.lng,
+      body: Stack(children: [
+        currentPosition != null
+            ? GmapsWidget(
+                polylines: polylines,
+                center: currentPosition!,
+                bearing: bearing,
+                marker: LatLng(widget.carereceiverModel.safezoneCtr.lat,
+                    widget.carereceiverModel.safezoneCtr.lng))
+            : Container(),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade600,
+                    spreadRadius: 1,
+                    blurRadius: 15,
+                    blurStyle: BlurStyle.inner,
                   ),
-                )
-              : Container(),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
+                ],
+                color: const Color(0xFF9ED5CB),
+              ),
+              child: SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(MaterialSymbols.home_pin,
+                          color: Theme.of(context).colorScheme.primary),
+                      Flexible(
+                        child: Text(
+                          homeAddress,
+                          textScaleFactor: 1.2,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: sosCalled,
+              child: Container(
+                width: double.infinity,
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.shade600,
                       spreadRadius: 1,
                       blurRadius: 15,
-                      blurStyle: BlurStyle.inner,
+                      blurStyle: BlurStyle.outer,
                     ),
                   ],
-                  color: const Color(0xFF9ED5CB),
+                  color: Colors.white,
                 ),
-                child: SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          MaterialSymbols.home_pin,
-                          color: Theme.of(context).colorScheme.primary,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Icon(
+                        determineRouteArrow(
+                            routeIndex >= routeLogsModel.length - 1
+                                ? null
+                                : routeLogsModel[routeIndex + 1]),
+                        size: 100,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              parseHTML(routeIndex >= routeLogsModel.length - 1
+                                  ? "Continue to destination"
+                                  : routeLogsModel[routeIndex + 1]
+                                      .htmlInstructions),
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                      text: routeIndex >=
+                                              routeLogsModel.length - 1
+                                          ? "For "
+                                          : routeLogsModel[routeIndex + 1]
+                                                      .maneuver ==
+                                                  "straight"
+                                              ? "For "
+                                              : "In "),
+                                  TextSpan(
+                                    text:
+                                        '${distanceToNextRouteLog.toInt().toString()}m',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            )
+                          ],
                         ),
-                        Flexible(
-                          child: Text(
-                            homeAddress,
-                            textScaleFactor: 1.2,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      )
+                    ],
                   ),
                 ),
               ),
-              Visibility(
-                visible: sosCalled,
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade600,
-                        spreadRadius: 1,
-                        blurRadius: 15,
-                        blurStyle: BlurStyle.outer,
-                      ),
-                    ],
-                    color: Colors.white,
-                  ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(
-                          determineRouteArrow(
-                              routeIndex >= routeLogsModel.length - 1
-                                  ? null
-                                  : routeLogsModel[routeIndex + 1]),
-                          size: 100,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                parseHTML(
-                                    routeIndex >= routeLogsModel.length - 1
-                                        ? "Continue to destination"
-                                        : routeLogsModel[routeIndex + 1]
-                                            .htmlInstructions),
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                              Text.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                        text: routeIndex >=
-                                                routeLogsModel.length - 1
-                                            ? "For "
-                                            : routeLogsModel[routeIndex + 1]
-                                                        .maneuver ==
-                                                    "straight"
-                                                ? "For "
-                                                : "In "),
-                                    TextSpan(
-                                      text:
-                                          '${distanceToNextRouteLog.toInt().toString()}m',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        )
-                      ],
-                    ),
+            )
+          ],
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: Visibility(
+            visible: visible,
+            maintainAnimation: true,
+            maintainState: true,
+            child: AnimatedOpacity(
+              opacity: fade ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 400),
+              onEnd: () {
+                setState(() {
+                  visible = !visible;
+                });
+              },
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  fixedSize: MaterialStateProperty.all<Size>(
+                      const Size.fromRadius(100)),
+                  foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white),
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100.0),
+                        side: const BorderSide(color: Colors.red)),
                   ),
                 ),
-              )
-            ],
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: Visibility(
-              visible: visible,
-              maintainAnimation: true,
-              maintainState: true,
-              child: AnimatedOpacity(
-                opacity: fade ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 400),
-                onEnd: () {
+                onPressed: () {
                   setState(() {
-                    visible = !visible;
+                    _locStatusCallHelp(true);
                   });
                 },
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: Column(
-                    children: [
+                    children: const [
                       Icon(
                         Icons.home_outlined,
                         size: 100,
                       ),
-                    ),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _locStatusCallHelp(true);
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                    child: Column(
-                      children: const [
-                        Icon(
-                          Icons.home_outlined,
-                          size: 100,
+                      Text(
+                        "Navigate Home",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Text(
-                          "Navigate Home",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
       floatingActionButton: SizedBox(
           height: 80,
           width: 80,
@@ -1109,5 +1061,19 @@ class _PatientState extends State<Patient> {
         ),
       ),
     );
+  }
+}
+
+class NavigateMap extends StatefulWidget {
+  const NavigateMap({super.key});
+
+  @override
+  State<NavigateMap> createState() => _NavigateMapState();
+}
+
+class _NavigateMapState extends State<NavigateMap> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
