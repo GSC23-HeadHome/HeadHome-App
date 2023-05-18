@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../components/gmaps_widget.dart' show GmapsWidget;
 import 'package:headhome/constants.dart';
 
+/// Volunteers will be redirected here upon clicking on patient on the VolunteerPage.
 class PatientPage extends StatefulWidget {
   const PatientPage(
       {super.key,
@@ -32,13 +33,24 @@ class PatientPage extends StatefulWidget {
 }
 
 class _PatientPageState extends State<PatientPage> {
-  String priContactName = "-";
+  /// Stores primary caregiver number of patient.
+  String _priContactName = "-";
+
+  /// Stores primary contact number of patient.
   String _priContactNo = "-";
-  late LatLng currentLocation = const LatLng(0, 0);
+
+  /// Stores current location of patient.
+  late LatLng _currentLocation = const LatLng(0, 0);
+
+  /// Timer for scheduling locational updates of patient.
   Timer? _lTimer;
 
-  //to check if class rerenders
+  /// Stores authentication status for current volunteer,
+  /// on whether he/she is allowed to guide the patient home and view the patient's
+  /// address information.
+  bool _authenticated = false;
 
+  /// Retrieves the caregiver number for the patient, number is stored in [_priContactNo].
   void fetchCgNumber() async {
     final Cgcontactnum? fetchedContactNo = await ApiService.getCgContact(
         widget.carereceiverModel.careGiver[0].id,
@@ -50,17 +62,18 @@ class _PatientPageState extends State<PatientPage> {
     }
   }
 
+  /// Retrieves the caregiver name for the patient, name is stored in [_priContactName].
   void fetchCgName() async {
     final CaregiverModel? caregiverModel =
         await ApiService.getCaregiver(widget.carereceiverModel.careGiver[0].id);
     if (caregiverModel != null) {
       setState(() {
-        priContactName = caregiverModel.name;
+        _priContactName = caregiverModel.name;
       });
     }
   }
 
-  //redirect to google maps
+  /// Redirects volunteer to patient location on Google Maps.
   void openMap(double latitude, double longitude) async {
     String googleUrl =
         'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
@@ -71,24 +84,40 @@ class _PatientPageState extends State<PatientPage> {
     }
   }
 
-  //call travel log and update current location
+  /// Call travel log API and retrieve current location of patient, location is stored in [_currentLocation].
   void getPatientLocation() async {
     final TravelLogModel? travelLogModel =
         await ApiService.getTravelLog(widget.carereceiverModel.crId);
     if (travelLogModel != null) {
       setState(() {
-        currentLocation = LatLng(travelLogModel.currentLocation.lat,
+        _currentLocation = LatLng(travelLogModel.currentLocation.lat,
             travelLogModel.currentLocation.lng);
       });
       debugPrint("currentLocation updated");
     }
   }
 
-  //call travel log every 5 min to update current location
+  /// Schedule travel log API every 5 min to retrieve current location of patient.
   void updateLocation() {
     debugPrint("timer activated");
     _lTimer = Timer.periodic(const Duration(minutes: 5), (Timer timer) {
       getPatientLocation();
+    });
+  }
+
+  /// Determines whether volunteer is authenticated to guide the patient home.
+  void initialiseAuthenticated() {
+    if (widget.sosLogModel["status"] == "guided") {
+      setState(() {
+        _authenticated = true;
+      });
+    }
+  }
+
+  /// Update current status on whether volunteer is authenticated to guide the patient home.
+  void updateAuthenticated(bool newAuthenticated) {
+    setState(() {
+      _authenticated = newAuthenticated;
     });
   }
 
@@ -99,40 +128,13 @@ class _PatientPageState extends State<PatientPage> {
     fetchCgNumber();
     getPatientLocation();
     updateLocation();
-    intialiseAuthenticated();
-    debugPrint("currentlocation");
-    debugPrint(currentLocation.toString());
+    initialiseAuthenticated();
   }
 
   @override
   void dispose() {
     super.dispose();
     _lTimer?.cancel();
-  }
-
-  @override
-  void didUpdateWidget(PatientPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    debugPrint("main widget has been updated");
-  }
-
-  bool authenticated = false;
-
-  void intialiseAuthenticated() {
-    debugPrint("intialise authenticated");
-    if (widget.sosLogModel["status"] == "guided") {
-      setState(() {
-        authenticated = true;
-      });
-    }
-  }
-
-  void updateAuthenticated(bool newAuthenticated) {
-    setState(() {
-      authenticated = newAuthenticated;
-    });
-    debugPrint("updated authenticated:");
-    debugPrint(authenticated.toString());
   }
 
   @override
@@ -176,16 +178,16 @@ class _PatientPageState extends State<PatientPage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
                 child: ListView(
-                  scrollDirection:
-                      Axis.vertical, // set the direction of scrolling
+                  scrollDirection: Axis.vertical,
                   children: <Widget>[
-                    // list of widgets that you want to scroll through
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
                       child: Column(
                         children: [
-                          Text(widget.carereceiverModel.name,
-                              style: Theme.of(context).textTheme.displayMedium),
+                          Text(
+                            widget.carereceiverModel.name,
+                            style: Theme.of(context).textTheme.displayMedium,
+                          ),
                         ],
                       ),
                     ),
@@ -211,26 +213,27 @@ class _PatientPageState extends State<PatientPage> {
                           Text(
                             "Out of Safe Zone",
                             style: TextStyle(
-                                fontSize: 16.0,
-                                color: Theme.of(context).colorScheme.error),
+                              fontSize: 16.0,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           )
                         ],
                       ),
                     ),
-                    authenticated
+                    _authenticated
                         ? FindHome(
-                            priContactName: priContactName,
+                            priContactName: _priContactName,
                             priContactNo: _priContactNo,
                             homeLocation: homeLocation,
                             openMap: openMap,
                           )
                         : FindPatient(
-                            priContactName: priContactName,
+                            priContactName: _priContactName,
                             priContactNo: _priContactNo,
                             sosLogModel: widget.sosLogModel,
                             volunteerModel: widget.volunteerModel,
                             updateAuthenticated: updateAuthenticated,
-                            patientLocation: currentLocation,
+                            patientLocation: _currentLocation,
                             openMap: openMap,
                           ),
                   ],
@@ -248,7 +251,7 @@ class _PatientPageState extends State<PatientPage> {
               heroTag: 'VolunteerPatientFAB',
               //Floating action button on Scaffold
               onPressed: () async {
-                //code to execute on bxutton press
+                //code to execute on button press
                 await FlutterPhoneDirectCaller.callNumber(
                     widget.carereceiverModel.contactNum.replaceAll(' ', ''));
               },
@@ -269,6 +272,8 @@ class _PatientPageState extends State<PatientPage> {
   }
 }
 
+/// Patient page that displays when the patient is still unguided, and hence volunteer is still
+/// unauthenticated to guide the patient home.
 class FindPatient extends StatefulWidget {
   const FindPatient({
     super.key,
@@ -301,13 +306,6 @@ class FindPatientState extends State<FindPatient> {
     authIdController.dispose();
   }
 
-  // to check if class rerenders
-  @override
-  void didUpdateWidget(FindPatient oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    debugPrint("find patient widget has been updated");
-  }
-
   @override
   Widget build(BuildContext context) {
     double lat = widget.patientLocation.latitude;
@@ -317,49 +315,53 @@ class FindPatientState extends State<FindPatient> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-              child: Row(
-                children: [
-                  Text("Enter Patient's Authentication ID",
-                      style: Theme.of(context).textTheme.bodyMedium),
-                ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                child: Row(
+                  children: [
+                    Text(
+                      "Enter Patient's Authentication ID",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            TextField(
-              controller: authIdController,
-              decoration: InputDecoration(
-                suffixIcon: IconButton(
-                  icon: const Icon(
-                    Icons.send_outlined,
+              TextField(
+                controller: authIdController,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    icon: const Icon(
+                      Icons.send_outlined,
+                    ),
+                    onPressed: () async {
+                      debugPrint(widget.sosLogModel["sos_id"]);
+                      debugPrint(authIdController.text);
+                      debugPrint(widget.volunteerModel.vId);
+                      AcceptSOSResponse? response = await ApiService.acceptSOS(
+                          widget.sosLogModel["sos_id"],
+                          authIdController.text,
+                          widget.volunteerModel.vId);
+                      debugPrint("$response");
+                      if (response != null) {
+                        widget.updateAuthenticated(true);
+                        debugPrint("updateAuthenticated called");
+                      }
+                    },
                   ),
-                  onPressed: () async {
-                    debugPrint(widget.sosLogModel["sos_id"]);
-                    debugPrint(authIdController.text);
-                    debugPrint(widget.volunteerModel.vId);
-                    AcceptSOSResponse? response = await ApiService.acceptSOS(
-                        widget.sosLogModel["sos_id"],
-                        authIdController.text,
-                        widget.volunteerModel.vId);
-                    debugPrint("$response");
-                    if (response != null) {
-                      widget.updateAuthenticated(true);
-                      debugPrint("updateAuthenticated called");
-                    }
-                  },
+                  border: OutlineInputBorder(
+                    borderSide: const BorderSide(width: 1, color: Colors.grey),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                 ),
-                border: OutlineInputBorder(
-                  borderSide: const BorderSide(
-                      width: 1, color: Colors.grey), //<-- SEE HERE
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            )
-          ]),
+              )
+            ],
+          ),
         ),
-        //google map widget
+
+        // Google Map widget.
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
           child: Column(
@@ -399,104 +401,117 @@ class FindPatientState extends State<FindPatient> {
           ),
         ),
 
-        //caregiver info
+        /// Information on patient's caregiver.
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-              child: Row(
-                children: [
-                  Text("Caregiver Information",
-                      style: Theme.of(context).textTheme.titleSmall),
-                  const Spacer(),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-              child: Container(
-                width: 350,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 3,
-                      blurRadius: 6,
-                      offset: const Offset(0, 5), // changes position of shadow
-                    ),
-                  ],
-                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child: Row(
                   children: [
-                    Expanded(
-                      flex: 6, // 60%
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                              child: Wrap(children: [
-                                Text(
-                                  widget.priContactName,
-                                  style: const TextStyle(
-                                      fontSize: 16.0,
-                                      color: Color(0xFF263238),
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ])),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                            child: Text(widget.priContactNo,
-                                style: const TextStyle(fontSize: 12.0)),
-                          ),
-                        ],
-                      ),
+                    Text(
+                      "Caregiver Information",
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    Expanded(
-                      flex: 4, // 40%
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            //send alert
-                            if (widget.priContactNo != "-") {
-                              await FlutterPhoneDirectCaller.callNumber(
-                                  widget.priContactNo.replaceAll(' ', ''));
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(100, 45),
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary),
-                          child: const Text(
-                            'Contact',
-                            style: TextStyle(color: Colors.white),
+                    const Spacer(),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                child: Container(
+                  width: 350,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: const BorderRadius.all(Radius.circular(6)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 3,
+                        blurRadius: 6,
+                        offset:
+                            const Offset(0, 5), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 6, // 60%
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                              child: Wrap(
+                                children: [
+                                  Text(
+                                    widget.priContactName,
+                                    style: const TextStyle(
+                                        fontSize: 16.0,
+                                        color: Color(0xFF263238),
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                              child: Text(
+                                widget.priContactNo,
+                                style: const TextStyle(fontSize: 12.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4, // 40%
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              //send alert
+                              if (widget.priContactNo != "-") {
+                                await FlutterPhoneDirectCaller.callNumber(
+                                    widget.priContactNo.replaceAll(' ', ''));
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(100, 45),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary),
+                            child: const Text(
+                              'Contact',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
+/// Patient page that displays when the patient is guided by current volunteer,
+/// and hence volunteer is authenticated to guide the patient home.
 class FindHome extends StatelessWidget {
-  const FindHome(
-      {super.key,
-      required this.priContactName,
-      required this.priContactNo,
-      required this.homeLocation,
-      required this.openMap});
+  const FindHome({
+    super.key,
+    required this.priContactName,
+    required this.priContactNo,
+    required this.homeLocation,
+    required this.openMap,
+  });
   final String priContactName;
   final String priContactNo;
   final LatLng homeLocation;
@@ -509,7 +524,7 @@ class FindHome extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        //google map widget
+        // Google Map widget.
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
           child: Column(
@@ -517,8 +532,10 @@ class FindHome extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                child: Text("Home Location",
-                    style: Theme.of(context).textTheme.titleSmall),
+                child: Text(
+                  "Home Location",
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
               Stack(
                 children: [
@@ -550,87 +567,100 @@ class FindHome extends StatelessWidget {
         //safe zone
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-              child: Row(
-                children: [
-                  Text("Caregiver Information",
-                      style: Theme.of(context).textTheme.titleSmall),
-                  const Spacer(),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-              child: Container(
-                width: 350,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 3,
-                      blurRadius: 6,
-                      offset: const Offset(0, 5), // changes position of shadow
-                    ),
-                  ],
-                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child: Row(
                   children: [
-                    Expanded(
-                      flex: 6, // 60%
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                              child: Wrap(children: [
-                                Text(
-                                  priContactName,
-                                  style: const TextStyle(
-                                      fontSize: 16.0,
-                                      color: Color(0xFF263238),
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ])),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                            child: Text(priContactNo,
-                                style: const TextStyle(fontSize: 12.0)),
-                          ),
-                        ],
-                      ),
+                    Text(
+                      "Caregiver Information",
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    Expanded(
-                      flex: 4, // 40%
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (priContactNo != "-") {
-                              await FlutterPhoneDirectCaller.callNumber(
-                                  priContactNo.replaceAll(' ', ''));
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
+                    const Spacer(),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                child: Container(
+                  width: 350,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: const BorderRadius.all(Radius.circular(6)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 3,
+                        blurRadius: 6,
+                        offset:
+                            const Offset(0, 5), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 6, // 60%
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                              child: Wrap(
+                                children: [
+                                  Text(
+                                    priContactName,
+                                    style: const TextStyle(
+                                        fontSize: 16.0,
+                                        color: Color(0xFF263238),
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
+                              child: Text(
+                                priContactNo,
+                                style: const TextStyle(fontSize: 12.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4, // 40%
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 10, 20, 10),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (priContactNo != "-") {
+                                await FlutterPhoneDirectCaller.callNumber(
+                                    priContactNo.replaceAll(' ', ''));
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
                               minimumSize: const Size(100, 45),
                               backgroundColor:
-                                  Theme.of(context).colorScheme.primary),
-                          child: const Text(
-                            'Contact',
-                            style: TextStyle(color: Colors.white),
+                                  Theme.of(context).colorScheme.primary,
+                            ),
+                            child: const Text(
+                              'Contact',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ],
     );

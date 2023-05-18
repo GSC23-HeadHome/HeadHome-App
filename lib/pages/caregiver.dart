@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_symbols/flutter_material_symbols.dart';
 import 'package:headhome/api/models/caregiverdata.dart';
 import 'package:headhome/constants.dart';
-import '../main.dart' show MyApp;
+import '../main.dart' show HeadHomeApp;
 import 'package:headhome/pages/caregiver_patient.dart' show PatientDetails;
 import '../components/profile_dialog.dart' show ProfileOverlay;
 import '../components/settings_dialog.dart' show SettingsOverlay;
@@ -157,7 +157,8 @@ class _CaregiverState extends State<Caregiver> {
             Navigator.push(
               context,
               PageRouteBuilder(
-                  pageBuilder: (context, animation1, animation2) => const MyApp(
+                  pageBuilder: (context, animation1, animation2) =>
+                      const HeadHomeApp(
                         isLocationEnabled: true,
                       )),
             );

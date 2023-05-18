@@ -16,7 +16,7 @@ import 'package:headhome/utils/debouncer.dart';
 import '../constants.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import '../main.dart' show MyApp;
+import '../main.dart' show HeadHomeApp;
 
 import 'package:headhome/utils/strings.dart';
 import 'package:headhome/api/api_services.dart';
@@ -800,7 +800,8 @@ class _PatientState extends State<Patient> {
             Navigator.push(
               context,
               PageRouteBuilder(
-                  pageBuilder: (context, animation1, animation2) => const MyApp(
+                  pageBuilder: (context, animation1, animation2) =>
+                      const HeadHomeApp(
                         isLocationEnabled: true,
                       )),
             );

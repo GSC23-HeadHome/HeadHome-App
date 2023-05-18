@@ -10,7 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api/models/carereceiverdata.dart';
-import '../main.dart' show MyApp;
+import '../main.dart' show HeadHomeApp;
 import 'volunteer_patient.dart' show PatientPage;
 import '../components/profile_dialog.dart' show ProfileOverlay;
 import '../components/settings_dialog.dart' show SettingsOverlay;
@@ -19,6 +19,7 @@ import '../components/gmaps_widget.dart' show GmapsWidget;
 final FirebaseFirestore db = FirebaseFirestore.instance;
 final Reference ref = FirebaseStorage.instance.ref();
 
+/// Volunteer page (displays when volunteer logs in).
 class Volunteer extends StatefulWidget {
   const Volunteer({super.key, required this.volunteerModel});
   final VolunteerModel volunteerModel;
@@ -28,36 +29,36 @@ class Volunteer extends StatefulWidget {
 }
 
 class _VolunteerState extends State<Volunteer> {
+  /// Stores the volunteer's ID.
   late String vId = widget.volunteerModel.vId;
-  late String nameValue = widget.volunteerModel.name;
-  late String contactNum = widget.volunteerModel.contactNum;
-  late String password = "";
-  Position? _currentPosition;
-  LatLng? currentPosition;
-  Set<String> polylines = {};
 
+  /// Stores the volunteer's name
+  late String nameValue = widget.volunteerModel.name;
+
+  /// Stores the volunteer's contact number.
+  late String contactNum = widget.volunteerModel.contactNum;
+
+  /// Stores the new password for the volunteer.
+  String password = "";
+
+  /// Stores the current position of the volunteer.
+  Position? _currentPosition;
+
+  /// Stream that listens out for sos_log changes in cloud firestore,
+  /// renders new patients that are calling for sos in real-time.
   final Stream<QuerySnapshot> _soslogStream =
       FirebaseFirestore.instance.collection('sos_log').snapshots();
 
-  @override
-  void initState() {
-    super.initState();
-    _getData();
-    debugPrint(currentPosition.toString());
-  }
-
-  void _getData() async {
+  /// Retrieves current location of volunteer.
+  void _getVolunteerLocation() async {
     Position fetchedPosition = await Geolocator.getCurrentPosition();
-    debugPrint(fetchedPosition.toString());
-    debugPrint("FetchedLocationData: $fetchedPosition");
     setState(() {
       _currentPosition = fetchedPosition;
-      currentPosition =
-          LatLng(fetchedPosition.latitude, fetchedPosition.longitude);
     });
-    debugPrint(currentPosition.toString());
+    debugPrint("Fetched volunteer position: ${_currentPosition.toString()}");
   }
 
+  /// Edits volunteer information.
   Future<String> _updateVolunteerInfo(
       String vId, String name, String contact, String password) async {
     setState(() {
@@ -65,11 +66,17 @@ class _VolunteerState extends State<Volunteer> {
       contactNum = contact;
       password = password;
     });
-    //send put request to update caregiver num
+
+    // Send put request to update caregiver num
     var response = await ApiService.updateVolunteer(contactNum, vId);
     debugPrint(response.message);
     return response.message;
-    //get all careReceiver
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getVolunteerLocation();
   }
 
   @override
@@ -78,21 +85,16 @@ class _VolunteerState extends State<Volunteer> {
       appBar: AppBar(
           backgroundColor: Colors.white,
           centerTitle: true,
-          // leading: BackButton(
-          //   onPressed: () {
-          //     Navigator.pop(context);
-          //   },
-          //   color: Theme.of(context).colorScheme.primary,
-          // ),
           title: GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
                 PageRouteBuilder(
-                    pageBuilder: (context, animation1, animation2) =>
-                        const MyApp(
-                          isLocationEnabled: true,
-                        )),
+                  pageBuilder: (context, animation1, animation2) =>
+                      const HeadHomeApp(
+                    isLocationEnabled: true,
+                  ),
+                ),
               );
             },
             child: Row(
@@ -124,23 +126,32 @@ class _VolunteerState extends State<Volunteer> {
                 padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
                 child: Column(
                   children: [
-                    const Text("Welcome back,",
-                        style: TextStyle(
-                            fontSize: 18.0, color: Color(0xFF263238))),
-                    Text(nameValue,
-                        style: Theme.of(context).textTheme.displayMedium),
+                    const Text(
+                      "Welcome back,",
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Color(0xFF263238),
+                      ),
+                    ),
+                    Text(
+                      nameValue,
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                   ],
                 ),
               ),
-              //google map widget
+              // Google Map widget.
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
                 child: SizedBox(
                   height: 200,
-                  child: currentPosition == null
+                  child: _currentPosition == null
                       ? Container()
                       : GmapsWidget(
-                          center: currentPosition!,
+                          center: LatLng(
+                            _currentPosition!.latitude,
+                            _currentPosition!.longitude,
+                          ),
                         ),
                 ),
               ),
@@ -151,8 +162,10 @@ class _VolunteerState extends State<Volunteer> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                      child: Text("Patients Near You",
-                          style: Theme.of(context).textTheme.titleSmall),
+                      child: Text(
+                        "Patients Near You",
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                     ),
                     const Text(
                       "Help locate these patients and bring them home to their worried caregivers.",
@@ -265,6 +278,7 @@ class _VolunteerState extends State<Volunteer> {
   }
 }
 
+/// Displays details for a specific patient on the main volunteer page.
 class PatientDetails extends StatefulWidget {
   final num distance;
   final Map<String, dynamic> sosLogModel;
@@ -282,9 +296,13 @@ class PatientDetails extends StatefulWidget {
 }
 
 class _PatientDetailsState extends State<PatientDetails> {
+  /// Stores the patient's information
   CarereceiverModel? _carereceiverModel;
+
+  /// Stores the patient's profile picture.
   Uint8List? profileBytes;
 
+  /// Fetches the patient's information.
   void fetchPatient() async {
     CarereceiverModel? fetchedModel =
         await ApiService.getCarereceiver(widget.sosLogModel["cr_id"]);
@@ -298,20 +316,16 @@ class _PatientDetailsState extends State<PatientDetails> {
         profileBytes = fetchedBytes;
       });
     } else {
-      _carereceiverModel = fetchedModel;
+      setState(() {
+        _carereceiverModel = fetchedModel;
+      });
     }
-
-    debugPrint("seet patient details");
-    debugPrint(_carereceiverModel?.name);
-    debugPrint("soslog");
-    debugPrint(widget.sosLogModel.toString());
   }
 
   @override
   void initState() {
     super.initState();
     fetchPatient();
-    debugPrint("PATIENT DETAILS WIDGET CALLEDr");
   }
 
   @override
@@ -334,24 +348,26 @@ class _PatientDetailsState extends State<PatientDetails> {
         child: Row(
           children: [
             Expanded(
-                flex: 2, // 60%
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: profileBytes == null
-                        ? const NetworkImage(defaultProfilePic) as ImageProvider
-                        : MemoryImage(profileBytes!),
-                  ),
-                )),
+              flex: 2, // 60%
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundImage: profileBytes == null
+                      ? const NetworkImage(defaultProfilePic) as ImageProvider
+                      : MemoryImage(profileBytes!),
+                ),
+              ),
+            ),
             Expanded(
               flex: 4, // 60%
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                      child: Wrap(children: [
+                    padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                    child: Wrap(
+                      children: [
                         Text(
                           _carereceiverModel == null
                               ? ""
@@ -361,11 +377,15 @@ class _PatientDetailsState extends State<PatientDetails> {
                               color: Color(0xFF263238),
                               fontWeight: FontWeight.w600),
                         ),
-                      ])),
+                      ],
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                    child: Text("${widget.distance.round()}m away",
-                        style: const TextStyle(fontSize: 12.0)),
+                    child: Text(
+                      "${widget.distance.round()}m away",
+                      style: const TextStyle(fontSize: 12.0),
+                    ),
                   ),
                 ],
               ),
@@ -381,20 +401,24 @@ class _PatientDetailsState extends State<PatientDetails> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => PatientPage(
-                              carereceiverModel: _carereceiverModel!,
-                              sosLogModel: widget.sosLogModel,
-                              volunteerModel: widget.volunteerModel,
-                              profileBytes: profileBytes),
+                            carereceiverModel: _carereceiverModel!,
+                            sosLogModel: widget.sosLogModel,
+                            volunteerModel: widget.volunteerModel,
+                            profileBytes: profileBytes,
+                          ),
                         ),
                       );
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(100, 45),
-                      backgroundColor: Theme.of(context).colorScheme.error),
+                    minimumSize: const Size(100, 45),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
                   child: const Text(
                     'Locate',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
