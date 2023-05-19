@@ -1040,10 +1040,10 @@ class _PatientState extends State<Patient> {
                       _locStatusCallHelp(true);
                     });
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
                     child: Column(
-                      children: const [
+                      children: [
                         Icon(
                           Icons.home_outlined,
                           size: 100,
