@@ -24,6 +24,8 @@ import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 
 import '../components/gmaps_widget.dart' show GmapsWidget;
+import '../components/stview_widget.dart' show GmapsStView;
+
 
 class Patient extends StatefulWidget {
   const Patient({super.key, required this.carereceiverModel});
@@ -836,12 +838,14 @@ class _PatientState extends State<Patient> {
       ),
       body: Stack(children: [
         currentPosition != null
-            ? GmapsWidget(
-                polylines: polylines,
-                center: currentPosition!,
-                bearing: bearing,
-                marker: LatLng(widget.carereceiverModel.safezoneCtr.lat,
-                    widget.carereceiverModel.safezoneCtr.lng))
+            ? (stview
+                ? GmapsStView(latitude: currentPosition!.latitude, longitude: currentPosition!.longitude, bearing: bearing)
+                : GmapsWidget(
+                    polylines: polylines,
+                    center: currentPosition!,
+                    bearing: bearing,
+                    marker: LatLng(widget.carereceiverModel.safezoneCtr.lat,
+                        widget.carereceiverModel.safezoneCtr.lng)))
             : Container(),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
