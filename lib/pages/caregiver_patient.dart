@@ -54,7 +54,6 @@ class _PatientDetailsState extends State<PatientDetails> {
   /// Timer for scheduling locational updates of patient.
   Timer? _lTimer;
   late int distanceValue = widget.carereceiverModel.safezoneRadius;
-  late ScrollController _scrollController;
 
   bool _showAlertButton = false;
   bool toggleVisible = false;
@@ -108,7 +107,6 @@ class _PatientDetailsState extends State<PatientDetails> {
 
   @override
   void initState() {
-    _scrollController = ScrollController();
     super.initState();
     _getCRSOSLog();
     if (widget.carereceiverModel.travellog != null) {
@@ -168,7 +166,6 @@ class _PatientDetailsState extends State<PatientDetails> {
                   child: ListView(
                     scrollDirection:
                         Axis.vertical, // set the direction of scrolling
-                    controller: _scrollController,
                     children: <Widget>[
                       // list of widgets that you want to scroll through
                       Padding(
@@ -319,12 +316,6 @@ class _PatientDetailsState extends State<PatientDetails> {
                                           setState(() {
                                             toggleVisible = !toggleVisible;
                                           });
-                                          if (toggleVisible == true) {
-                                            _scrollController.animateTo(430,
-                                                duration: const Duration(
-                                                    seconds: 1),
-                                                curve: Curves.easeIn);
-                                          }
                                         },
                                         icon: const Icon(Icons.edit))
                                   ],
