@@ -98,6 +98,7 @@ class _CaregiverState extends State<Caregiver> {
     }
   }
 
+  /// Retrieves all patients under caregiver.
   Future<CarereceiverModel?> _fetchCarereceiverInfo(crId) async {
     CarereceiverModel? carereceiverModel =
         await ApiService.getCarereceiver(crId);
@@ -220,7 +221,6 @@ class _CaregiverState extends State<Caregiver> {
                 width: 350,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  // mainAxisSize: MainAxisSize.values,
                   children: [
                     Container(),
                     Text(
