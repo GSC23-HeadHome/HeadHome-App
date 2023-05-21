@@ -44,71 +44,76 @@ class _SettingsOverlayState extends State<SettingsOverlay> {
                 // list of widgets that you want to scroll through
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                  child: Column(children: [
-                    Container(
-                      height: 110,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(12),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 110,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.3),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Expanded(
+                              flex: 6, // 60%
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                      padding:
+                                          EdgeInsets.fromLTRB(20, 20, 0, 5),
+                                      child: Text(
+                                        "Notifications",
+                                        style: TextStyle(
+                                            fontSize: 20.0,
+                                            color: Color(0xFF263238),
+                                            fontWeight: FontWeight.w500),
+                                      )),
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(20, 5, 0, 10),
+                                    child: Wrap(
+                                      children: [
+                                        Text(
+                                          "Alerts when patient is out of safe zone",
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            color: Color(0xFF263238),
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: Switch(
+                                // thumb color (round icon)
+                                activeColor:
+                                    Theme.of(context).colorScheme.primary,
+                                activeTrackColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.4),
+                                inactiveThumbColor: Colors.blueGrey.shade600,
+                                inactiveTrackColor: Colors.grey.shade400,
+                                splashRadius: 50.0,
+                                // boolean variable value
+                                value: notifications,
+                                // changes the state of the switch
+                                onChanged: (value) => setState(
+                                    () => notifications = !notifications),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            flex: 6, // 60%
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                    padding: EdgeInsets.fromLTRB(20, 20, 0, 5),
-                                    child: Text(
-                                      "Notifications",
-                                      style: TextStyle(
-                                        fontSize: 20.0,
-                                        color: Color(0xFF263238),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    )),
-                                Padding(
-                                    padding: EdgeInsets.fromLTRB(20, 5, 0, 10),
-                                    child: Wrap(children: [
-                                      Text(
-                                        "Alerts when patient is out of safe zone",
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                          color: Color(0xFF263238),
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ])),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            flex: 4,
-                            child: Switch(
-                              // thumb color (round icon)
-                              activeColor:
-                                  Theme.of(context).colorScheme.primary,
-                              activeTrackColor: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.4),
-                              inactiveThumbColor: Colors.blueGrey.shade600,
-                              inactiveTrackColor: Colors.grey.shade400,
-                              splashRadius: 50.0,
-                              // boolean variable value
-                              value: notifications,
-                              // changes the state of the switch
-                              onChanged: (value) => setState(
-                                  () => notifications = !notifications),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ]),
+                    ],
+                  ),
                 ),
               ],
             ),

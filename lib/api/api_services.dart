@@ -88,6 +88,25 @@ class ApiService {
     );
     return response;
   }
+  
+  /// Updates the safezone radius for a particular patient.
+  static Future<http.Response> updateSafezoneRadius(String id, int radius) async {
+    Uri url =
+        Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
+    debugPrint(url.toString());
+    Map data = {
+      'SafezoneRadius': radius,
+    };
+
+    var body = json.encode(data);
+
+    var response = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+    return response;
+  }
 
   /// For patient to send an SOS alert to caregivers.
   static Future<http.Response> requestHelp(

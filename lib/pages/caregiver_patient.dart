@@ -53,9 +53,10 @@ class _PatientDetailsState extends State<PatientDetails> {
 
   /// Timer for scheduling locational updates of patient.
   Timer? _lTimer;
+  late int distanceValue = widget.carereceiverModel.safezoneRadius;
 
-  String distanceValue = "";
   bool _showAlertButton = false;
+  bool toggleVisible = false;
 
   Future<void> _getCRSOSLog() async {
     await widget.carereceiverModel.getCRSOSLog();
@@ -96,6 +97,12 @@ class _PatientDetailsState extends State<PatientDetails> {
     _lTimer = Timer.periodic(const Duration(minutes: 5), (Timer timer) {
       getPatientLocation();
     });
+  }
+
+  void _updateData() async {
+    var response = await ApiService.updateSafezoneRadius(
+        widget.carereceiverModel.crId, distanceValue);
+    debugPrint(response.body);
   }
 
   @override
@@ -291,42 +298,81 @@ class _PatientDetailsState extends State<PatientDetails> {
 
                       //safe zone
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
                                 child: Row(
                                   children: [
-                                    Text("Safe Zone",
+                                    Text("Safe Zone Radius",
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleSmall),
                                     const Spacer(),
-                                    const Icon(Icons.edit)
+                                    IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            toggleVisible = !toggleVisible;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.edit))
                                   ],
                                 ),
                               ),
-                              TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Distance from home',
-                                  labelStyle: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(5.0)),
-                                  contentPadding:
-                                      const EdgeInsets.fromLTRB(15, 20, 15, 20),
-                                  hintText: 'Enter Distance',
-                                  suffixText: 'meters',
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
+                              Visibility(
+                                visible: toggleVisible,
+                                child: Column(
+                                  children: [
+                                    TextField(
+                                      decoration: InputDecoration(
+                                        labelText: 'Maximum distance from home',
+                                        labelStyle: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0)),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                15, 20, 15, 20),
+                                        hintText: widget
+                                            .carereceiverModel.safezoneRadius
+                                            .toString(),
+                                        suffixText: 'meters',
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                      ),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          distanceValue = int.parse(newValue!);
+                                        });
+                                      },
+                                      autofocus: true,
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        minimumSize: const Size(120, 50),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0)),
+                                      ),
+                                      onPressed: () {
+                                        _updateData();
+                                      },
+                                      child: const Text(
+                                        "Save",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    distanceValue = newValue!;
-                                  });
-                                },
                               ),
                             ]),
                       ),
