@@ -88,9 +88,10 @@ class ApiService {
     );
     return response;
   }
-  
+
   /// Updates the safezone radius for a particular patient.
-  static Future<http.Response> updateSafezoneRadius(String id, int radius) async {
+  static Future<http.Response> updateSafezoneRadius(
+      String id, int radius) async {
     Uri url =
         Uri.parse('${ApiConstants.baseUrl}/${ApiConstants.carereceiver}/$id');
     debugPrint(url.toString());
@@ -205,7 +206,7 @@ class ApiService {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
       'GET',
-      Uri.parse('https://HeadHome.chayhuixiang.repl.co/carereceiver/contactcg'),
+      Uri.parse('${ApiConstants.baseUrl}/carereceiver/contactcg'),
     );
     debugPrint("$cgId $crId");
     request.body = json.encode({"CrId": crId, "CgId": cgId});
@@ -226,8 +227,8 @@ class ApiService {
   /// Updates patient information.
   static Future<UpdateCgResponse> updateCg(String contact, String cgId) async {
     var headers = {'Content-Type': 'application/json'};
-    var request = http.Request('PUT',
-        Uri.parse('https://HeadHome.chayhuixiang.repl.co/caregiver/$cgId'));
+    var request = http.Request(
+        'PUT', Uri.parse('${ApiConstants.baseUrl}/caregiver/$cgId'));
     request.body = json.encode({"ContactNum": contact});
     request.headers.addAll(headers);
 
@@ -248,7 +249,7 @@ class ApiService {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
       'PUT',
-      Uri.parse('https://HeadHome.chayhuixiang.repl.co/caregiver/$cgId/newcr'),
+      Uri.parse('${ApiConstants.baseUrl}/caregiver/$cgId/newcr'),
     );
     request.body = json.encode({"Id": crId, "Relationship": relationship});
     request.headers.addAll(headers);
@@ -320,7 +321,7 @@ class ApiService {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
       'PUT',
-      Uri.parse('https://HeadHome.chayhuixiang.repl.co/volunteers/$vId'),
+      Uri.parse('${ApiConstants.baseUrl}/volunteers/$vId'),
     );
     request.body = json.encode({"ContactNum": contact});
     request.headers.addAll(headers);
@@ -406,8 +407,8 @@ class ApiService {
     int datetime =
         DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     var headers = {'Content-Type': 'application/json'};
-    var request = http.Request(
-        'POST', Uri.parse('https://HeadHome.chayhuixiang.repl.co/sos/'));
+    var request =
+        http.Request('POST', Uri.parse('${ApiConstants.baseUrl}/sos/'));
     request.body = json.encode({
       "CrId": crId,
       "Datetime": datetime,
