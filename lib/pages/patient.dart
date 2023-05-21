@@ -974,18 +974,6 @@ class _PatientState extends State<Patient> {
                               });
                               print("stview pressed");
                             },
-                            child: Container(
-                              width: 30.0,
-                              height: 60.0,
-                              alignment: Alignment.center,
-                              child: Icon(Icons.map_outlined,
-                                  color: stview
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.5)
-                                      : Theme.of(context).colorScheme.primary),
-                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
@@ -999,8 +987,20 @@ class _PatientState extends State<Patient> {
                                       width: 2.0)
                                   : BorderSide.none,
                             ),
+                            child: Container(
+                              width: 30.0,
+                              height: 60.0,
+                              alignment: Alignment.center,
+                              child: Icon(Icons.map_outlined,
+                                  color: stview
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.5)
+                                      : Theme.of(context).colorScheme.primary),
+                            ),
                           ),
-                          SizedBox(height: 10.0),
+                          const SizedBox(height: 10.0),
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
@@ -1008,18 +1008,6 @@ class _PatientState extends State<Patient> {
                               });
                               print("stview pressed");
                             },
-                            child: Container(
-                              width: 30.0,
-                              height: 60.0,
-                              alignment: Alignment.center,
-                              child: Icon(Icons.apartment_outlined,
-                                  color: !stview
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.5)
-                                      : Theme.of(context).colorScheme.primary),
-                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
@@ -1032,6 +1020,18 @@ class _PatientState extends State<Patient> {
                                           Theme.of(context).colorScheme.primary,
                                       width: 2.0)
                                   : BorderSide.none,
+                            ),
+                            child: Container(
+                              width: 30.0,
+                              height: 60.0,
+                              alignment: Alignment.center,
+                              child: Icon(Icons.apartment_outlined,
+                                  color: !stview
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.5)
+                                      : Theme.of(context).colorScheme.primary),
                             ),
                           ),
                         ],
@@ -1075,10 +1075,10 @@ class _PatientState extends State<Patient> {
                     _locStatusCallHelp(true);
                   });
                 },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: Column(
-                    children: const [
+                    children: [
                       Icon(
                         Icons.home_outlined,
                         size: 100,
