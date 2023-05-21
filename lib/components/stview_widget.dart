@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_street_view/flutter_google_street_view.dart';
 
-class GmapsStView extends StatelessWidget {
+class GmapsStView extends StatefulWidget {
   final double latitude;
   final double longitude;
   // final Set<String>? polylineStrs;
@@ -15,27 +15,31 @@ class GmapsStView extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<GmapsStView> createState() => _GmapsStViewState();
+}
+
+class _GmapsStViewState extends State<GmapsStView> {
+  BitmapDescriptor? markerIcon;
+
+  void addCustomIcon() async {
+    var icon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(), 'assets/arrow_1.png');
+
+    setState(() {
+      markerIcon = icon;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    addCustomIcon();
+    // toPolyline();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    print(bearing);
-    Set<Marker> markers = {
-  Marker(
-    markerId: MarkerId('marker1'),
-    position: LatLng(latitude, longitude),
-    onTap: () {
-      // Handle marker tap
-    },
-    icon: BitmapDescriptor.defaultMarker,
-  ),
-  // Marker(
-  //   markerId: MarkerId('marker2'),
-  //   position: LatLng(latitude, longitude),
-  //   onTap: () {
-  //     // Handle marker tap
-  //   },
-  //   icon: BitmapDescriptor.defaultMarker,
-  // ),
-  // Add more markers as needed
-};
+    print(widget.bearing);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -48,8 +52,8 @@ class GmapsStView extends StatelessWidget {
                  * choice one of initPos or initPanoId
                  * do not feed param to both of them, or you should get assert error
                  */
-                initPos: LatLng(latitude, longitude),
-                //initPos: LatLng(37.769263, -122.450727),
+                initPos: LatLng(widget.latitude, widget.longitude),
+                //initPos: LatLng(1.3546728595207234, 103.68799965195743),
                 //initPanoId: "WddsUw1geEoAAAQIt9RnsQ",
 
                 /**
@@ -63,7 +67,7 @@ class GmapsStView extends StatelessWidget {
                  *  initBearing can set default bearing of camera.
                  */
                 //nitBearing: 30,
-                initBearing: bearing,
+                initBearing: widget.bearing,
 
                 /**
                  *  It is worked while you set initPos or initPanoId.
@@ -75,7 +79,7 @@ class GmapsStView extends StatelessWidget {
                  *  It is worked while you set initPos or initPanoId.
                  *  initZoom can set default zoom of camera.
                  */
-                initZoom: 1.5,
+                initZoom: 1,
 
                 /**
                  *  iOS Only
@@ -88,7 +92,7 @@ class GmapsStView extends StatelessWidget {
                  *  Set street view can panning gestures or not.
                  *  default setting is true
                  */
-                //panningGesturesEnabled: false,
+                panningGesturesEnabled: false,
 
                 /**
                  *  Set street view shows street name or not.
@@ -100,7 +104,7 @@ class GmapsStView extends StatelessWidget {
                  *  Set street view can allow user move to other panorama or not.
                  *  default setting is true
                  */
-                //userNavigationEnabled: false,
+                userNavigationEnabled: false,
 
                 /**
                  *  Set street view can zoom gestures or not.
@@ -117,10 +121,18 @@ class GmapsStView extends StatelessWidget {
                   controller.animateTo(
                       duration: 50,
                       camera: StreetViewPanoramaCamera(
-                          bearing: 15, tilt: 10, zoom: 3));
+                          bearing: widget.bearing, tilt: 0, zoom: 1));
                 },
-
-                markers: markers,
+                // markers: markerIcon == null
+                //     ? {}
+                //     : {
+                //         Marker(
+                //           markerId: const MarkerId('current_location'),
+                //           //position: LatLng(widget.latitude, widget.longitude),
+                //           position: LatLng(1.3546728595207234, 103.68799965195743),
+                //           // icon: markerIcon!,
+                //         )
+                //       },
               ),
             ],
           ),
