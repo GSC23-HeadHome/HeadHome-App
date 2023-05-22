@@ -24,6 +24,8 @@ import 'package:headhome/api/models/caregivercontactmodel.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 
 import '../components/gmaps_widget.dart' show GmapsWidget;
+import '../components/stview_widget.dart' show GmapsStView;
+
 
 class Patient extends StatefulWidget {
   const Patient({super.key, required this.carereceiverModel});
@@ -39,6 +41,7 @@ class _PatientState extends State<Patient> {
   // UI
   bool visible = true;
   bool fade = true;
+  bool stview = false;
 
   // Patient Details
   late String crId = widget.carereceiverModel.crId;
@@ -844,12 +847,14 @@ class _PatientState extends State<Patient> {
       ),
       body: Stack(children: [
         currentPosition != null
-            ? GmapsWidget(
-                polylines: polylines,
-                center: currentPosition!,
-                bearing: bearing,
-                marker: LatLng(widget.carereceiverModel.safezoneCtr.lat,
-                    widget.carereceiverModel.safezoneCtr.lng))
+            ? (stview
+                ? GmapsStView(latitude: currentPosition!.latitude, longitude: currentPosition!.longitude, bearing: bearing)
+                : GmapsWidget(
+                    polylines: polylines,
+                    center: currentPosition!,
+                    bearing: bearing,
+                    marker: LatLng(widget.carereceiverModel.safezoneCtr.lat,
+                        widget.carereceiverModel.safezoneCtr.lng)))
             : Container(),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -894,60 +899,141 @@ class _PatientState extends State<Patient> {
             Visibility(
               /// Bar with directions to map home
               visible: sosCalled,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade600,
-                      spreadRadius: 1,
-                      blurRadius: 15,
-                      blurStyle: BlurStyle.outer,
-                    ),
-                  ],
-                  color: Colors.white,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Icon(
-                      determineRouteArrow(
-                          routeIndex >= routeLogsModel.length - 1
-                              ? null
-                              : routeLogsModel[routeIndex + 1]),
-                      size: 100,
-                    ),
-                    SizedBox(
-                      width: 300,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        physics: const ClampingScrollPhysics(),
-                        child: Text.rich(
-                          TextSpan(children: [
-                            TextSpan(
-                              text:
-                                  "${parseHTML(routeIndex >= routeLogsModel.length - 1 ? "Continue to destination" : routeLogsModel[routeIndex + 1].htmlInstructions)}\n",
-                            ),
-                            TextSpan(
-                                text: routeIndex >= routeLogsModel.length - 1
-                                    ? "For "
-                                    : routeLogsModel[routeIndex + 1].maneuver ==
-                                            "straight"
-                                        ? "For "
-                                        : "In "),
-                            TextSpan(
-                              text:
-                                  '${distanceToNextRouteLog.toInt().toString()}m',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ], style: const TextStyle(fontSize: 20)),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade600,
+                          spreadRadius: 1,
+                          blurRadius: 15,
+                          blurStyle: BlurStyle.outer,
                         ),
+                      ],
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Icon(
+                          determineRouteArrow(
+                              routeIndex >= routeLogsModel.length - 1
+                                  ? null
+                                  : routeLogsModel[routeIndex + 1]),
+                          size: 100,
+                        ),
+                        SizedBox(
+                          width: 300,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const ClampingScrollPhysics(),
+                            child: Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text:
+                                      "${parseHTML(routeIndex >= routeLogsModel.length - 1 ? "Continue to destination" : routeLogsModel[routeIndex + 1].htmlInstructions)}\n",
+                                ),
+                                TextSpan(
+                                    text: routeIndex >= routeLogsModel.length - 1
+                                        ? "For "
+                                        : routeLogsModel[routeIndex + 1].maneuver ==
+                                                "straight"
+                                            ? "For "
+                                            : "In "),
+                                TextSpan(
+                                  text:
+                                      '${distanceToNextRouteLog.toInt().toString()}m',
+                                  style:
+                                      const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ], style: const TextStyle(fontSize: 20)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 14, 10, 0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                stview = !stview;
+                              });
+                              print("stview pressed");
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              elevation: stview ? 0.0 : 4.0,
+                              side: !stview
+                                  ? BorderSide(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      width: 2.0)
+                                  : BorderSide.none,
+                            ),
+                            child: Container(
+                              width: 30.0,
+                              height: 60.0,
+                              alignment: Alignment.center,
+                              child: Icon(Icons.map_outlined,
+                                  color: stview
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.5)
+                                      : Theme.of(context).colorScheme.primary),
+                            ),
+                          ),
+                          const SizedBox(height: 10.0),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                stview = !stview;
+                              });
+                              print("stview pressed");
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              elevation: stview ? 4.0 : 0.0,
+                              side: stview
+                                  ? BorderSide(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      width: 2.0)
+                                  : BorderSide.none,
+                            ),
+                            child: Container(
+                              width: 30.0,
+                              height: 60.0,
+                              alignment: Alignment.center,
+                              child: Icon(Icons.apartment_outlined,
+                                  color: !stview
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.5)
+                                      : Theme.of(context).colorScheme.primary),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  )
+                ],
               ),
             )
           ],

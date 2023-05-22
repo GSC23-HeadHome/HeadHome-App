@@ -262,6 +262,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.8.0"
+  flutter_google_street_view:
+    dependency: "direct main"
+    description:
+      name: flutter_google_street_view
+      sha256: "5a0b6df82f0e2249c04d7c6de67a9f3c087d312f2c5fb76cb2d56fc0af1082ab"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.3"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -376,6 +384,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.1"
+  google_maps:
+    dependency: transitive
+    description:
+      name: google_maps
+      sha256: "555d5d736339b0478e821167ac521c810d7b51c3b2734e6802a9f046b64ea37a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.3.0"
   google_maps_flutter:
     dependency: "direct main"
     description:
@@ -589,6 +605,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  street_view_platform_interface:
+    dependency: transitive
+    description:
+      name: street_view_platform_interface
+      sha256: "0f7a259e95c1192b9054328b1e3591f4867b045ce279dec4e0528f3f999f3ba8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.8"
   string_scanner:
     dependency: transitive
     description:
