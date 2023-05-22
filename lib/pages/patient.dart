@@ -897,60 +897,55 @@ class _PatientState extends State<Patient> {
                   ],
                   color: Colors.white,
                 ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Icon(
-                        determineRouteArrow(
-                            routeIndex >= routeLogsModel.length - 1
-                                ? null
-                                : routeLogsModel[routeIndex + 1]),
-                        size: 100,
-                      ),
-                      Padding(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Icon(
+                      determineRouteArrow(
+                          routeIndex >= routeLogsModel.length - 1
+                              ? null
+                              : routeLogsModel[routeIndex + 1]),
+                      size: 100,
+                    ),
+                    Flexible(
+                      child: Padding(
                         padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              parseHTML(routeIndex >= routeLogsModel.length - 1
-                                  ? "Continue to destination"
-                                  : routeLogsModel[routeIndex + 1]
-                                      .htmlInstructions),
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text.rich(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
                               TextSpan(
-                                children: [
-                                  TextSpan(
-                                      text: routeIndex >=
-                                              routeLogsModel.length - 1
+                                text: "${parseHTML(
+                                    routeIndex >= routeLogsModel.length - 1
+                                        ? "Continue to destination"
+                                        : routeLogsModel[routeIndex + 1]
+                                            .htmlInstructions)}\n",
+                              ),
+                              TextSpan(
+                                  text:
+                                      routeIndex >= routeLogsModel.length - 1
                                           ? "For "
                                           : routeLogsModel[routeIndex + 1]
                                                       .maneuver ==
                                                   "straight"
                                               ? "For "
                                               : "In "),
-                                  TextSpan(
-                                    text:
-                                        '${distanceToNextRouteLog.toInt().toString()}m',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                                style: const TextStyle(fontSize: 20),
+                              TextSpan(
+                                text:
+                                    '${distanceToNextRouteLog.toInt().toString()}m',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
-                            )
-                          ],
+                            ],
+                            style: const TextStyle(fontSize: 20)
+                          ),
+                          textAlign: TextAlign.justify,
                         ),
                       ),
-                      const SizedBox(
-                        width: 10,
-                      )
-                    ],
-                  ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    )
+                  ],
                 ),
               ),
             )
