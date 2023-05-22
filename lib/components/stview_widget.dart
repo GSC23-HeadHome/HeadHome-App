@@ -39,7 +39,6 @@ class _GmapsStViewState extends State<GmapsStView> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.bearing);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -53,7 +52,6 @@ class _GmapsStViewState extends State<GmapsStView> {
                  * do not feed param to both of them, or you should get assert error
                  */
                 initPos: LatLng(widget.latitude, widget.longitude),
-                //initPos: LatLng(1.3546728595207234, 103.68799965195743),
                 //initPanoId: "WddsUw1geEoAAAQIt9RnsQ",
 
                 /**
@@ -86,13 +84,13 @@ class _GmapsStViewState extends State<GmapsStView> {
                  *  It is worked while you set initPos or initPanoId.
                  *  initFov can set default fov of camera.
                  */
-                //initFov: 120,
+                //initFov: 100,
 
                 /**
                  *  Set street view can panning gestures or not.
                  *  default setting is true
                  */
-                panningGesturesEnabled: false,
+                panningGesturesEnabled: true,
 
                 /**
                  *  Set street view shows street name or not.
@@ -128,8 +126,8 @@ class _GmapsStViewState extends State<GmapsStView> {
                 //     : {
                 //         Marker(
                 //           markerId: const MarkerId('current_location'),
-                //           //position: LatLng(widget.latitude, widget.longitude),
-                //           position: LatLng(1.3546728595207234, 103.68799965195743),
+                //           position: LatLng(widget.latitude, widget.longitude),
+                //           //position: LatLng(1.3546728595207234, 103.68799965195743),
                 //           // icon: markerIcon!,
                 //         )
                 //       },
