@@ -126,6 +126,7 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  // Patient Modal with patient details
   void showPatientDetails() {
     showDialog(
         context: context,
@@ -264,6 +265,7 @@ class _PatientState extends State<Patient> {
         });
   }
 
+  // Patient Profile edit modal
   void showEditProfile() {
     showDialog(
         context: context,
@@ -468,7 +470,6 @@ class _PatientState extends State<Patient> {
   @override
   void initState() {
     super.initState();
-
     _positionStream =
         Geolocator.getPositionStream().listen((Position position) {
       // listen out for whether we've reached the end of current routelog
@@ -627,6 +628,7 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  // Contact of the caregiver
   void _getContact(cgId) async {
     debugPrint("Getting Contact");
     _cgcontactnumModel = await ApiService.getCgContact(cgId, crId);
@@ -635,12 +637,14 @@ class _PatientState extends State<Patient> {
     });
   }
 
+  // Editing the profile information of the patient
   void _updateData() async {
     var response = await ApiService.updateCarereceiver(crId, nameValue,
         homeAddress, phoneNumberValue, priContactUsername, priContactRel);
     debugPrint(response.body);
   }
 
+  // Load profile image
   void _getProfileImg() async {
     Uint8List? fetchedBytes = await ApiService.getProfileImg(profilePic);
     if (fetchedBytes != null) {
@@ -650,6 +654,7 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  // Enable direct calling of caregiver by patient
   _callNumber() async {
     bool? res = await FlutterPhoneDirectCaller.callNumber(
         priContactNo.replaceAll(' ', ''));
@@ -662,6 +667,7 @@ class _PatientState extends State<Patient> {
   // ------- END OF PROFILE METHODS -------
 
   // ------- START OF FUNCTIONAL LOCATION METHODS -------
+  // Updates current position of the patient to the database
   Future<String> _updateLocStatus(bool manualCall) async {
     if (currentPosition != null) {
       double distFromSafe = Geolocator.distanceBetween(
@@ -702,6 +708,7 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  // Timer for location update
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
     _lTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
@@ -764,6 +771,7 @@ class _PatientState extends State<Patient> {
     });
   }
 
+  // Timer to update route of patient
   Future<void> _routingTimer() async {
     _rTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       debugPrint("Routing");
@@ -776,6 +784,7 @@ class _PatientState extends State<Patient> {
     });
   }
 
+  // Update routing
   void _routingHelp() async {
     // Position position = await _getCurrentPosition();
     var response = await ApiService.routingHelp(
@@ -882,7 +891,7 @@ class _PatientState extends State<Patient> {
                 ),
               ),
             ),
-            Visibility(
+            Visibility( // Bar with directions to map home
               visible: sosCalled,
               child: Container(
                 width: double.infinity,
@@ -951,7 +960,7 @@ class _PatientState extends State<Patient> {
             )
           ],
         ),
-        Align(
+        Align( // Floating red "Navigate Home" button
           alignment: Alignment.center,
           child: Visibility(
             visible: visible,
@@ -983,10 +992,10 @@ class _PatientState extends State<Patient> {
                     _locStatusCallHelp(true);
                   });
                 },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: Column(
-                    children: const [
+                    children: [
                       Icon(
                         Icons.home_outlined,
                         size: 100,
