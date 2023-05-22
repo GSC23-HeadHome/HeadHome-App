@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:headhome/api/api_services.dart';
 
+/// User registration screen.
 class AuthRegister extends StatefulWidget {
   const AuthRegister({super.key});
 
@@ -10,6 +11,7 @@ class AuthRegister extends StatefulWidget {
 }
 
 class _AuthRegisterState extends State<AuthRegister> {
+  /// User input fields
   String dropdownValue = "Caregiver";
   String nameValue = "";
   String emailValue = "";
@@ -17,6 +19,7 @@ class _AuthRegisterState extends State<AuthRegister> {
   String confirmValue = "";
   String mobileValue = "";
 
+  /// Registers an account.
   void registerAccount() async {
     try {
       final credential =
@@ -107,7 +110,8 @@ class _AuthRegisterState extends State<AuthRegister> {
                         labelStyle:
                             const TextStyle(fontWeight: FontWeight.bold),
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
                         contentPadding: const EdgeInsets.all(10),
                       ),
                       child: ButtonTheme(
@@ -141,7 +145,8 @@ class _AuthRegisterState extends State<AuthRegister> {
                       labelText: 'Name',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                       contentPadding: const EdgeInsets.all(10),
                       hintText: 'My name is',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -160,7 +165,8 @@ class _AuthRegisterState extends State<AuthRegister> {
                       labelText: 'Email',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                       contentPadding: const EdgeInsets.all(10),
                       hintText: 'Enter Email',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -179,7 +185,8 @@ class _AuthRegisterState extends State<AuthRegister> {
                       labelText: 'Mobile Phone',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                       contentPadding: const EdgeInsets.all(10),
                       hintText: 'Enter Mobile Number',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -199,7 +206,8 @@ class _AuthRegisterState extends State<AuthRegister> {
                       labelText: 'Password',
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                       contentPadding: const EdgeInsets.all(10),
                       hintText: 'Enter Password',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -217,10 +225,12 @@ class _AuthRegisterState extends State<AuthRegister> {
                   TextField(
                     decoration: InputDecoration(
                         labelText: 'Confirm Password',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
                         contentPadding: const EdgeInsets.all(10),
                         hintText: 'Re-Enter Password',
                         floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -239,8 +249,10 @@ class _AuthRegisterState extends State<AuthRegister> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      minimumSize:
-                          const Size(double.infinity, 50), //////// HERE
+                      minimumSize: const Size(
+                        double.infinity,
+                        50,
+                      ), //////// HERE
                     ),
                     onPressed: () {
                       registerAccount();
@@ -248,7 +260,6 @@ class _AuthRegisterState extends State<AuthRegister> {
                     },
                     child: const Text(
                       "Register",
-                      // style: Theme.of(context).textTheme.bodySmall,
                     ),
                   )
                 ],

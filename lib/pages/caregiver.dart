@@ -15,6 +15,7 @@ import 'package:headhome/api/api_services.dart';
 import 'package:headhome/api/models/carereceiverdata.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+/// Caregiver page (displays when caregiver logs in).
 class Caregiver extends StatefulWidget {
   const Caregiver({super.key, required this.caregiverModel});
   final CaregiverModel caregiverModel;
@@ -26,30 +27,20 @@ class Caregiver extends StatefulWidget {
 class _CaregiverState extends State<Caregiver> {
   // late Cgcontactnum? _cgcontactnumModel = {} as Cgcontactnum?;
 
-  //caregiver details
+  // Stores caregiver information.
   late String cgId = widget.caregiverModel.cgId;
   late String nameValue = widget.caregiverModel.name;
   late String contactNum = widget.caregiverModel.contactNum;
   late String password = "69823042";
 
+  // Stores list of patients under the caregiver.
   late List<CareReceiver> careReceivers = widget.caregiverModel.careReceiver;
   late List<CarereceiverModel> careReceiverDetails = [];
-  final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
   StreamSubscription? fcmStream;
 
-  @override
-  void initState() {
-    super.initState();
-    _getCaregiverInfo();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _deregisterNotification();
-  }
-
+  /// Registers phone notification.
   void _registerNotification(List<CareReceiver> careReceivers) async {
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
@@ -95,6 +86,7 @@ class _CaregiverState extends State<Caregiver> {
     }
   }
 
+  /// Deregisters notification.
   void _deregisterNotification() async {
     fcmStream?.cancel();
     try {
@@ -106,6 +98,7 @@ class _CaregiverState extends State<Caregiver> {
     }
   }
 
+  /// Retrieves all patients under caregiver.
   Future<CarereceiverModel?> _fetchCarereceiverInfo(crId) async {
     CarereceiverModel? carereceiverModel =
         await ApiService.getCarereceiver(crId);
@@ -113,6 +106,7 @@ class _CaregiverState extends State<Caregiver> {
     return carereceiverModel;
   }
 
+  /// Retrieves caregiver information.
   void _getCaregiverInfo() async {
     //get all careReceivers
     List<CarereceiverModel?> fetchedCarereceivers = await Future.wait(
@@ -124,6 +118,7 @@ class _CaregiverState extends State<Caregiver> {
     _registerNotification(careReceivers);
   }
 
+  /// Updates caregiver profile information.
   Future<String> _updateCgInfo(
       String cgid, String name, String contact, String password) async {
     //set states of parent widget
@@ -139,11 +134,24 @@ class _CaregiverState extends State<Caregiver> {
     return response.message;
   }
 
+  /// Adds new patient to the caregiver.
   Future<String> _addNewPatient(
       String cgId, String crId, String relationship) async {
     var response = await ApiService.addPatient(cgId, crId, relationship);
     debugPrint(response.message);
     return response.message;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getCaregiverInfo();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _deregisterNotification();
   }
 
   @override
@@ -157,10 +165,11 @@ class _CaregiverState extends State<Caregiver> {
             Navigator.push(
               context,
               PageRouteBuilder(
-                  pageBuilder: (context, animation1, animation2) =>
-                      const HeadHomeApp(
-                        isLocationEnabled: true,
-                      )),
+                pageBuilder: (context, animation1, animation2) =>
+                    const HeadHomeApp(
+                  isLocationEnabled: true,
+                ),
+              ),
             );
           },
           child: Row(
@@ -192,49 +201,58 @@ class _CaregiverState extends State<Caregiver> {
               padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
               child: Column(
                 children: [
-                  const Text("Welcome back,",
-                      style:
-                          TextStyle(fontSize: 18.0, color: Color(0xFF263238))),
-                  Text(nameValue,
-                      style: Theme.of(context).textTheme.displayMedium),
+                  const Text(
+                    "Welcome back,",
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Color(0xFF263238),
+                    ),
+                  ),
+                  Text(
+                    nameValue,
+                    style: Theme.of(context).textTheme.displayMedium,
+                  ),
                 ],
               ),
             ),
             Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-                child: SizedBox(
-                  width: 350,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    // mainAxisSize: MainAxisSize.values,
-                    children: [
-                      Container(),
-                      Text("Select Patient",
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          textAlign: TextAlign.center),
-                      const Icon(Icons.edit)
-                    ],
-                  ),
-                )),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+              child: SizedBox(
+                width: 350,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(),
+                    Text(
+                      "Select Patient",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const Icon(Icons.edit),
+                  ],
+                ),
+              ),
+            ),
             Expanded(
               child: ListView.builder(
-                  itemCount: careReceiverDetails.length,
-                  itemBuilder: (BuildContext context, int i) {
-                    return Card(
-                      elevation: 0,
-                      color: Colors.transparent,
-                      surfaceTintColor: Colors.white,
-                      child: CaregiverPatients(
-                        model: careReceiverDetails[i],
-                        name: careReceiverDetails[i].name,
-                        note: careReceiverDetails[i].notes,
-                        status: careReceiverDetails[i].travellog == null
-                            ? "home"
-                            : careReceiverDetails[i].travellog!.status,
-                      ),
-                    );
-                  }),
-            )
+                itemCount: careReceiverDetails.length,
+                itemBuilder: (BuildContext context, int i) {
+                  return Card(
+                    elevation: 0,
+                    color: Colors.transparent,
+                    surfaceTintColor: Colors.white,
+                    child: CaregiverPatients(
+                      model: careReceiverDetails[i],
+                      name: careReceiverDetails[i].name,
+                      note: careReceiverDetails[i].notes,
+                      status: careReceiverDetails[i].travellog == null
+                          ? "home"
+                          : careReceiverDetails[i].travellog!.status,
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -242,9 +260,10 @@ class _CaregiverState extends State<Caregiver> {
         height: 80,
         width: 80,
         child: FittedBox(
-            child: AddPatientOverlay(
-          addNewPatient: _addNewPatient,
-        )),
+          child: AddPatientOverlay(
+            addNewPatient: _addNewPatient,
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
@@ -260,22 +279,16 @@ class _CaregiverState extends State<Caregiver> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Expanded(
-                flex: 5, // 50%
-                // child: IconButton(
-                //   icon: Icon(
-                //     Icons.person_2_outlined,
-                //     color: Theme.of(context).colorScheme.primary,
-                //   ),
-                //   onPressed: () {},
-                // ),
-                child: ProfileOverlay(
-                  name: nameValue,
-                  phoneNum: contactNum,
-                  password: password,
-                  role: "Caregiver",
-                  updateInfo: _updateCgInfo,
-                  id: cgId,
-                )),
+              flex: 5, // 50%
+              child: ProfileOverlay(
+                name: nameValue,
+                phoneNum: contactNum,
+                password: password,
+                role: "Caregiver",
+                updateInfo: _updateCgInfo,
+                id: cgId,
+              ),
+            ),
             const Expanded(
               flex: 5, // 50%
               child: SettingsOverlay(),
@@ -360,8 +373,9 @@ class _CaregiverPatientsState extends State<CaregiverPatients> {
               context,
               MaterialPageRoute(
                 builder: (context) => PatientDetails(
-                    carereceiverModel: widget.model,
-                    profileBytes: profileBytes),
+                  carereceiverModel: widget.model,
+                  profileBytes: profileBytes,
+                ),
               ),
             );
           },
@@ -387,17 +401,20 @@ class _CaregiverPatientsState extends State<CaregiverPatients> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 5),
-                          child: Text(
-                            widget.name,
-                            style: const TextStyle(
-                                fontSize: 20.0,
-                                color: Color(0xFF263238),
-                                fontWeight: FontWeight.w500),
-                          )),
+                        padding: const EdgeInsets.fromLTRB(20, 20, 0, 5),
+                        child: Text(
+                          widget.name,
+                          style: const TextStyle(
+                            fontSize: 20.0,
+                            color: Color(0xFF263238),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                       Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 5, 0, 10),
-                          child: Wrap(children: [
+                        padding: const EdgeInsets.fromLTRB(20, 5, 0, 10),
+                        child: Wrap(
+                          children: [
                             Text(
                               widget.note,
                               style: const TextStyle(
@@ -405,12 +422,18 @@ class _CaregiverPatientsState extends State<CaregiverPatients> {
                                   color: Color(0xFF263238),
                                   fontWeight: FontWeight.w400),
                             ),
-                          ])),
+                          ],
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 5, 0, 20),
-                        child: Text(statusText,
-                            style: TextStyle(
-                                fontSize: 12.0, color: statusTextColour)),
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: statusTextColour,
+                          ),
+                        ),
                       ),
                     ],
                   ),

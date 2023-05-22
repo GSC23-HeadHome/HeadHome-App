@@ -13,9 +13,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:headhome/api/api_services.dart';
 
+/// Caregivers will be redirected here upon clicking on patient on the CaregiverPage.
 class PatientDetails extends StatefulWidget {
-  const PatientDetails(
-      {super.key, required this.carereceiverModel, required this.profileBytes});
+  const PatientDetails({
+    super.key,
+    required this.carereceiverModel,
+    required this.profileBytes,
+  });
   final CarereceiverModel carereceiverModel;
   final Uint8List? profileBytes;
 
@@ -23,12 +27,11 @@ class PatientDetails extends StatefulWidget {
   State<PatientDetails> createState() => _PatientDetailsState();
 }
 
-class MyState extends ChangeNotifier {
+/// State management for sending alerts to volunteers near patient.
+class AlertState extends ChangeNotifier {
   bool alertSent = false;
 
   void respondButton(CarereceiverModel model) async {
-    debugPrint("state changed");
-    debugPrint(alertSent.toString());
     await ApiService.sendSOS(model.crId);
     await model.getCRSOSLog();
     alertSent = !alertSent;
@@ -42,17 +45,23 @@ class MyState extends ChangeNotifier {
 }
 
 class _PatientDetailsState extends State<PatientDetails> {
-  final MyState _myState = MyState();
+  /// Handles state for whether alert is sent to patient.
+  final AlertState _alertState = AlertState();
+
+  /// Stores location of patient.
   LatLng? patientLocation;
+
+  /// Timer for scheduling locational updates of patient.
   Timer? _lTimer;
-  String distanceValue = "";
+  late int distanceValue = widget.carereceiverModel.safezoneRadius;
 
   bool _showAlertButton = false;
+  bool toggleVisible = false;
 
   Future<void> _getCRSOSLog() async {
     await widget.carereceiverModel.getCRSOSLog();
     if (widget.carereceiverModel.soslog != null) {
-      _myState.initAlertSent(
+      _alertState.initAlertSent(
           widget.carereceiverModel.soslog!.status == "lost" ||
               widget.carereceiverModel.soslog!.status == "guided");
     }
@@ -90,6 +99,12 @@ class _PatientDetailsState extends State<PatientDetails> {
     });
   }
 
+  void _updateData() async {
+    var response = await ApiService.updateSafezoneRadius(
+        widget.carereceiverModel.crId, distanceValue);
+    debugPrint(response.body);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -111,20 +126,8 @@ class _PatientDetailsState extends State<PatientDetails> {
 
   @override
   Widget build(BuildContext context) {
-    // double lat = patientLocation!.latitude;
-    // double lng = patientLocation!.longitude;
-    // var responded;
-    // var alertStatus;
-    // void toggleAlert (responded) {}
-
-    // if (responded == 0) {
-    //   alertStatus = SendAlert();
-    // } else {
-    //   alertStatus = alertSent(response: responded);
-    // }
-
     return ChangeNotifierProvider(
-      create: (_) => _myState,
+      create: (_) => _alertState,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -295,42 +298,81 @@ class _PatientDetailsState extends State<PatientDetails> {
 
                       //safe zone
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
                                 child: Row(
                                   children: [
-                                    Text("Safe Zone",
+                                    Text("Safe Zone Radius",
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleSmall),
                                     const Spacer(),
-                                    const Icon(Icons.edit)
+                                    IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            toggleVisible = !toggleVisible;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.edit))
                                   ],
                                 ),
                               ),
-                              TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Distance from home',
-                                  labelStyle: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(5.0)),
-                                  contentPadding:
-                                      const EdgeInsets.fromLTRB(15, 20, 15, 20),
-                                  hintText: 'Enter Distance',
-                                  suffixText: 'meters',
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
+                              Visibility(
+                                visible: toggleVisible,
+                                child: Column(
+                                  children: [
+                                    TextField(
+                                      decoration: InputDecoration(
+                                        labelText: 'Maximum distance from home',
+                                        labelStyle: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0)),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                15, 20, 15, 20),
+                                        hintText: widget
+                                            .carereceiverModel.safezoneRadius
+                                            .toString(),
+                                        suffixText: 'meters',
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                      ),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          distanceValue = int.parse(newValue!);
+                                        });
+                                      },
+                                      autofocus: true,
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        minimumSize: const Size(120, 50),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0)),
+                                      ),
+                                      onPressed: () {
+                                        _updateData();
+                                      },
+                                      child: const Text(
+                                        "Save",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    distanceValue = newValue!;
-                                  });
-                                },
                               ),
                             ]),
                       ),
@@ -374,14 +416,14 @@ class SendAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MyState>(builder: (context, myState, child) {
+    return Consumer<AlertState>(builder: (context, alertState, child) {
       if (model.soslog != null) {
         debugPrint("Model: ${model.soslog!.vId}");
       } else {
         debugPrint("Model: null");
       }
-      debugPrint("updated child with: ${myState.alertSent}");
-      return myState.alertSent
+      debugPrint("updated child with: ${alertState.alertSent}");
+      return alertState.alertSent
           ? Column(
               children: [
                 //button
@@ -503,7 +545,7 @@ class SendAlert extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         //send alert
-                        myState.respondButton(model);
+                        alertState.respondButton(model);
                         debugPrint("responded");
                       },
                       style: ElevatedButton.styleFrom(
