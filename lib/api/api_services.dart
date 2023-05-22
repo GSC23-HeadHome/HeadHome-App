@@ -206,10 +206,10 @@ class ApiService {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
       'GET',
-      Uri.parse('${ApiConstants.baseUrl}/carereceiver/contactcg'),
+      Uri.parse('${ApiConstants.baseUrl}/carereceiver/contactcg?CrId=$crId&CgId=$cgId'),
     );
     debugPrint("$cgId $crId");
-    request.body = json.encode({"CrId": crId, "CgId": cgId});
+    // request.body = json.encode({"CrId": crId, "CgId": cgId});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
