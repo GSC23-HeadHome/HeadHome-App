@@ -39,6 +39,7 @@ class _GmapsStViewState extends State<GmapsStView> {
 
   @override
   Widget build(BuildContext context) {
+    print("bearing");
     print(widget.bearing);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -92,7 +93,7 @@ class _GmapsStViewState extends State<GmapsStView> {
                  *  Set street view can panning gestures or not.
                  *  default setting is true
                  */
-                panningGesturesEnabled: false,
+                panningGesturesEnabled: true,
 
                 /**
                  *  Set street view shows street name or not.
@@ -123,16 +124,16 @@ class _GmapsStViewState extends State<GmapsStView> {
                       camera: StreetViewPanoramaCamera(
                           bearing: widget.bearing, tilt: 0, zoom: 1));
                 },
-                // markers: markerIcon == null
-                //     ? {}
-                //     : {
-                //         Marker(
-                //           markerId: const MarkerId('current_location'),
-                //           //position: LatLng(widget.latitude, widget.longitude),
-                //           position: LatLng(1.3546728595207234, 103.68799965195743),
-                //           // icon: markerIcon!,
-                //         )
-                //       },
+                markers: markerIcon == null
+                    ? {}
+                    : {
+                        Marker(
+                          markerId: const MarkerId('current_location'),
+                          position: LatLng(widget.latitude, widget.longitude),
+                          //position: LatLng(1.3546728595207234, 103.68799965195743),
+                          // icon: markerIcon!,
+                        )
+                      },
               ),
             ],
           ),

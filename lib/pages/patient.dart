@@ -26,7 +26,6 @@ import 'package:headhome/api/models/carereceiverdata.dart';
 import '../components/gmaps_widget.dart' show GmapsWidget;
 import '../components/stview_widget.dart' show GmapsStView;
 
-
 class Patient extends StatefulWidget {
   const Patient({super.key, required this.carereceiverModel});
   final CarereceiverModel carereceiverModel;
@@ -492,6 +491,7 @@ class _PatientState extends State<Patient> {
         Map<String, dynamic> dataToESP;
 
         debugPrint('endDistance: $endDistance');
+        debugPrint('endBearing:$endBearing');
 
         // check if user has reached home
         if (distFromSafe > 30) {
@@ -506,6 +506,7 @@ class _PatientState extends State<Patient> {
               routeIndex++;
             }
             currentPosition = LatLng(position.latitude, position.longitude);
+            bearing = endBearing;
           });
           txCharacteristic?.write(utf8.encode(jsonEncode(dataToESP)));
 
@@ -525,6 +526,7 @@ class _PatientState extends State<Patient> {
             sosCalled = false;
             polylines = {};
             fade = !fade;
+            bearing = endBearing;
           });
 
           const snackBar = SnackBar(
@@ -668,6 +670,7 @@ class _PatientState extends State<Patient> {
       debugPrint("Not working");
     }
   }
+
   /// ------- END OF PROFILE METHODS -------
 
   /// ------- START OF FUNCTIONAL LOCATION METHODS -------
@@ -732,6 +735,7 @@ class _PatientState extends State<Patient> {
     Map<String, dynamic> res = json.decode(response.body);
 
     _processRouteResponse(res);
+
     /// Calling route api every 5 mins
     _routingTimer();
   }
@@ -770,6 +774,9 @@ class _PatientState extends State<Patient> {
             currentPosition!.latitude,
             currentPosition!.longitude,
             fetchedRouteLogs[0].endLocation.lat,
+            fetchedRouteLogs[0].endLocation.lng);
+        bearing = Geolocator.bearingBetween(currentPosition!.latitude,
+            currentPosition!.longitude, fetchedRouteLogs[0].endLocation.lat,
             fetchedRouteLogs[0].endLocation.lng);
       }
     });
@@ -848,7 +855,10 @@ class _PatientState extends State<Patient> {
       body: Stack(children: [
         currentPosition != null
             ? (stview
-                ? GmapsStView(latitude: currentPosition!.latitude, longitude: currentPosition!.longitude, bearing: bearing)
+                ? GmapsStView(
+                    latitude: currentPosition!.latitude,
+                    longitude: currentPosition!.longitude,
+                    bearing: bearing)
                 : GmapsWidget(
                     polylines: polylines,
                     center: currentPosition!,
@@ -937,17 +947,19 @@ class _PatientState extends State<Patient> {
                                       "${parseHTML(routeIndex >= routeLogsModel.length - 1 ? "Continue to destination" : routeLogsModel[routeIndex + 1].htmlInstructions)}\n",
                                 ),
                                 TextSpan(
-                                    text: routeIndex >= routeLogsModel.length - 1
-                                        ? "For "
-                                        : routeLogsModel[routeIndex + 1].maneuver ==
-                                                "straight"
+                                    text:
+                                        routeIndex >= routeLogsModel.length - 1
                                             ? "For "
-                                            : "In "),
+                                            : routeLogsModel[routeIndex + 1]
+                                                        .maneuver ==
+                                                    "straight"
+                                                ? "For "
+                                                : "In "),
                                 TextSpan(
                                   text:
                                       '${distanceToNextRouteLog.toInt().toString()}m',
-                                  style:
-                                      const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ], style: const TextStyle(fontSize: 20)),
                             ),
@@ -956,7 +968,7 @@ class _PatientState extends State<Patient> {
                       ],
                     ),
                   ),
-                Padding(
+                  Padding(
                     padding: const EdgeInsets.fromLTRB(0, 14, 10, 0),
                     child: Align(
                       alignment: Alignment.centerRight,
@@ -1118,8 +1130,9 @@ class _PatientState extends State<Patient> {
         height: 100,
         color: Theme.of(context).colorScheme.tertiary,
         shape: const CircularNotchedRectangle(), //shape of notch
-        notchMargin:
-            5, /// notche margin between floating button and bottom appbar
+        notchMargin: 5,
+
+        /// notche margin between floating button and bottom appbar
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
           child: Align(

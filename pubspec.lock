@@ -464,6 +464,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  js_wrapping:
+    dependency: transitive
+    description:
+      name: js_wrapping
+      sha256: e385980f7c76a8c1c9a560dfb623b890975841542471eade630b2871d243851c
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.4"
   json_annotation:
     dependency: transitive
     description:
@@ -472,6 +480,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.1"
+  kotlin_scope_function:
+    dependency: transitive
+    description:
+      name: kotlin_scope_function
+      sha256: "73d53ae58e36ee44ae538411766091e8c2fb36054dc048c70d95cbf3aab3d85c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   lints:
     dependency: transitive
     description:
