@@ -129,6 +129,7 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  // Patient Modal with patient details
   void showPatientDetails() {
     showDialog(
         context: context,
@@ -267,6 +268,7 @@ class _PatientState extends State<Patient> {
         });
   }
 
+  // Patient Profile edit modal
   void showEditProfile() {
     showDialog(
         context: context,
@@ -471,7 +473,6 @@ class _PatientState extends State<Patient> {
   @override
   void initState() {
     super.initState();
-
     _positionStream =
         Geolocator.getPositionStream().listen((Position position) {
       // listen out for whether we've reached the end of current routelog
@@ -630,20 +631,24 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  /// Contact of the caregiver
   void _getContact(cgId) async {
     debugPrint("Getting Contact");
     _cgcontactnumModel = await ApiService.getCgContact(cgId, crId);
+    debugPrint(_cgcontactnumModel!.cgContactNum);
     setState(() {
       priContactNo = _cgcontactnumModel!.cgContactNum;
     });
   }
 
+  /// Editing the profile information of the patient
   void _updateData() async {
     var response = await ApiService.updateCarereceiver(crId, nameValue,
         homeAddress, phoneNumberValue, priContactUsername, priContactRel);
     debugPrint(response.body);
   }
 
+  // Load profile image
   void _getProfileImg() async {
     Uint8List? fetchedBytes = await ApiService.getProfileImg(profilePic);
     if (fetchedBytes != null) {
@@ -653,6 +658,7 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  /// Enable direct calling of caregiver by patient
   _callNumber() async {
     bool? res = await FlutterPhoneDirectCaller.callNumber(
         priContactNo.replaceAll(' ', ''));
@@ -662,9 +668,10 @@ class _PatientState extends State<Patient> {
       debugPrint("Not working");
     }
   }
-  // ------- END OF PROFILE METHODS -------
+  /// ------- END OF PROFILE METHODS -------
 
-  // ------- START OF FUNCTIONAL LOCATION METHODS -------
+  /// ------- START OF FUNCTIONAL LOCATION METHODS -------
+  /// Updates current position of the patient to the database
   Future<String> _updateLocStatus(bool manualCall) async {
     if (currentPosition != null) {
       double distFromSafe = Geolocator.distanceBetween(
@@ -690,8 +697,8 @@ class _PatientState extends State<Patient> {
     }
   }
 
-  // CAN ALSO USE THIS FUNCTION TO CALL FOR BLUETOOTH BUTTON PRESS BY
-  // manualCALL = true WHEN CALLING THE FUNCTION
+  /// CAN ALSO USE THIS FUNCTION TO CALL FOR BLUETOOTH BUTTON PRESS BY
+  /// manualCALL = true WHEN CALLING THE FUNCTION
   void _locStatusCallHelp(bool manualCall) async {
     String locStatus = await _updateLocStatus(manualCall);
     debugPrint(locStatus);
@@ -705,6 +712,7 @@ class _PatientState extends State<Patient> {
     }
   }
 
+  /// Timer for location update
   Future<void> _locationHandler() async {
     _locStatusCallHelp(false);
     _lTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
@@ -713,7 +721,7 @@ class _PatientState extends State<Patient> {
   }
 
   void _requestHelp() async {
-    // Position position = await _getCurrentPosition();
+    /// Position position = await _getCurrentPosition();
     debugPrint(currentPosition!.latitude.toString());
     debugPrint(currentPosition!.longitude.toString());
     var response = await ApiService.requestHelp(
@@ -724,12 +732,12 @@ class _PatientState extends State<Patient> {
     Map<String, dynamic> res = json.decode(response.body);
 
     _processRouteResponse(res);
-    // Calling route api every 5 mins
+    /// Calling route api every 5 mins
     _routingTimer();
   }
 
   void _processRouteResponse(Map<String, dynamic> res) {
-    // Converting polyline
+    /// Converting polyline
     Set<Polyline> tempPoly = {};
     for (int i = 0; i < res["Route"].length; i++) {
       PolylinePoints polylinePoints = PolylinePoints();
@@ -767,6 +775,7 @@ class _PatientState extends State<Patient> {
     });
   }
 
+  /// Timer to update route of patient
   Future<void> _routingTimer() async {
     _rTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       debugPrint("Routing");
@@ -779,8 +788,8 @@ class _PatientState extends State<Patient> {
     });
   }
 
+  /// Update routing
   void _routingHelp() async {
-    // Position position = await _getCurrentPosition();
     var response = await ApiService.routingHelp(
         currentPosition!,
         widget.carereceiverModel.safezoneCtr.lat.toString(),
@@ -888,6 +897,7 @@ class _PatientState extends State<Patient> {
               ),
             ),
             Visibility(
+              /// Bar with directions to map home
               visible: sosCalled,
               child: Column(
                 children: [
@@ -904,64 +914,49 @@ class _PatientState extends State<Patient> {
                       ],
                       color: Colors.white,
                     ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Icon(
-                            determineRouteArrow(
-                                routeIndex >= routeLogsModel.length - 1
-                                    ? null
-                                    : routeLogsModel[routeIndex + 1]),
-                            size: 100,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  parseHTML(
-                                      routeIndex >= routeLogsModel.length - 1
-                                          ? "Continue to destination"
-                                          : routeLogsModel[routeIndex + 1]
-                                              .htmlInstructions),
-                                  style: const TextStyle(fontSize: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Icon(
+                          determineRouteArrow(
+                              routeIndex >= routeLogsModel.length - 1
+                                  ? null
+                                  : routeLogsModel[routeIndex + 1]),
+                          size: 100,
+                        ),
+                        SizedBox(
+                          width: 300,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const ClampingScrollPhysics(),
+                            child: Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text:
+                                      "${parseHTML(routeIndex >= routeLogsModel.length - 1 ? "Continue to destination" : routeLogsModel[routeIndex + 1].htmlInstructions)}\n",
                                 ),
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                          text: routeIndex >=
-                                                  routeLogsModel.length - 1
-                                              ? "For "
-                                              : routeLogsModel[routeIndex + 1]
-                                                          .maneuver ==
-                                                      "straight"
-                                                  ? "For "
-                                                  : "In "),
-                                      TextSpan(
-                                        text:
-                                            '${distanceToNextRouteLog.toInt().toString()}m',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                )
-                              ],
+                                TextSpan(
+                                    text: routeIndex >= routeLogsModel.length - 1
+                                        ? "For "
+                                        : routeLogsModel[routeIndex + 1].maneuver ==
+                                                "straight"
+                                            ? "For "
+                                            : "In "),
+                                TextSpan(
+                                  text:
+                                      '${distanceToNextRouteLog.toInt().toString()}m',
+                                  style:
+                                      const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ], style: const TextStyle(fontSize: 20)),
                             ),
                           ),
-                          const SizedBox(
-                            width: 10,
-                          )
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  Padding(
+                Padding(
                     padding: const EdgeInsets.fromLTRB(0, 14, 10, 0),
                     child: Align(
                       alignment: Alignment.centerRight,
@@ -1044,6 +1039,7 @@ class _PatientState extends State<Patient> {
           ],
         ),
         Align(
+          /// Floating red "Navigate Home" button
           alignment: Alignment.center,
           child: Visibility(
             visible: visible,
@@ -1105,9 +1101,9 @@ class _PatientState extends State<Patient> {
           width: 80,
           child: FittedBox(
             child: FloatingActionButton(
-              //Floating action button on Scaffold
+              /// Floating action button on Scaffold
               onPressed: () {
-                //code to execute on button press
+                /// code to execute on button press
                 debugPrint("Calling caregiver");
                 _callNumber();
               },
@@ -1118,12 +1114,12 @@ class _PatientState extends State<Patient> {
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
       bottomNavigationBar: BottomAppBar(
-        //bottom navigation bar on scaffold
+        /// bottom navigation bar on scaffold
         height: 100,
         color: Theme.of(context).colorScheme.tertiary,
         shape: const CircularNotchedRectangle(), //shape of notch
         notchMargin:
-            5, //notche margin between floating button and bottom appbar
+            5, /// notche margin between floating button and bottom appbar
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
           child: Align(
