@@ -39,8 +39,6 @@ class _GmapsStViewState extends State<GmapsStView> {
 
   @override
   Widget build(BuildContext context) {
-    print("bearing");
-    print(widget.bearing);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -54,7 +52,6 @@ class _GmapsStViewState extends State<GmapsStView> {
                  * do not feed param to both of them, or you should get assert error
                  */
                 initPos: LatLng(widget.latitude, widget.longitude),
-                //initPos: LatLng(1.3546728595207234, 103.68799965195743),
                 //initPanoId: "WddsUw1geEoAAAQIt9RnsQ",
 
                 /**
@@ -87,7 +84,7 @@ class _GmapsStViewState extends State<GmapsStView> {
                  *  It is worked while you set initPos or initPanoId.
                  *  initFov can set default fov of camera.
                  */
-                //initFov: 120,
+                //initFov: 100,
 
                 /**
                  *  Set street view can panning gestures or not.
@@ -124,16 +121,16 @@ class _GmapsStViewState extends State<GmapsStView> {
                       camera: StreetViewPanoramaCamera(
                           bearing: widget.bearing, tilt: 0, zoom: 1));
                 },
-                markers: markerIcon == null
-                    ? {}
-                    : {
-                        Marker(
-                          markerId: const MarkerId('current_location'),
-                          position: LatLng(widget.latitude, widget.longitude),
-                          //position: LatLng(1.3546728595207234, 103.68799965195743),
-                          // icon: markerIcon!,
-                        )
-                      },
+                // markers: markerIcon == null
+                //     ? {}
+                //     : {
+                //         Marker(
+                //           markerId: const MarkerId('current_location'),
+                //           position: LatLng(widget.latitude, widget.longitude),
+                //           //position: LatLng(1.3546728595207234, 103.68799965195743),
+                //           // icon: markerIcon!,
+                //         )
+                //       },
               ),
             ],
           ),
