@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class GmapsWidget extends StatefulWidget {
   final LatLng center;
   final Set<Polyline>? polylines;
-  // final Set<String>? polylineStrs;
+
   final double? bearing;
   final bool? enableLocationButton;
   final LatLng? marker;
