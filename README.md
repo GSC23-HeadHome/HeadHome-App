@@ -75,7 +75,7 @@ Currently, we have a couple of testing accounts that can be used to test out the
 
 <br>
 
-## 🔑 &nbsp; Files and Directories
+## 🔑 &nbsp;Files and Directories
 
 ```tree
 ├── android
