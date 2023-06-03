@@ -1,14 +1,19 @@
 # Testing Accounts
 
 ### All accounts:
+
 > password: password
 
-### Care Receiver Accounts:
->adrian.lim@gmail.com
->julian.kim@gmail.com
+### Patient Accounts:
 
-### Care Giver Accounts:
->aurora.lim@gmail.com
+> adrian.lim@gmail.com
+
+> julian.kim@gmail.com
+
+### Caregiver Accounts:
+
+> aurora.lim@gmail.com
 
 ### Volunteer Accounts:
->chay.huixiang@gmail.com
+
+> chay.huixiang@gmail.com
