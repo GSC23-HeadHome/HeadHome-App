@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Dialog component for caregivers to add new patients.
+/// Dialog component for caregivers to add new patients.
 class AddPatientOverlay extends StatefulWidget {
   const AddPatientOverlay({Key? key, required this.addNewPatient})
       : super(key: key);

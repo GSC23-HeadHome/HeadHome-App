@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_street_view/flutter_google_street_view.dart';
 
+/// Google Maps Street View Widget.
 class GmapsStView extends StatefulWidget {
   final double latitude;
   final double longitude;
