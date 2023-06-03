@@ -894,7 +894,6 @@ class _PatientState extends State<Patient> {
                   : GmapsWidget(
                       polylines: polylines,
                       center: currentPosition!,
-                      bearing: bearing,
                       marker: LatLng(
                         widget.carereceiverModel.safezoneCtr.lat,
                         widget.carereceiverModel.safezoneCtr.lng,

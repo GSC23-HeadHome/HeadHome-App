@@ -6,14 +6,12 @@ class GmapsWidget extends StatefulWidget {
   final LatLng center;
   final Set<Polyline>? polylines;
 
-  final double? bearing;
   final bool? enableLocationButton;
   final LatLng? marker;
 
   const GmapsWidget({
     Key? key,
     this.polylines,
-    this.bearing,
     required this.center,
     this.marker,
     this.enableLocationButton,
@@ -69,8 +67,6 @@ class _GmapsWidgetState extends State<GmapsWidget> {
                 markerId: const MarkerId('current_location'),
                 position: widget.marker!,
                 infoWindow: const InfoWindow(title: 'Current Location'),
-                // icon: markerIcon!,
-                rotation: widget.bearing ?? 0.0,
               )
             },
       myLocationButtonEnabled: widget.enableLocationButton == null
